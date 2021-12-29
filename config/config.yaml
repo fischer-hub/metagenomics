@@ -1,0 +1,14 @@
+# custom params
+
+reads: 
+
+#humannDB: "chocophlan"
+
+protDB_build: "uniref50_ec_filtered_diamond"
+
+nucDB_build: "full"
+
+cacheDir: "cacheDir"
+
+ext: ""
+

@@ -1,0 +1,12 @@
+name: humann
+channels:
+  - biobakery
+  - bioconda
+  - conda-forge
+  - anaconda
+  - r
+  - defaults
+dependencies:
+  - humann=3.0.1
+  - diamond==2.0.6
+

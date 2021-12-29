@@ -1,0 +1,8 @@
+name: utils
+channels:
+  - bioconda
+  - conda-forge
+  - anaconda
+dependencies:
+  - gzip=1.10
+  #- awk=5.1.0

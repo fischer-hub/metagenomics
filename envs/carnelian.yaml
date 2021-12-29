@@ -1,0 +1,17 @@
+name: carnelian
+channels:
+  - bioconda
+  - conda-forge
+  - anaconda
+  - r
+dependencies:
+  - vowpalwabbit=8.1.1
+  - scikit-learn
+  - r=3.3.2
+  - python=2.7.13
+  - biopython=1.70 
+  - fraggenescan
+  - git
+  - autopep8
+  - pip
+  - gcc

@@ -1,0 +1,6 @@
+{
+    "SBATCH_DEFAULTS": "-e slurm/%j.err -o slurm/%j.out",
+    "CLUSTER_NAME": "allegro",
+    "CLUSTER_CONFIG": "",
+    "ADVANCED_ARGUMENT_CONVERSION": "no"
+}

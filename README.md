@@ -2,8 +2,8 @@
 This is a `Snakemake` base pipeline for functional profiling of (WGS) metagenomic read data.
 When finished, it is supposed to provide multiple modes to analyse the (relative) gene abundance and genetic profile of your samples and do some statistical analysis and visualisation on it as well.
 As of right now the pipeline provides analysis via the tools:
-- humann 
-- carnelian (under construction)
+- [`humann`](https://github.com/biobakery/humann)
+- [`carnelian`](https://github.com/snz20/carnelian) (under construction)
 
 A manual mode, mapping your reads against a reference to retrieve the gene counts is planned in the future.
 Additionally optional automatic preprocessing of your read data (filtering and cleaning) is planned as well.

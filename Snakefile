@@ -22,15 +22,18 @@ print(READDIR)
 SINGLE = True if pd.isna(SAMPLESHEET.loc[0, "R2"]) == 0 else False
 R = ["1"] if SINGLE else ["1", "2"] 
 
+print("samples found:", SAMPLE)
 
 rule all:
     input:
-        expand("results/humann/{sample}", sample = SAMPLE)
+        config["resultDir"] + "/humann/genefamilies_relab_combined.tsv",
+        config["resultDir"] + "/humann/pathabundance_combined.tsv",
+        config["resultDir"] + "/humann/pathcoverage_combined.tsv"
         #expand("results/{sample}_{r}.{ext}.info", sample = SAMPLE, r = R, ext = EXT)
-    shell:
-        "rm -r results"
+    #shell:
+    #    "rm -r results"
 
-configfile: "config/config.yaml"
+configfile: "profiles/config.yaml"
 
 include: "rules/humann.smk"
 include: "rules/utils.smk"

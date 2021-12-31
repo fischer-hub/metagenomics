@@ -74,11 +74,11 @@ rule humann_join:
         pathabundance   = expand(config["resultDir"] + "/humann/norm/{sample}_pathabundance_relab.tsv", sample = SAMPLE),
         pathCov         = expand(config["resultDir"] + "/humann/norm/{sample}_pathcoverage.tsv", sample = SAMPLE)
     output:
-        genefamilies    = config["resultDir"] + "/humann/{sample}_genefamilies_relab_combined.tsv",
-        pathways        = config["resultDir"] + "/humann/{sample}_pathabundance_combined.tsv",
-        pathCov         = config["resultDir"] + "/humann/{sample}_pathcoverage_combined.tsv"
+        genefamilies    = config["resultDir"] + "/humann/genefamilies_relab_combined.tsv",
+        pathways        = config["resultDir"] + "/humann/pathabundance_combined.tsv",
+        pathCov         = config["resultDir"] + "/humann/pathcoverage_combined.tsv"
     log:
-        "log/humann/join/{sample}_humann.log"
+        "log/humann/join/humann.log"
     conda:
         WD + "envs/humann.yaml"
     threads:
@@ -86,10 +86,10 @@ rule humann_join:
     resources:
         runtime=240
     params:
-        outdir = (config["resultDir"] + "/humann/norm/{sample}_genefamilies.tsv").rsplit('/',1)[0]
+        tabledir = (config["resultDir"] + "/humann/norm/{sample}_genefamilies.tsv").rsplit('/',1)[0]
     shell:
         """
-        humann_join_tables --input {params.outdir} --output {output.genefamilies} --file_name genefamilies_relab_combined
-        humann_join_tables --input {params.outdir} --output {output.pathCov} --file_name pathcoverage_combined
-        humann_join_tables --input {params.outdir} --output {output.pathways} --file_name pathabundance_relab_combined
+        humann_join_tables --input {params.tabledir} --output {output.genefamilies} --file_name genefamilies_relab
+        humann_join_tables --input {params.tabledir} --output {output.pathCov} --file_name pathcoverage
+        humann_join_tables --input {params.tabledir} --output {output.pathways} --file_name pathabundance_relab
         """

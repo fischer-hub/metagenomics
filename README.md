@@ -54,7 +54,7 @@ ext=            define the file extension of your read data [default: try to ret
 protDB_build=   define the protein database build used for humann runs [default: uniref50_ec_filtered_diamond]
 nucDB_build=    define the nucleotide translation database build used for humann runs [default: full]
 ```
-These can be useful when runnin in environments where the project directory is storage limited and one might want to have large files in other directories without storage limits (this could be the case on shared machines like HPC's where you would want big temporary files on lets say /scratch or similar).
+These can be useful when runnin in environments where the project directory is storage limited and one might want to have large files in other directories without storage limits (this could be the case on shared machines like HPC's where you would want big temporary files on lets say /scratch or similar).\
 NOTE: All of these parameters can be set permanently in the configuration file (profiles/config.yaml).
 
 ## Usage on high performance clusters (HPC)
@@ -64,3 +64,15 @@ The pipeline can be run on HPC's (only SLURM job manager supported right now) us
 ```
 In this example the pipeline would run with specific settings for the `Allegro` high performance cluster of FU Berlin and manage your Snakemake rules as jobs ([see more](https://github.com/Snakemake-Profiles/slurm)).
 You can define your own HPC (or local) profiles and put them in the profiles dir to run as shown above. 
+
+## Output
+### Results
+As of right now the pipeline will output combined gene abundance tables in `resultDir/humann/`. Here you can aso find the individual gene abundance tables for every sample, normalized for gene length and amount of reads per sample (relative abundances) and raw (absoulte abundance).
+
+### Logs
+All log files are saved to `log/$toolname` and contain the standard output of the tool.\
+NOTE: On HPCs the job manager might catch the stdout before going to the log files resulting in empty logs. You can find the stdout of each job in its job-log file. For `SLURM` these will be redirected to the `slurm/` directory of the project dir.
+
+
+
+

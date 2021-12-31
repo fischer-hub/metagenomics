@@ -12,6 +12,9 @@ cacheDir: "cacheDir"
 
 ext: ""
 
+resultDir: "resultDir"
+
+
 # cli params
 
 cores: 16
@@ -19,5 +22,6 @@ cores: 16
 use-conda: true
 
 latency-wait: 20
+
 
 #report: true

@@ -14,6 +14,7 @@ ext: ""
 
 resultDir: "resultDir"
 
+humann_count_units: "cpm"
 
 # cli params
 

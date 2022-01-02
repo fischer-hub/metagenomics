@@ -13,6 +13,8 @@ rule humann_databases:
         WD + "envs/humann.yaml"
     threads:
         2
+    message:
+        "humann_database"
     shell:
         """
         mkdir -p {params.installDir}
@@ -39,6 +41,8 @@ rule humann_compute:
         runtime=960
     params:
         outdir = (config["resultDir"] + "/humann/raw/{sample}_genefamilies.tsv").rsplit('/',1)[0]
+    message:
+        "humann_compute({wildcards.sample})"
     shell: 
         "humann --threads {threads} -i {input.reads} -o {params.outdir} --nucleotide-database {input.nucDB}/*/ --protein-database {input.protDB}/*/ --output-basename {wildcards.sample} --verbose 2> {log}"
 
@@ -60,11 +64,14 @@ rule humann_normalize:
     resources:
         runtime=240
     params:
-        outdir = (config["resultDir"] + "/humann/norm/{sample}_genefamilies.tsv").rsplit('/',1)[0]
+        outdir = (config["resultDir"] + "/humann/norm/{sample}_genefamilies.tsv").rsplit('/',1)[0],
+        units = config["humann_count_units"]
+    message:
+        "humann_norm({wildcards.sample})"
     shell:
         """
-        humann_renorm_table --input {input.genefamilies} --output {output.genefamilies} --units relab
-        humann_renorm_table --input {input.pathabundance} --output {output.pathabundance} --units relab
+        humann_renorm_table --input {input.genefamilies} --output {output.genefamilies} --units {params.units}
+        humann_renorm_table --input {input.pathabundance} --output {output.pathabundance} --units {params.units}
         mv {input.pathCov} {params.outdir}/
         """
 
@@ -87,6 +94,8 @@ rule humann_join:
         runtime=240
     params:
         tabledir = (config["resultDir"] + "/humann/norm/{sample}_genefamilies.tsv").rsplit('/',1)[0]
+    message:
+        "humann_join"
     shell:
         """
         humann_join_tables --input {params.tabledir} --output {output.genefamilies} --file_name genefamilies_relab

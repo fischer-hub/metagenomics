@@ -10,6 +10,8 @@ rule concat_paired_reads:
         WD + "envs/utils.yaml"
     threads:
         1
+    message:
+        "concat_paired_reads({wildcards.sample})"
     shell: 
         """
         cat {input.R1} {input.R1} > {output}

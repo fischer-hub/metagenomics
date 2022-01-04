@@ -7,3 +7,4 @@ channels:
   - defaults
 dependencies:
   - diamond==2.0.6
+  - wget

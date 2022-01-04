@@ -1,0 +1,8 @@
+name: megan
+channels:
+  - bioconda
+  - conda-forge
+  - anaconda
+  - r
+dependencies:
+  - megan

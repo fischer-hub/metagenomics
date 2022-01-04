@@ -1,0 +1,9 @@
+name: diamond
+channels:
+  - bioconda
+  - conda-forge
+  - anaconda
+  - r
+  - defaults
+dependencies:
+  - diamond==2.0.6

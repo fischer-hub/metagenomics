@@ -3,6 +3,7 @@ This is a `Snakemake` base pipeline for functional profiling of (WGS) metagenomi
 When finished, it is supposed to provide multiple modes to analyse the (relative) gene abundance and genetic profile of your samples and do some statistical analysis and visualisation on it as well.
 As of right now the pipeline provides analysis via the tools:
 - [`humann`](https://github.com/biobakery/humann)
+- [`MEGAN6`](https://uni-tuebingen.de/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/algorithms-in-bioinformatics/software/megan6/)
 - [`carnelian`](https://github.com/snz20/carnelian) (under construction)
 
 A manual mode, mapping your reads against a reference to retrieve the gene counts is planned in the future.

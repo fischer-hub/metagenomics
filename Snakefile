@@ -26,8 +26,8 @@ print("samples found:", SAMPLE)
 
 rule all:
     input:
-        config["resultDir"] + "/humann/genefamilies_relab_combined.tsv",
-        config["resultDir"] + "/humann/pathabundance_combined.tsv",
+        config["resultDir"] + "/humann/genefamilies_"  + config["humann_count_units"] + "_combined.tsv",
+        config["resultDir"] + "/humann/pathabundance_" + config["humann_count_units"] + "_combined.tsv",
         config["resultDir"] + "/humann/pathcoverage_combined.tsv"
         #expand("results/{sample}_{r}.{ext}.info", sample = SAMPLE, r = R, ext = EXT)
     #shell:

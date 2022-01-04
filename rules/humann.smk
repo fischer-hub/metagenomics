@@ -52,8 +52,8 @@ rule humann_normalize:
         pathabundance   = config["resultDir"] + "/humann/raw/{sample}_pathabundance.tsv",
         pathCov         = config["resultDir"] + "/humann/raw/{sample}_pathcoverage.tsv"
     output:
-        genefamilies    = config["resultDir"] + "/humann/norm/{sample}_genefamilies_relab.tsv",
-        pathabundance   = config["resultDir"] + "/humann/norm/{sample}_pathabundance_relab.tsv",
+        genefamilies    = config["resultDir"] + "/humann/norm/{sample}_genefamilies_"  + config["humann_count_units"] + ".tsv",
+        pathabundance   = config["resultDir"] + "/humann/norm/{sample}_pathabundance_" + config["humann_count_units"] + ".tsv",
         pathCov         = config["resultDir"] + "/humann/norm/{sample}_pathcoverage.tsv"
     log:
         "log/humann/normalize/{sample}_humann.log"
@@ -77,12 +77,12 @@ rule humann_normalize:
 
 rule humann_join:
     input: 
-        genefamilies    = expand(config["resultDir"] + "/humann/norm/{sample}_genefamilies_relab.tsv", sample = SAMPLE),
-        pathabundance   = expand(config["resultDir"] + "/humann/norm/{sample}_pathabundance_relab.tsv", sample = SAMPLE),
+        genefamilies    = expand(config["resultDir"] + "/humann/norm/{sample}_genefamilies_"  + config["humann_count_units"] + ".tsv", sample = SAMPLE),
+        pathabundance   = expand(config["resultDir"] + "/humann/norm/{sample}_pathabundance_" + config["humann_count_units"] + ".tsv", sample = SAMPLE),
         pathCov         = expand(config["resultDir"] + "/humann/norm/{sample}_pathcoverage.tsv", sample = SAMPLE)
     output:
-        genefamilies    = config["resultDir"] + "/humann/genefamilies_relab_combined.tsv",
-        pathways        = config["resultDir"] + "/humann/pathabundance_combined.tsv",
+        genefamilies    = config["resultDir"] + "/humann/genefamilies_" + config["humann_count_units"]  + "_combined.tsv",
+        pathways        = config["resultDir"] + "/humann/pathabundance_" + config["humann_count_units"] + "_combined.tsv",
         pathCov         = config["resultDir"] + "/humann/pathcoverage_combined.tsv"
     log:
         "log/humann/join/humann.log"

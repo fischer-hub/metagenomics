@@ -1,6 +1,8 @@
 #snakemake --config yourparam=1.5
 import pandas as pd
 
+configfile: "profiles/config.yaml"
+
 # read in samplesheet
 SAMPLESHEET = pd.read_csv(config["reads"]) #.set_index("Sample", drop=False)
 
@@ -24,16 +26,19 @@ R = ["1"] if SINGLE else ["1", "2"]
 
 print("samples found:", SAMPLE)
 
+
 rule all:
     input:
-        config["resultDir"] + "/humann/genefamilies_"  + config["humann_count_units"] + "_combined.tsv",
-        config["resultDir"] + "/humann/pathabundance_" + config["humann_count_units"] + "_combined.tsv",
-        config["resultDir"] + "/humann/pathcoverage_combined.tsv"
+        expand( config["resultDir"] + "/diamond/{sample}.daa", sample = SAMPLE)
+    # humann
+        #config["resultDir"] + "/humann/genefamilies_"  + config["humann_count_units"] + "_combined.tsv",
+        #config["resultDir"] + "/humann/pathabundance_" + config["humann_count_units"] + "_combined.tsv",
+        #config["resultDir"] + "/humann/pathcoverage_combined.tsv"
         #expand("results/{sample}_{r}.{ext}.info", sample = SAMPLE, r = R, ext = EXT)
     #shell:
     #    "rm -r results"
 
-configfile: "profiles/config.yaml"
 
 include: "rules/humann.smk"
 include: "rules/utils.smk"
+include: "rules/diamond.smk"

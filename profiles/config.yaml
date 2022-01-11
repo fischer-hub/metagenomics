@@ -25,7 +25,7 @@ use-conda: true
 latency-wait: 20
 
 # these diamond parameters can be tweaked for better performance
-dmnd_block_size: 10
+dmnd_block_size: 12
 
 dmnd_num_index_chunks: 1
 #report: true

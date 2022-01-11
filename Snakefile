@@ -29,7 +29,10 @@ print("samples found:", SAMPLE)
 
 rule all:
     input:
-        expand( config["resultDir"] + "/diamond/{sample}.daa", sample = SAMPLE)
+        expand("temp/megan/{sample}.done", sample = SAMPLE)
+    # diamond
+        #config["cacheDir"] + "/databases/diamond/nr.dmnd"
+        #expand( config["resultDir"] + "/diamond/{sample}.daa", sample = SAMPLE)
     # humann
         #config["resultDir"] + "/humann/genefamilies_"  + config["humann_count_units"] + "_combined.tsv",
         #config["resultDir"] + "/humann/pathabundance_" + config["humann_count_units"] + "_combined.tsv",
@@ -42,3 +45,4 @@ rule all:
 include: "rules/humann.smk"
 include: "rules/utils.smk"
 include: "rules/diamond.smk"
+include: "rules/megan.smk"

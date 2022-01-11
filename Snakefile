@@ -1,6 +1,8 @@
 #snakemake --config yourparam=1.5
 import pandas as pd
 
+configfile: "profiles/config.yaml"
+
 # read in samplesheet
 SAMPLESHEET = pd.read_csv(config["reads"]) #.set_index("Sample", drop=False)
 
@@ -32,8 +34,6 @@ rule all:
         #expand("results/{sample}_{r}.{ext}.info", sample = SAMPLE, r = R, ext = EXT)
     #shell:
     #    "rm -r results"
-
-configfile: "profiles/config.yaml"
 
 include: "rules/humann.smk"
 include: "rules/utils.smk"

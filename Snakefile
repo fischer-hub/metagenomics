@@ -46,3 +46,4 @@ include: "rules/humann.smk"
 include: "rules/utils.smk"
 include: "rules/diamond.smk"
 include: "rules/megan.smk"
+

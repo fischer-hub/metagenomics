@@ -52,12 +52,14 @@ After that the pipeline is independant of any network connection.
 ## Pipeline parameters
 Additionally to the standard `Snakemake` parameters the pipeline comes with some custom ones that can be used after the `--config` flag:
 ```
-cacheDir=           define the directory where the pipeline can store big files like databases and reference genomes [default: ./cacheDir]
-resultDir=          define the directory where the pipeline can store result files [default: ./resultDir]
-ext=                define the file extension of your read data [default: try to retrieve automatically]
-protDB_build=       define the protein database build used for humann runs [default: uniref50_ec_filtered_diamond]
-nucDB_build=        define the nucleotide translation database build used for humann runs [default: full]
-humann_count_units= define units for gene counts [cpm (counts per million), relab (relative abundance), default: cpm]
+cacheDir=               define the directory where the pipeline can store big files like databases and reference genomes [default: ./cacheDir]
+resultDir=              define the directory where the pipeline can store result files [default: ./resultDir]
+ext=                    define the file extension of your read data [default: try to retrieve automatically]
+protDB_build=           define the protein database build used for humann runs [default: uniref50_ec_filtered_diamond]
+nucDB_build=            define the nucleotide translation database build used for humann runs [default: full]
+humann_count_units=     define units for gene counts [cpm (counts per million), relab (relative abundance), default: cpm]
+dmnd_block_size=        block size to run `DIAMOND`, mem. usage is approximately 6 times this value, increases performance for increased values
+dmnd_num_index_chunks=  number of index chunks to run `DIAMOND` on, lower values increase the performance
 ```
 These can be useful when runnin in environments where the project directory is storage limited and one might want to have large files in other directories without storage limits (this could be the case on shared machines like HPC's where you would want big temporary files on lets say /scratch or similar).\
 NOTE: All of these parameters can be set permanently in the configuration file (profiles/config.yaml).

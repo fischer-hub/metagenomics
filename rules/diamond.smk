@@ -1,5 +1,5 @@
 def get_blast_mem(wildcards, attempt):
-    return ((config["dmnd_block_size"] * 5 + config["dmnd_block_size"] * attempt) * 1024)
+    return ((config["dmnd_block_size"] * 7 + config["dmnd_block_size"] * attempt) * 1024)
 
 rule diamond_makedb:
     output:

@@ -13,7 +13,7 @@ rule megan_get_db:
     shell:
         """
         wget --directory-prefix={output} https://software-ab.informatik.uni-tuebingen.de/download/megan6/megan-map-Jan2021.db.zip 2> {log.wget}
-        gunzip {output}/megan-map-Jan2021.db.zip 2> {log.gunzip}
+        unzip {output}/megan-map-Jan2021.db.zip -d {output} 2> {log.gunzip}
         """
 
 

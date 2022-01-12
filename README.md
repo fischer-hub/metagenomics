@@ -31,7 +31,10 @@ Sample,R1,R2
 samplename,/path/to/sample/file/samplename_forward.ext,/path/to/sample/file/samplename_reverse.ext
 samplename,/path/to/sample/file/samplename_forward.ext,/path/to/sample/file/samplename_reverse.ext
 ```
-
+If your input files are all in the same directory you can use the `create_input_csv.py` script in `scripts/` to generate the `input.csv` file:
+```
+python3 scripts/create_input_csv.py <FASTQ_DIR>
+```
 NOTE: If you have single-end reads put them in the `R1` column and leave `R2` empty. The pipeline will detect the read mode automatically and adjust accordingly.
 
 ## Installation

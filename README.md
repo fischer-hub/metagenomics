@@ -10,13 +10,13 @@ A manual mode, mapping your reads against a reference to retrieve the gene count
 Additionally optional automatic preprocessing of your read data (filtering and cleaning) is planned as well.
 
 ## Requirements
-To run the pipeline you will need a working [`Snakemake`](https://snakemake.readthedocs.io/en/stable/) installation as well as the [`Anaconda/Conda`](https://github.com/conda-forge/miniforge) package manager on your machine. A miniforge `Anaconda` installation is sufficient for this project:
+To run the pipeline you will need a working [`Snakemake`](https://snakemake.readthedocs.io/en/stable/) installation as well as the [`Conda`](https://github.com/conda-forge/miniforge) package manager on your machine. A miniforge `Conda` installation is sufficient for this project:
 
 ```
 wget https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-$(uname)-$(uname -m).sh
 bash Mambaforge-$(uname)-$(uname -m).sh
 ```
-You can install and activate `Snakemake` via `Anaconda` package manager as well:
+You can install and activate `Snakemake` via `Conda` package manager as well:
 
 ```
 conda install -n base -c conda-forge mamba
@@ -35,7 +35,7 @@ samplename,/path/to/sample/file/samplename_forward.ext,/path/to/sample/file/samp
 NOTE: If you have single-end reads put them in the `R1` column and leave `R2` empty. The pipeline will detect the read mode automatically and adjust accordingly.
 
 ## Installation
-With `Snakemake` and `Anaconda` set up you can just clone and cd into this project via:
+With `Snakemake` and `Conda` set up you can just clone and cd into this project via:
 ```
 git clone https://github.com/fischer-hub/metagenomics && cd metagenomics
 ```

@@ -12,6 +12,10 @@ dependencies:
   - biopython=1.70 
   - fraggenescan
   - git
-  - autopep8
-  - pip
   - gcc
+  - pip:
+    - sequtil
+    - ldpc
+    - autopep8
+    - Bio
+

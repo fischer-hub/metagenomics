@@ -1,8 +1,8 @@
-name: utils
+name: megan
 channels:
   - bioconda
   - conda-forge
   - anaconda
+  - r
 dependencies:
-  - gzip=1.10
-  - wget
+  - megan

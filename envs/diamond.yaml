@@ -1,8 +1,10 @@
-name: utils
+name: diamond
 channels:
   - bioconda
   - conda-forge
   - anaconda
+  - r
+  - defaults
 dependencies:
-  - gzip=1.10
+  - diamond==2.0.6
   - wget

@@ -24,7 +24,7 @@ def main(args=None):
         dictionary[SRR].append(path)
         dictionary[SRR].sort()
     
-    with open('test.csv', 'w') as f:
+    with open('input.csv', 'w') as f:
         print("Sample,R1,R2", file=f)
         for SRR in dict(dictionary):
             print(f"{SRR.strip()},{WD + dict(dictionary)[SRR][0].strip()},{WD + dict(dictionary)[SRR][1].strip()}", file=f)

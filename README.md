@@ -60,6 +60,7 @@ nucDB_build=            define the nucleotide translation database build used fo
 humann_count_units=     define units for gene counts [cpm (counts per million), relab (relative abundance), default: cpm]
 dmnd_block_size=        block size to run `DIAMOND`, mem. usage is approximately 6 times this value, increases performance for increased values
 dmnd_num_index_chunks=  number of index chunks to run `DIAMOND` on, lower values increase the performance
+merge_reads=            if true, merge overlapping paired-end reads with `PEAR` instead of just concatenating them [default: true]
 ```
 These can be useful when runnin in environments where the project directory is storage limited and one might want to have large files in other directories without storage limits (this could be the case on shared machines like HPC's where you would want big temporary files on lets say /scratch or similar).\
 NOTE: All of these parameters can be set permanently in the configuration file (profiles/config.yaml).

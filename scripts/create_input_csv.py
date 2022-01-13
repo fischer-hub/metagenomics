@@ -27,7 +27,7 @@ def main(args=None):
     with open('input.csv', 'w') as f:
         print("Sample,R1,R2", file=f)
         for SRR in dict(dictionary):
-            print(f"{SRR.strip()},{WD + dict(dictionary)[SRR][0].strip()},{WD + dict(dictionary)[SRR][1].strip()}", file=f)
+            print(f"{SRR.strip()},{WD + '/' + dict(dictionary)[SRR][0].strip()},{WD + '/' + dict(dictionary)[SRR][1].strip()}", file=f)
 
 if __name__ == "__main__":
     sys.exit(main())

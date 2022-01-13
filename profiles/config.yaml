@@ -28,4 +28,6 @@ latency-wait: 20
 dmnd_block_size: 12
 
 dmnd_num_index_chunks: 1
-#report: true
+
+# use pear to merge overlapping paired reads
+merge_reads: true

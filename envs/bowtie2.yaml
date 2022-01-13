@@ -1,0 +1,8 @@
+name: bowtie2
+channels:
+  - bioconda
+  - conda-forge
+  - anaconda
+  - r
+dependencies:
+  - bowtie2==2.4.4

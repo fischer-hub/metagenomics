@@ -15,8 +15,8 @@ rule bowtie2_index:
         rev_one = config["cacheDir"] + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1] + "/index.rev.1.bt2l",
         rev_two = config["cacheDir"] + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1] + "/index.rev.2.bt2l"
     params:
-        index_out_dir   = config["cacheDir"] + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1],
-        index_in_dir    = config["bowtie2_reference"]
+        index_dir   = config["cacheDir"] + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1],
+        ref_dir     = config["bowtie2_reference"]
     log:
         "log/bowite2/bowtie2_index.log"
     conda:
@@ -29,10 +29,10 @@ rule bowtie2_index:
         runtime=240
     shell:
         """
-        cat {input} > {params.index_in_dir}_concat.fa 2> {log}
-        bowtie2-build --large-index --threads {threads} {params.index_in_dir}_concat.fa {params.index_out_dir}/index 2> {log}
-        export BOWTIE2_INDEXES={params.index_out_dir} 2> {log}
-        rm {params.index_in_dir}_concat.fa 2> {log}
+        cat {input} > {params.ref_dir}_concat.fa 2> {log}
+        bowtie2-build --large-index --threads {threads} {params.ref_dir}_concat.fa {params.index_dir}/index 2> {log}
+        export BOWTIE2_INDEXES={params.index_dir} 2> {log}
+        rm {params.ref_dir}_concat.fa 2> {log}
         """
 
 rule bowtie2_map:
@@ -47,7 +47,7 @@ rule bowtie2_map:
     output:
         unmapped = config["resultDir"] + "/bowtie2/{sample}_unmapped.fastq.gz"
     params:
-        out_dir  = config["resultDir"] + "/bowtie2/"
+        ref_dir  = config["cacheDir"] + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1]
     log:
         "log/bowite2/bowtie2_map_{sample}.log"
     conda:
@@ -60,5 +60,5 @@ rule bowtie2_map:
         runtime=480
     shell:
         """
-        bowtie2 -x index -U {input.reads} --un-gz {params.out_dir} 2> {log}
+        bowtie2 -x {params.ref_dir}/index -U {input.reads} --un-gz {output.unmapped} 2> {log}
         """

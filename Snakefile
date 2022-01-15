@@ -1,5 +1,6 @@
 #snakemake --config yourparam=1.5
 import pandas as pd
+import glob
 
 configfile: "profiles/config.yaml"
 
@@ -29,7 +30,8 @@ R = ["1"] if SINGLE else ["1", "2"]
 
 rule all:
     input:
-        expand(config["resultDir"] + "/concat_reads/{sample}_concat.fq", sample = SAMPLE)
+        expand(config["resultDir"] + "/bowtie2/{sample}_unmapped.fastq.gz", sample = SAMPLE)
+        #expand(config["resultDir"] + "/concat_reads/{sample}_concat.fq", sample = SAMPLE)
     # pear
         #expand(config["resultDir"] + "/pear/{sample}.assembled.fastq", sample = SAMPLE)
     #megan
@@ -44,13 +46,14 @@ rule all:
         #expand("results/{sample}_{r}.{ext}.info", sample = SAMPLE, r = R, ext = EXT)
     #shell:
     #    "rm -r results"
-    onsuccess:
-        print("Workflow finished, startibng cleanup..")
-
-    onerror:
-        print("An error occurred, looking for temporary files to clean up..")
     message:
         "rule all"
+
+onsuccess:
+    print("Workflow finished, startibng cleanup..")
+
+onerror:
+    print("An error occurred, looking for temporary files to clean up..")
 
 
 
@@ -60,4 +63,5 @@ include: "rules/utils.smk"
 include: "rules/diamond.smk"
 include: "rules/megan.smk"
 include: "rules/pear.smk"
+include: "rules/bowtie2.smk"
 

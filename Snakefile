@@ -50,7 +50,7 @@ rule all:
         "rule all"
 
 onsuccess:
-    print("Workflow finished, startibng cleanup..")
+    print("Workflow finished, starting cleanup..")
 
 onerror:
     print("An error occurred, looking for temporary files to clean up..")

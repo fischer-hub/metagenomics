@@ -64,7 +64,7 @@ merge_reads=            if true, merge overlapping paired-end reads with PEAR in
 bowtie2_reference=      directory containing the host genome file(s) used for removing host sequences from the reads [default: empty]
 ```
 These can be useful when running in environments where the project directory has limited storage and one might want to have large files in other directories without storage limits (this could be the case on shared machines like HPC's where you would want big temporary files on lets say /scratch or similar).\
-Providing a genome reference file via the `bowtie2_reference=` will activate the host sequence removal sub workflow.\
+Providing a genome reference via the `bowtie2_reference=` will activate the host sequence removal sub workflow (reference files have to be uncompressed).\
 NOTE: All of these parameters can be set permanently in the configuration file (profiles/config.yaml).
 
 ## Usage on high performance clusters (HPC)

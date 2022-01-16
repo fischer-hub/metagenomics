@@ -58,12 +58,12 @@ ext=                    define the file extension of your read data [default: tr
 protDB_build=           define the protein database build used for humann runs [default: uniref50_ec_filtered_diamond]
 nucDB_build=            define the nucleotide translation database build used for humann runs [default: full]
 humann_count_units=     define units for gene counts [cpm (counts per million), relab (relative abundance), default: cpm]
-dmnd_block_size=        block size to run `DIAMOND`, mem. usage is approximately 6 times this value, increases performance for increased values
-dmnd_num_index_chunks=  number of index chunks to run `DIAMOND` on, lower values increase the performance
-merge_reads=            if true, merge overlapping paired-end reads with `PEAR` instead of just concatenating them [default: true]
+dmnd_block_size=        block size to run DIAMOND, mem. usage is approximately 6 times this value, increases performance for increased values
+dmnd_num_index_chunks=  number of index chunks to run DIAMOND on, lower values increase the performance
+merge_reads=            if true, merge overlapping paired-end reads with PEAR instead of just concatenating them [default: true]
 bowtie2_reference=      directory containing the host genome file(s) used for removing host sequences from the reads [default: empty]
 ```
-These can be useful when runnin in environments where the project directory is storage limited and one might want to have large files in other directories without storage limits (this could be the case on shared machines like HPC's where you would want big temporary files on lets say /scratch or similar).\
+These can be useful when running in environments where the project directory has limited storage and one might want to have large files in other directories without storage limits (this could be the case on shared machines like HPC's where you would want big temporary files on lets say /scratch or similar).\
 NOTE: All of these parameters can be set permanently in the configuration file (profiles/config.yaml).
 
 ## Usage on high performance clusters (HPC)
@@ -76,7 +76,9 @@ You can define your own HPC (or local) profiles and put them in the profiles dir
 
 ## Output
 ### Results
-As of right now the pipeline will output combined gene abundance tables in `resultDir/humann/`. Here you can aso find the individual gene abundance tables for every sample, normalized for gene length and amount of reads per sample (relative abundances) and raw (absoulte abundance).
+All results can be found in the `/resultDir` directory in their respective tool directories. 
+As of right now the pipeline will outputs combined gene abundance tables in `resultDir/humann/`. Here you can aso find the individual gene abundance tables for every sample, normalized for gene length and amount of reads per sample (relative abundances) and raw (absoulte abundance).
+Meganized `.daa` files can be found in `resultDir/megan/$sample_meganized.daa`.
 
 ### Logs
 All log files are saved to `log/$toolname` and contain the standard output of the tool.\

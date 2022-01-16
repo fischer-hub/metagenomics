@@ -84,7 +84,7 @@ Meganized `.daa` files can be found in `resultDir/megan/$sample_meganized.daa`.
 All log files are saved to `log/$toolname` and contain the standard output of the tool.\
 NOTE: On HPCs the job manager might catch the stdout before going to the log files resulting in empty logs. You can find the stdout of each job in its job-log file. For `SLURM` these will be redirected to the `slurm/` directory of the project dir.
 
-##LICENSE
+## LICENSE
 
 MIT License
 

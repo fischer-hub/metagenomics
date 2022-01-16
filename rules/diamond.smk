@@ -1,6 +1,12 @@
 def get_blast_mem(wildcards, attempt):
     return ((config["dmnd_block_size"] * 7 + config["dmnd_block_size"] * attempt) * 1024)
 
+def get_diamond_reads(wildcards):
+    if config["bowtie2_reference"] != "":
+        return config["resultDir"] + "/bowtie2/{wildcards.sample}_unmapped.fastq.gz"
+    else:
+        return config["resultDir"] + "/concat_reads/{wildcards.sample}_concat.fq" + EXT
+
 rule diamond_makedb:
     output:
         config["cacheDir"] + "/databases/diamond/nr.dmnd"
@@ -27,7 +33,7 @@ rule diamond_makedb:
 rule diamond_blastx:
     input:
         db      = config["cacheDir"] + "/databases/diamond/nr.dmnd",
-        reads   = config["resultDir"] + "/concat_reads/{sample}_concat.fq" + EXT
+        reads   = get_diamond_reads
     output: 
         config["resultDir"] + "/diamond/{sample}.daa"
     params:

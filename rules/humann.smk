@@ -1,3 +1,9 @@
+def get_humann_reads(wildcards):
+    if config["bowtie2_reference"] != "":
+        return config["resultDir"] + "/bowtie2/{wildcards.sample}_unmapped.fastq.gz"
+    else:
+        return config["resultDir"] + "/concat_reads/{wildcards.sample}_concat.fq" + EXT
+
 rule humann_databases:
     log:
         c = "log/humann/humann_databases_ChocoPhlAn.log",
@@ -26,7 +32,7 @@ rule humann_compute:
     input: 
         nucDB   = config["cacheDir"] + "/databases/humann/nuc",
         protDB  = config["cacheDir"] + "/databases/humann/prot",
-        reads   = config["resultDir"] + "/concat_reads/{sample}_concat.fq" + EXT
+        reads   = get_humann_reads
     output: 
         genefamilies    = config["resultDir"] + "/humann/raw/{sample}_genefamilies.tsv",
         pathways        = config["resultDir"] + "/humann/raw/{sample}_pathabundance.tsv",

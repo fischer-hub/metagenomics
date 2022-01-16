@@ -22,9 +22,9 @@ rule daa_meganize:
         megan_db_dir    = config["cacheDir"] + "/databases/megan",
         daa             = config["resultDir"] + "/diamond/{sample}.daa"
     output:
-        flag            = touch("temp/megan/{sample}.done")
+        meganized       = config["resultDir"] + "/megan/{sample}_meganized.daa"
     params:
-        megan_db_dir = config["cacheDir"] + "/databases/megan/"
+        megan_db_dir    = config["cacheDir"] + "/databases/megan/"
     log:
         "log/megan/{sample}.log"
     conda:
@@ -38,4 +38,5 @@ rule daa_meganize:
     shell:
         """
         daa-meganizer -i {input.daa} -mdb {input.megan_db_dir}/megan-map-Jan2021.db -t {threads} 2> {log}
+        mv {input.daa} {output.meganized}
         """ 

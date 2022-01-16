@@ -46,7 +46,7 @@ Start the pipeline with:
 ```
 snakemake --config reads=input.csv
 ```
-Where `input.csv` is the csv file created before, providing information of your read data. On first run, the pipeline will download all necessary packages and install them into the according environments. This can take a while depending on your machine an internet connection.
+Where `input.csv` is the csv file created before, providing information of your read data. On first run, the pipeline will download all necessary packages and install them into the according environments. This can take a while depending on your machine and internet connection.
 After that the pipeline is independant of any network connection.
 
 ## Pipeline parameters
@@ -64,7 +64,7 @@ merge_reads=            if true, merge overlapping paired-end reads with PEAR in
 bowtie2_reference=      directory containing the host genome file(s) used for removing host sequences from the reads [default: empty]
 ```
 These can be useful when running in environments where the project directory has limited storage and one might want to have large files in other directories without storage limits (this could be the case on shared machines like HPC's where you would want big temporary files on lets say /scratch or similar).\
-Providing a genome reference file via the `bowtie2_reference=` will activate the host sequence removal sub workflow.
+Providing a genome reference file via the `bowtie2_reference=` will activate the host sequence removal sub workflow.\
 NOTE: All of these parameters can be set permanently in the configuration file (profiles/config.yaml).
 
 ## Usage on high performance clusters (HPC)

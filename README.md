@@ -46,7 +46,7 @@ Start the pipeline with:
 ```
 snakemake --config reads=input.csv
 ```
-Where `input.csv` is the csv file created before, providing information of your read data. On first run, the pipeline will download all necessary packages and install them into the according environments. This can take a while depending on your machine an internet connection.
+Where `input.csv` is the csv file created before, providing information of your read data. On first run, the pipeline will download all necessary packages and install them into the according environments. This can take a while depending on your machine and internet connection.
 After that the pipeline is independant of any network connection.
 
 ## Pipeline parameters
@@ -64,6 +64,7 @@ merge_reads=            if true, merge overlapping paired-end reads with PEAR in
 bowtie2_reference=      directory containing the host genome file(s) used for removing host sequences from the reads [default: empty]
 ```
 These can be useful when running in environments where the project directory has limited storage and one might want to have large files in other directories without storage limits (this could be the case on shared machines like HPC's where you would want big temporary files on lets say /scratch or similar).\
+Providing a genome reference via the `bowtie2_reference=` will activate the host sequence removal sub workflow (reference files have to be uncompressed).\
 NOTE: All of these parameters can be set permanently in the configuration file (profiles/config.yaml).
 
 ## Usage on high performance clusters (HPC)
@@ -84,6 +85,28 @@ Meganized `.daa` files can be found in `resultDir/megan/$sample_meganized.daa`.
 All log files are saved to `log/$toolname` and contain the standard output of the tool.\
 NOTE: On HPCs the job manager might catch the stdout before going to the log files resulting in empty logs. You can find the stdout of each job in its job-log file. For `SLURM` these will be redirected to the `slurm/` directory of the project dir.
 
+## LICENSE
 
+MIT License
+
+Copyright (c) 2022 David Fischer
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 

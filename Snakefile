@@ -19,9 +19,9 @@ EXT += '.' + SAMPLESHEET.loc[0, "R1"].rsplit(".", 2)[2] if SAMPLESHEET.loc[0, "R
 
 # set constants
 READDIR     = SAMPLESHEET.loc[0, "R1"].rsplit("/", 1)[0]
-RESULTDIR   = config["resultDir"]
-CACHEDIR    = config["cacheDir"]
-TEMPDIR     = config["tempDir"]
+RESULTDIR   = config["resultDir"] if config["resultDir"][-1] != '/' else config["resultDir"][:-1]
+CACHEDIR    = config["cacheDir"] if config["cacheDir"][-1] != '/' else config["cacheDir"][:-1]
+TEMPDIR     = config["tempDir"] if config["tempDir"][-1] != '/' else config["tempDir"][:-1]
 #print(READDIR)
 
 # detect read mode

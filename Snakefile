@@ -17,8 +17,10 @@ SAMPLE = list(SAMPLESHEET["Sample"])
 EXT  = '.' + SAMPLESHEET.loc[0, "R1"].rsplit(".", 2)[1]
 EXT += '.' + SAMPLESHEET.loc[0, "R1"].rsplit(".", 2)[2] if SAMPLESHEET.loc[0, "R1"].rsplit(".", 1)[1] == "gz" else + ""
 
-
-READDIR = SAMPLESHEET.loc[0, "R1"].rsplit("/", 1)[0]
+# set constants
+READDIR     = SAMPLESHEET.loc[0, "R1"].rsplit("/", 1)[0]
+RESULTDIR   = config["resultDir"]
+CACHEDIR    = config["cacheDir"]
 #print(READDIR)
 
 # detect read mode

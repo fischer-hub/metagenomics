@@ -10,7 +10,6 @@ def get_concat_input(wildcards):
     return dd
 
 
-
 rule concat_paired_reads:
     input: 
         unpack(get_concat_input)

@@ -29,6 +29,11 @@ rule bowtie2_index:
         runtime=240
     shell:
         """
+        #if [[ {input}[0] == *.gz ]]
+        #then
+        #    gunzip {input}
+        #fi
+
         cat {input} > {params.ref_dir}_concat.fa 2> {log}
         bowtie2-build --large-index --threads {threads} {params.ref_dir}_concat.fa {params.index_dir}/index 2> {log}
         export BOWTIE2_INDEXES={params.index_dir} 2> {log}

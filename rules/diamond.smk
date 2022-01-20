@@ -3,9 +3,9 @@ def get_blast_mem(wildcards, attempt):
 
 def get_diamond_reads(wildcards):
     if config["bowtie2_reference"] != "":
-        return config["resultDir"] + "/bowtie2/{wildcards.sample}_unmapped.fastq.gz"
+        return config["resultDir"] + "/bowtie2/{wildcards.sample}_unmapped.fastq.gz".format(wildcards=wildcards)
     else:
-        return config["resultDir"] + "/concat_reads/{wildcards.sample}_concat.fq" + EXT
+        return config["resultDir"] + "/concat_reads/{wildcards.sample}_concat.fq".format(wildcards=wildcards)
 
 rule diamond_makedb:
     output:

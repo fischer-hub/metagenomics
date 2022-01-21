@@ -1,11 +1,29 @@
 #snakemake --config yourparam=1.5
 import pandas as pd
 import glob
+import os
 
 configfile: "profiles/config.yaml"
+include: "scripts/create_input_csv.py"
+include: "scripts/io.py"
+
+
+param_reads = config["reads"]
 
 # read in samplesheet
-SAMPLESHEET = pd.read_csv(config["reads"]) #.set_index("Sample", drop=False)
+if ".csv" in param_reads:
+    # reads= is a csv file containing read info
+    SAMPLESHEET = pd.read_csv(param_reads)
+    print(f"{bcolors.OKBLUE}INFO: Loading samples from file '{param_reads}'.")
+elif config["reads"] == "":
+    # reads is empty, exit
+    print(f"{bcolors.FAIL}CRITICAL: No samplesheet or directory containing reads were provided to parameter 'reads='! Exiting..")
+    exit()
+else:
+    # assume whatever is in 'reads=' is the path to read dir
+    print(f"{bcolors.OKBLUE}INFO: Loading samples from directory '{param_reads}', automatically created 'input.csv' in work directory.")
+    os.system(f"python3 scripts/create_input_csv.py {param_reads}")
+    SAMPLESHEET = pd.read_csv("input.csv")
 
 # set working directory
 WD = {workflow.snakefile}.pop().rsplit('/', 1)[0] + '/'
@@ -28,12 +46,14 @@ TEMPDIR     = config["tempDir"] if config["tempDir"][-1] != '/' else config["tem
 SINGLE = True if pd.isna(SAMPLESHEET.loc[0, "R2"]) == 0 else False
 R = ["1"] if SINGLE else ["1", "2"] 
 
-#print("samples found:", SAMPLE)
+print("INFO: Samples found:", SAMPLE)
 
 
 rule all:
     input:
-        expand(config["resultDir"] + "/bowtie2/{sample}_unmapped.fastq.gz", sample = SAMPLE)
+        expand(RESULTDIR + "/01-QualityControl/trimmed/{sample}_{mate}.fastq.gz", sample = SAMPLE, mate = ["1", "2"]),
+        expand(RESULTDIR + "/01-QualityControl/fastqcPre/{sample}_{mate}.html", sample = SAMPLE, mate = ["1", "2"])
+        #expand(config["resultDir"] + "/bowtie2/{sample}_unmapped.fastq.gz", sample = SAMPLE)
         #expand(config["resultDir"] + "/concat_reads/{sample}_concat.fq", sample = SAMPLE)
     # pear
         #expand(config["resultDir"] + "/pear/{sample}.assembled.fastq", sample = SAMPLE)
@@ -54,11 +74,11 @@ rule all:
 
 onsuccess:
     print("Workflow finished, starting cleanup..")
+    if RESULTDIR != "results":
+        shell(f"if [ ! -d results ]; then ln -s {RESULTDIR} results; fi")
 
 onerror:
     print("An error occurred, looking for temporary files to clean up..")
-
-
 
 
 include: "rules/humann.smk"
@@ -67,4 +87,8 @@ include: "rules/diamond.smk"
 include: "rules/megan.smk"
 include: "rules/pear.smk"
 include: "rules/bowtie2.smk"
+include: "rules/trimmomatic.smk"
+include: "rules/fastqc.smk"
+
+
 

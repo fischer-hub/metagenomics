@@ -3,7 +3,7 @@ rule fastqcPre:
         read    = READDIR + "/{sample}_{mate}" + EXT
     output:
         html    = RESULTDIR + "/01-QualityControl/fastqcPre/{sample}_{mate}.html",
-        zip     = TEMPDIR + "/qc/fastqc/{sample}_{mate}_fastqc.zip"
+        zip     = TEMPDIR + "/qc/fastqc_pre/{sample}_{mate}_fastqc.zip"
     params: "--quiet"
     log:
         "log/fastqc/{sample}_{mate}.log"

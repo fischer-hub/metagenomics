@@ -18,7 +18,7 @@ rule bowtie2_index:
         index_dir   = config["cacheDir"] + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1],
         ref_dir     = config["bowtie2_reference"]
     log:
-        "log/bowite2/bowtie2_index.log"
+        "log/bowtie2/bowtie2_index.log"
     conda:
         WD + "envs/bowtie2.yaml"
     threads:
@@ -54,7 +54,7 @@ rule bowtie2_map:
     params:
         ref_dir  = config["cacheDir"] + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1]
     log:
-        "log/bowite2/bowtie2_map_{sample}.log"
+        "log/bowtie2/bowtie2_map_{sample}.log"
     conda:
         WD + "envs/bowtie2.yaml"
     threads:

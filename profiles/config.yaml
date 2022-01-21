@@ -1,6 +1,6 @@
 # custom params
 
-reads: 
+reads: ""
 
 #humannDB: "chocophlan"
 
@@ -10,9 +10,11 @@ nucDB_build: "full"
 
 cacheDir: "cacheDir"
 
-ext: ""
-
 resultDir: "resultDir"
+
+temp: "temp"
+
+ext: ""
 
 humann_count_units: "cpm"
 
@@ -35,3 +37,11 @@ merge_reads: true
 bowtie2_reference: ""
 
 tools: ""
+
+qc: true
+
+trimmomatic:
+  adapters: "assets/adapters/TruSeq3-PE.fa"
+  max_mismatch: "2"
+  pThreshold: "30"
+  sThreshold: "10" 

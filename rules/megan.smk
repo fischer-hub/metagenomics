@@ -59,7 +59,7 @@ rule daa_to_info:
     conda:
         WD + "envs/megan.yaml"
     threads:
-        16
+        1
     message:
         "daa_to_info({wildcards.sample})"
     shell:
@@ -79,4 +79,4 @@ rule join_megan_tsv:
         result = frames[0].join(frames[1:])
         result.fillna(0, inplace=True)
         result = result.astype(int)
-        result.to_csv(output.combined, header=HEADER, na_rep='0')
+        result.to_csv(output.combined, header=(",".join(input)), na_rep='0')

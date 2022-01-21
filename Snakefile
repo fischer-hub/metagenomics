@@ -1,11 +1,29 @@
 #snakemake --config yourparam=1.5
 import pandas as pd
 import glob
+import os
 
 configfile: "profiles/config.yaml"
+include: "scripts/create_input_csv.py"
+include: "scripts/io.py"
+
+
+param_reads = config["reads"]
 
 # read in samplesheet
-SAMPLESHEET = pd.read_csv(config["reads"]) #.set_index("Sample", drop=False)
+if ".csv" in param_reads:
+    # reads= is a csv file containing read info
+    SAMPLESHEET = pd.read_csv(param_reads)
+    print(f"{bcolors.OKBLUE}INFO: Loading samples from file '{param_reads}'.")
+elif config["reads"] == "":
+    # reads is empty, exit
+    print(f"{bcolors.FAIL}CRITICAL: No samplesheet or directory containing reads were provided to parameter 'reads='! Exiting..")
+    exit()
+else:
+    # assume whatever is in 'reads=' is the path to read dir
+    print(f"{bcolors.OKBLUE}INFO: Loading samples from directory '{param_reads}', automatically created 'input.csv' in work directory.")
+    os.system(f"python3 scripts/create_input_csv.py {param_reads}")
+    SAMPLESHEET = pd.read_csv("input.csv")
 
 # set working directory
 WD = {workflow.snakefile}.pop().rsplit('/', 1)[0] + '/'
@@ -17,9 +35,12 @@ SAMPLE = list(SAMPLESHEET["Sample"])
 EXT  = '.' + SAMPLESHEET.loc[0, "R1"].rsplit(".", 2)[1]
 EXT += '.' + SAMPLESHEET.loc[0, "R1"].rsplit(".", 2)[2] if SAMPLESHEET.loc[0, "R1"].rsplit(".", 1)[1] == "gz" else + ""
 
-
-READDIR = SAMPLESHEET.loc[0, "R1"].rsplit("/", 1)[0]
-print(READDIR)
+# set constants
+READDIR     = SAMPLESHEET.loc[0, "R1"].rsplit("/", 1)[0]
+RESULTDIR   = config["resultDir"] if config["resultDir"][-1] != '/' else config["resultDir"][:-1]
+CACHEDIR    = config["cacheDir"] if config["cacheDir"][-1] != '/' else config["cacheDir"][:-1]
+TEMPDIR     = config["tempDir"] if config["tempDir"][-1] != '/' else config["tempDir"][:-1]
+#print(READDIR)
 
 # detect read mode
 SINGLE = True if pd.isna(SAMPLESHEET.loc[0, "R2"]) == 0 else False
@@ -57,11 +78,11 @@ rule all:
 
 onsuccess:
     print("Workflow finished, starting cleanup..")
+    if RESULTDIR != "results":
+        shell(f"if [ ! -d results ]; then ln -s {RESULTDIR} results; fi")
 
 onerror:
     print("An error occurred, looking for temporary files to clean up..")
-
-
 
 
 include: "rules/humann.smk"
@@ -70,5 +91,7 @@ include: "rules/diamond.smk"
 include: "rules/megan.smk"
 include: "rules/pear.smk"
 include: "rules/bowtie2.smk"
-include: "scripts/io.py"
+include: "rules/trimmomatic.smk"
+include: "rules/fastqc.smk"
+
 

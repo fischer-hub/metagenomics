@@ -68,6 +68,10 @@ dmnd_block_size=        block size to run DIAMOND, mem. usage is approximately 6
 dmnd_num_index_chunks=  number of index chunks to run DIAMOND on, lower values increase the performance
 merge_reads=            if true, merge overlapping paired-end reads with PEAR instead of just concatenating them [default: true]
 bowtie2_reference=      directory containing the host genome file(s) used for removing host sequences from the reads [default: empty]
+adapters=               file with illumina adapter sequences to used by TRIMMOMATIC for adapter removal
+max_mismatch=           maximum mismatch count which will still allow a full adapter match
+pThreshold=             specifies how accurate the match between the two 'adapter ligated' reads must be
+sThreshold=             specifies how accurate the match between any adapter etc. sequence must be
 ```
 These can be useful when running in environments where the project directory has limited storage and one might want to have large files in other directories without storage limits (this could be the case on shared machines like HPC's where you would want big temporary files on lets say /scratch or similar).\
 Providing a genome reference via the `bowtie2_reference=` will activate the host sequence removal sub workflow (reference files have to be uncompressed).\

@@ -22,9 +22,9 @@ rule pear:
     shell:
         """
         mkdir -p {params.resultDir}/pear/
-        pear --threads {threads} --forward-fastq {input.R1} --reverse-fastq {input.R2} --output {wildcards.sample} > {log}
-        mv {wildcards.sample}.assembled.fastq {output.assembled_pairs} >> {log}
-        mv {wildcards.sample}.unassembled.forward.fastq {output.unassembled_fwd} >> {log}
-        mv {wildcards.sample}.unassembled.reverse.fastq {output.unassembled_rev} >> {log}
-        mv {wildcards.sample}.discarded.fastq {output.discarded_reads} >> {log}
+        pear -b 64 --threads {threads} --forward-fastq {input.R1} --reverse-fastq {input.R2} --output {params.resultDir}/pear/{wildcards.sample} > {log}
+        #mv {wildcards.sample}.assembled.fastq {output.assembled_pairs} >> {log}
+        #mv {wildcards.sample}.unassembled.forward.fastq {output.unassembled_fwd} >> {log}
+        #mv {wildcards.sample}.unassembled.reverse.fastq {output.unassembled_rev} >> {log}
+        #mv {wildcards.sample}.discarded.fastq {output.discarded_reads} >> {log}
         """

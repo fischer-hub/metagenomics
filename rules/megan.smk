@@ -46,7 +46,7 @@ rule daa_meganize:
 
         # meganize .daa file
         daa-meganizer -i {input.daa} -mdb {input.megan_db_dir}/megan-map-Jan2021.db -t {threads} 2> {log}
-        mv {input.daa} {output.meganized_daa} 2> {log}
+        cp {input.daa} {output.meganized_daa} 2> {log}
         """
 
 rule daa_to_info:
@@ -69,15 +69,14 @@ rule daa_to_info:
         mv temp.tsv {output}
         """
 
-""" rule join_megan_tsv:
+rule join_megan_tsv:
     input:
         expand(config["resultDir"] + "/megan/counts/{sample}_counts.tsv", sample = SAMPLE)
     output:
-        combined = "config["resultDir"] + /megan/megan_combined.csv"
+        combined = config["resultDir"] + "/megan/megan_combined.csv"
     run:
         frames = [ pd.read_csv(f, sep='\t', index_col=0, names=["gene_id", f]) for f in input ]
         result = frames[0].join(frames[1:])
         result.fillna(0, inplace=True)
         result = result.astype(int)
         result.to_csv(output.combined, header=HEADER, na_rep='0')
-     """

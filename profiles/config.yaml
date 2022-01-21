@@ -33,3 +33,5 @@ dmnd_num_index_chunks: 1
 merge_reads: true
 
 bowtie2_reference: ""
+
+tools: ""

@@ -46,31 +46,35 @@ TEMPDIR     = config["tempDir"] if config["tempDir"][-1] != '/' else config["tem
 SINGLE = True if pd.isna(SAMPLESHEET.loc[0, "R2"]) == 0 else False
 R = ["1"] if SINGLE else ["1", "2"] 
 
-print("INFO: Samples found:", SAMPLE)
+print("samples found:", SAMPLE)
 
+def rule_all_input(wildcards):
+    
+    if "humann" in config["tools"] and "megan" in config["tools"]:
+        print(f"{bcolors.OKBLUE}INFO: Running pipeline with core tools MEGAN6 and HUMAnN 3.0 to classify input reads.")
+        return [    config["resultDir"] + "/humann/genefamilies_"  + config["humann_count_units"] + "_combined.tsv",
+                    config["resultDir"] + "/humann/pathabundance_" + config["humann_count_units"] + "_combined.tsv",
+                    config["resultDir"] + "/humann/pathcoverage_combined.tsv", 
+                    config["resultDir"] + "/megan/megan_combined.csv"   ]
+    elif "humann" in config["tools"]:
+        print(f"{bcolors.OKBLUE}INFO: Running pipeline with core tool HUMAnN 3.0.")
+        return [    config["resultDir"] + "/humann/genefamilies_"  + config["humann_count_units"] + "_combined.tsv",
+                    config["resultDir"] + "/humann/pathabundance_" + config["humann_count_units"] + "_combined.tsv",
+                    config["resultDir"] + "/humann/pathcoverage_combined.tsv"   ]
+    elif "megan" in config["tools"]:
+        print(f"{bcolors.OKGREEN}Running pipeline with core tool MEGAN6 to classify input reads.")
+        return [    config["resultDir"] + "/megan/megan_combined.csv"   ]
+    else:
+        print(f"{bcolors.FAIL}WARNING: No core tool was chosen to classify the reads.")
+        return []
 
 rule all:
     input:
-        expand(RESULTDIR + "/01-QualityControl/trimmed/{sample}_{mate}.fastq.gz", sample = SAMPLE, mate = ["1", "2"]),
-        expand(RESULTDIR + "/01-QualityControl/fastqcPre/{sample}_{mate}.html", sample = SAMPLE, mate = ["1", "2"])
-        #expand(config["resultDir"] + "/bowtie2/{sample}_unmapped.fastq.gz", sample = SAMPLE)
-        #expand(config["resultDir"] + "/concat_reads/{sample}_concat.fq", sample = SAMPLE)
-    # pear
-        #expand(config["resultDir"] + "/pear/{sample}.assembled.fastq", sample = SAMPLE)
-    #megan
-        #expand("temp/megan/{sample}.done", sample = SAMPLE)
-    # diamond
-        #config["cacheDir"] + "/databases/diamond/nr.dmnd"
-        #expand( config["resultDir"] + "/diamond/{sample}.daa", sample = SAMPLE)
-    # humann
-        #config["resultDir"] + "/humann/genefamilies_"  + config["humann_count_units"] + "_combined.tsv",
-        #config["resultDir"] + "/humann/pathabundance_" + config["humann_count_units"] + "_combined.tsv",
-        #config["resultDir"] + "/humann/pathcoverage_combined.tsv"
-        #expand("results/{sample}_{r}.{ext}.info", sample = SAMPLE, r = R, ext = EXT)
-    #shell:
-    #    "rm -r results"
+        rule_all_input
     message:
         "rule all"
+    shell:
+        "echo 'clean up'"
 
 onsuccess:
     print("Workflow finished, starting cleanup..")
@@ -89,6 +93,5 @@ include: "rules/pear.smk"
 include: "rules/bowtie2.smk"
 include: "rules/trimmomatic.smk"
 include: "rules/fastqc.smk"
-
 
 

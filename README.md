@@ -50,7 +50,13 @@ Where `input.csv` is the csv file created before, providing information of your 
 After that the pipeline is independant of any network connection.
 
 ## Pipeline parameters
-Additionally to the standard `Snakemake` parameters the pipeline comes with some custom ones that can be used after the `--config` flag:
+Additionally to the standard `Snakemake` parameters the pipeline comes with some custom ones that can be used after the `--config` flag.
+### Required parameters
+The following parameters are required to run the pipeline:
+```
+reads=                  comma seperated file that with information about the reads or dir that contains the reads [section Requirements](#requirements)
+```
+### Optional parameters
 ```
 cacheDir=               define the directory where the pipeline can store big files like databases and reference genomes [default: ./cacheDir]
 resultDir=              define the directory where the pipeline can store result files [default: ./resultDir]

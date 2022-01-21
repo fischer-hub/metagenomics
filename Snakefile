@@ -39,14 +39,14 @@ EXT += '.' + SAMPLESHEET.loc[0, "R1"].rsplit(".", 2)[2] if SAMPLESHEET.loc[0, "R
 READDIR     = SAMPLESHEET.loc[0, "R1"].rsplit("/", 1)[0]
 RESULTDIR   = config["resultDir"] if config["resultDir"][-1] != '/' else config["resultDir"][:-1]
 CACHEDIR    = config["cacheDir"] if config["cacheDir"][-1] != '/' else config["cacheDir"][:-1]
-TEMPDIR     = config["tempDir"] if config["tempDir"][-1] != '/' else config["tempDir"][:-1]
+TEMPDIR     = config["temp"] if config["temp"][-1] != '/' else config["temp"][:-1]
 #print(READDIR)
 
 # detect read mode
 SINGLE = True if pd.isna(SAMPLESHEET.loc[0, "R2"]) == 0 else False
 R = ["1"] if SINGLE else ["1", "2"] 
 
-print("samples found:", SAMPLE)
+print("INFO: Found sample files:", SAMPLE)
 
 def rule_all_input(wildcards):
     
@@ -65,12 +65,16 @@ def rule_all_input(wildcards):
         print(f"{bcolors.OKGREEN}Running pipeline with core tool MEGAN6 to classify input reads.")
         return [    config["resultDir"] + "/megan/megan_combined.csv"   ]
     else:
-        print(f"{bcolors.FAIL}WARNING: No core tool was chosen to classify the reads.")
-        return []
+        print(f"{bcolors.FAIL}WARNING: No core tool was chosen to classify the reads. Running all core tools now..")
+        return [    config["resultDir"] + "/humann/genefamilies_"  + config["humann_count_units"] + "_combined.tsv",
+                    config["resultDir"] + "/humann/pathabundance_" + config["humann_count_units"] + "_combined.tsv",
+                    config["resultDir"] + "/humann/pathcoverage_combined.tsv", 
+                    config["resultDir"] + "/megan/megan_combined.csv"   ]
 
 rule all:
     input:
-        rule_all_input
+        rule_all_input,
+        RESULTDIR + "/Summary/multiqc.html"
     message:
         "rule all"
     shell:
@@ -93,5 +97,8 @@ include: "rules/pear.smk"
 include: "rules/bowtie2.smk"
 include: "rules/trimmomatic.smk"
 include: "rules/fastqc.smk"
+include: "rules/multiqc.smk"
+include: "rules/bbmerge.smk"
+
 
 

@@ -1,4 +1,4 @@
-rule fastqcPre:
+rule fastqc_pre:
     input:
         read    = READDIR + "/{sample}_{mate}" + EXT
     output:
@@ -14,7 +14,7 @@ rule fastqcPre:
     wrapper:
         "v0.86.0/bio/fastqc"
 
-rule fastqcPost:
+rule fastqc_post:
     input:
         "reads/{sample}.fastq"
     output:

@@ -46,11 +46,12 @@ rule humann_compute:
     resources:
         runtime=960
     params:
-        outdir = (config["resultDir"] + "/humann/raw/{sample}_genefamilies.tsv").rsplit('/',1)[0]
+        outdir      = (config["resultDir"] + "/humann/raw/{sample}_genefamilies.tsv").rsplit('/',1)[0],
+        read_len    = 45
     message:
         "humann_compute({wildcards.sample})"
     shell: 
-        "humann --threads {threads} -i {input.reads} -o {params.outdir} --nucleotide-database {input.nucDB}/*/ --protein-database {input.protDB}/*/ --output-basename {wildcards.sample} --verbose 2> {log}"
+        "humann --metaphlan-options=\"--read_min_len {params.read_len}\" --threads {threads} -i {input.reads} -o {params.outdir} --nucleotide-database {input.nucDB}/*/ --protein-database {input.protDB}/*/ --output-basename {wildcards.sample} --verbose 2> {log}"
 
 rule humann_normalize:
     input: 
@@ -76,9 +77,9 @@ rule humann_normalize:
         "humann_norm({wildcards.sample})"
     shell:
         """
-        humann_renorm_table --input {input.genefamilies} --output {output.genefamilies} --units {params.units}
-        humann_renorm_table --input {input.pathabundance} --output {output.pathabundance} --units {params.units}
-        mv {input.pathCov} {params.outdir}/
+        humann_renorm_table --input {input.genefamilies} --output {output.genefamilies} --units {params.units} 2> {log}
+        humann_renorm_table --input {input.pathabundance} --output {output.pathabundance} --units {params.units} 2>> {log}
+        mv {input.pathCov} {params.outdir}/ 2>> {log}
         """
 
 rule humann_join:
@@ -99,12 +100,13 @@ rule humann_join:
     resources:
         runtime=240
     params:
-        tabledir = (config["resultDir"] + "/humann/norm/{sample}_genefamilies.tsv").rsplit('/',1)[0]
+        tabledir    = (config["resultDir"] + "/humann/norm/{sample}_genefamilies.tsv").rsplit('/',1)[0],
+        units       = config["humann_count_units"]
     message:
         "humann_join"
     shell:
         """
-        humann_join_tables --input {params.tabledir} --output {output.genefamilies} --file_name genefamilies_relab
-        humann_join_tables --input {params.tabledir} --output {output.pathCov} --file_name pathcoverage
-        humann_join_tables --input {params.tabledir} --output {output.pathways} --file_name pathabundance_relab
+        humann_join_tables --input {params.tabledir} --output {output.genefamilies} --file_name genefamilies_{params.units} 2> {log}
+        humann_join_tables --input {params.tabledir} --output {output.pathCov} --file_name pathcoverage 2>> {log}
+        humann_join_tables --input {params.tabledir} --output {output.pathways} --file_name pathabundance_{params.units} 2>> {log}
         """

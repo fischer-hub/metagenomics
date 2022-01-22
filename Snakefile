@@ -7,8 +7,10 @@ configfile: "profiles/config.yaml"
 include: "scripts/create_input_csv.py"
 include: "scripts/io.py"
 
+print(f"{BANNER}")
 
 param_reads = config["reads"]
+param_mode = config["mode"]
 
 # read in samplesheet
 if ".csv" in param_reads:
@@ -21,8 +23,8 @@ elif config["reads"] == "":
     exit()
 else:
     # assume whatever is in 'reads=' is the path to read dir
-    print(f"{bcolors.OKBLUE}INFO: Loading samples from directory '{param_reads}', automatically created 'input.csv' in work directory.")
-    os.system(f"python3 scripts/create_input_csv.py {param_reads}")
+    print(f"{bcolors.OKBLUE}INFO: Loading samples from directory '{param_reads}', automatically created 'input.csv' in work directory.\n{bcolors.OKCYAN}NOTE: This requires the read mode to be set correctly. Set it with 'mode=[paired,single]'.\nRunning with read mode: {param_mode}.")
+    os.system(f"python3 scripts/create_input_csv.py {param_reads} {param_mode}")
     SAMPLESHEET = pd.read_csv("input.csv")
 
 # set working directory
@@ -46,12 +48,12 @@ TEMPDIR     = config["temp"] if config["temp"][-1] != '/' else config["temp"][:-
 SINGLE = True if pd.isna(SAMPLESHEET.loc[0, "R2"]) == 0 else False
 R = ["1"] if SINGLE else ["1", "2"] 
 
-print("INFO: Found sample files:", SAMPLE)
+print(f"{bcolors.OKBLUE}INFO: Found sample files:", SAMPLE)
 
 def rule_all_input(wildcards):
     
     if "humann" in config["tools"] and "megan" in config["tools"]:
-        print(f"{bcolors.OKBLUE}INFO: Running pipeline with core tools MEGAN6 and HUMAnN 3.0 to classify input reads.")
+        print(f"{bcolors.OKBLUE}INFO: Running pipeline with core tools MEGAN6 and HUMAnN 3.0 to classify input reads.{bcolors.OKBLUE}")
         return [    config["resultDir"] + "/humann/genefamilies_"  + config["humann_count_units"] + "_combined.tsv",
                     config["resultDir"] + "/humann/pathabundance_" + config["humann_count_units"] + "_combined.tsv",
                     config["resultDir"] + "/humann/pathcoverage_combined.tsv", 
@@ -62,10 +64,10 @@ def rule_all_input(wildcards):
                     config["resultDir"] + "/humann/pathabundance_" + config["humann_count_units"] + "_combined.tsv",
                     config["resultDir"] + "/humann/pathcoverage_combined.tsv"   ]
     elif "megan" in config["tools"]:
-        print(f"{bcolors.OKGREEN}Running pipeline with core tool MEGAN6 to classify input reads.")
+        print(f"{bcolors.OKGREEN}Running pipeline with core tool MEGAN6 to classify input reads.{bcolors.OKGREEN}")
         return [    config["resultDir"] + "/megan/megan_combined.csv"   ]
     else:
-        print(f"{bcolors.FAIL}WARNING: No core tool was chosen to classify the reads. Running all core tools now..")
+        print(f"{bcolors.FAIL}WARNING: No core tool was chosen to classify the reads. Running all core tools now..{bcolors.FAIL}")
         return [    config["resultDir"] + "/humann/genefamilies_"  + config["humann_count_units"] + "_combined.tsv",
                     config["resultDir"] + "/humann/pathabundance_" + config["humann_count_units"] + "_combined.tsv",
                     config["resultDir"] + "/humann/pathcoverage_combined.tsv", 
@@ -87,6 +89,8 @@ onsuccess:
 
 onerror:
     print("An error occurred, looking for temporary files to clean up..")
+    if RESULTDIR != "results":
+        shell(f"if [ ! -d results ]; then ln -s {RESULTDIR} results; fi")
 
 
 include: "rules/humann.smk"

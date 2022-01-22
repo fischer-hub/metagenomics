@@ -1,10 +1,17 @@
 def get_reports(wildcards):
-    reports = ["/bbmerge/{wildcards.sample}_ihist.txt"]
+
+    reports = []
+    if config["merger"] == "bbmerge":
+        reports.extend(expand(TEMPDIR   + "/bbmerge/{sample}_ihist.txt", sample = SAMPLE))
+
     if config["bowtie2_reference"] != "":
-        reports.append("log/bowtie2/bowtie2_map_{wildcards.sample}.log")
+        reports.extend(expand("log/bowtie2/bowtie2_map_{sample}.log", sample = SAMPLE))
+
     if config["qc"] == "true":
-        reports.append(TEMPDIR + "/qc/fastqc_pre/{wildcards.sample}_{mate}_fastqc.zip")
+        reports.extend(expand(TEMPDIR + "/qc/fastqc_pre/{sample}_{mate}_fastqc.zip", sample = SAMPLE, mate = ["1", "2"]))
+
     return reports
+
 
 rule multiqc:
     input:
@@ -14,6 +21,8 @@ rule multiqc:
     params:
         ""  # Optional: extra parameters for multiqc.
     log:
-        "logs/multiqc.log"
+        "log/multiqc.log"
+    message:
+        "multiqc"
     wrapper:
         "v0.86.0/bio/multiqc"

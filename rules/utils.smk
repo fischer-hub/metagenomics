@@ -1,13 +1,15 @@
 def get_concat_input(wildcards):
-    if config["merge_reads"] == "true":
-        dd = {  "assembled_pairs": config["resultDir"] + "/pear/{wildcards.sample}.assembled.fastq".format(wildcards=wildcards),
-                "unassembled_fwd": config["resultDir"] + "/pear/{wildcards.sample}.unassembled.forward.fastq".format(wildcards=wildcards),
-                "unassembled_rev": config["resultDir"] + "/pear/{wildcards.sample}.unassembled.reverse.fastq".format(wildcards=wildcards),
-                "discarded_reads": config["resultDir"] + "/pear/{wildcards.sample}.discarded.fastq".format(wildcards=wildcards) }
+    if config["merger"] == "pear":
+        return  [   config["resultDir"] + "/pear/{wildcards.sample}.assembled.fastq".format(wildcards=wildcards),
+                    config["resultDir"] + "/pear/{wildcards.sample}.unassembled.forward.fastq".format(wildcards=wildcards),
+                    config["resultDir"] + "/pear/{wildcards.sample}.unassembled.reverse.fastq".format(wildcards=wildcards),
+                    config["resultDir"] + "/pear/{wildcards.sample}.discarded.fastq".format(wildcards=wildcards) ]
+    elif config["merger"] == "bbmerge":
+        return [    RESULTDIR + "/01-QualityControl/merged/{wildcards.sample}_merged_fastq.gz".format(wildcards=wildcards),
+                    RESULTDIR + "/01-QualityControl/merged/{wildcards.sample}_unmerged_fastq.gz".format(wildcards=wildcards)  ]
     else:
-        dd = {  "R1": READDIR + "/{wildcards.sample}_1".format(wildcards=wildcards) + EXT,
-                "R2": READDIR + "/{wildcards.sample}_2".format(wildcards=wildcards) + EXT }
-    return dd
+        return [    READDIR + "/{wildcards.sample}_1".format(wildcards=wildcards) + EXT,
+                    READDIR + "/{wildcards.sample}_2".format(wildcards=wildcards) + EXT   ]
 
 
 rule concat_paired_reads:

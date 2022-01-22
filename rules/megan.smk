@@ -46,7 +46,7 @@ rule daa_meganize:
 
         # meganize .daa file
         daa-meganizer -i {input.daa} -mdb {input.megan_db_dir}/megan-map-Jan2021.db -t {threads} 2> {log}
-        cp {input.daa} {output.meganized_daa} 2> {log}
+        cp {input.daa} {output.meganized_daa} 2>> {log}
         """
 
 rule daa_to_info:
@@ -58,15 +58,18 @@ rule daa_to_info:
         "log/megan/{sample}_daa2info.log"
     conda:
         WD + "envs/megan.yaml"
+    params:
+        outdir = config["resultDir"] + "/megan/counts"
     threads:
         1
     message:
         "daa_to_info({wildcards.sample})"
     shell:
         """
-        daa2info --in {input} -es {output} #-es -> report all classifications: /DBNAME/DBID (no prefix)/COUNTS/, -c2c DB -> report one DB, --names replace ID with full ID and NAME
-        awk '!/@/ && !/END/ && !/daa/{{printf ("%1s%2s\\t%3s\\n", $1, $2, $3)}}' {output} > temp.tsv # merge db and id 
-        mv temp.tsv {output}
+        mkdir -p {params.outdir} 2> {log}
+        daa2info --in {input} -es {output} 2>> {log} #-es -> report all classifications: /DBNAME/DBID (no prefix)/COUNTS/, -c2c DB -> report one DB, --names replace ID with full ID and NAME
+        awk '!/@/ && !/END/ && !/daa/{{printf ("%1s%2s\\t%3s\\n", $1, $2, $3)}}' {output} > temp.tsv 2>> {log} # merge db and id 
+        mv temp.tsv {output} 2>> {log}
         """
 
 rule join_megan_tsv:
@@ -74,6 +77,8 @@ rule join_megan_tsv:
         expand(config["resultDir"] + "/megan/counts/{sample}_counts.tsv", sample = SAMPLE)
     output:
         combined = config["resultDir"] + "/megan/megan_combined.csv"
+    message:
+        "join_megan_tsv"
     run:
         frames = [ pd.read_csv(f, sep='\t', index_col=0, names=["gene_id", f]) for f in input ]
         result = frames[0].join(frames[1:])

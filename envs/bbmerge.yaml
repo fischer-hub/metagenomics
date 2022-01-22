@@ -1,5 +1,8 @@
 name: bbmerge
 channels:
+  - bioconda
   - conda-forge
+  - anaconda
+  - r
 dependencies:
   - bbmap==38.93

@@ -45,7 +45,7 @@ rule diamond_blastx:
         runtime=1200,
         mem_mb=get_blast_mem
     threads:
-        16
+        24
     message:
         "diamond_blastx({wildcards.sample})"
     log:

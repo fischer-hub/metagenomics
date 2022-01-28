@@ -53,7 +53,7 @@ rule daa_to_info:
     input: 
         meganized_daa   = config["resultDir"] + "/megan/meganized_daa/{sample}_meganized.daa"
     output:
-        counts          = config["resultDir"] + "/megan/counts/{sample}_counts.tsv"
+        counts          = config["resultDir"] + "/megan/counts/{sample}.tsv"
     log:
         "log/megan/{sample}_daa2info.log"
     conda:
@@ -74,7 +74,7 @@ rule daa_to_info:
 
 rule join_megan_tsv:
     input:
-        expand(config["resultDir"] + "/megan/counts/{sample}_counts.tsv", sample = SAMPLE)
+        expand(config["resultDir"] + "/megan/counts/{sample}.tsv", sample = SAMPLE)
     output:
         combined = config["resultDir"] + "/megan/megan_combined.csv"
     message:

@@ -1,14 +1,14 @@
-def bbmerge_input(wildcards):
+def merge_input(wildcards):
     if config["qc"] == "true":
-        return  {   "R1" : RESULTDIR + "/01-QualityControl/trimmed/{wildcards.sample}_1.fastq.gz".format(wildcards=wildcards),
-                    "R2" : RESULTDIR + "/01-QualityControl/trimmed/{wildcards.sample}_2.fastq.gz".format(wildcards=wildcards)    }
+        return  {   "R1" : RESULTDIR + "/01-QualityControl/trimmed_pe/{wildcards.sample}_1.fastq.gz".format(wildcards=wildcards),
+                    "R2" : RESULTDIR + "/01-QualityControl/trimmed_pe/{wildcards.sample}_2.fastq.gz".format(wildcards=wildcards)    }
     else:
         return  {   "R1" : READDIR + "/{wildcards.sample}_1".format(wildcards=wildcards) + EXT,
                     "R2" : READDIR + "/{wildcards.sample}_2".format(wildcards=wildcards) + EXT   }
 
 rule bbmerge:
     input:
-        unpack(bbmerge_input)
+        unpack(merge_input)
     output:
         merged      = RESULTDIR + "/01-QualityControl/merged/{sample}_merged_fastq.gz",
         unmerged    = RESULTDIR + "/01-QualityControl/merged/{sample}_unmerged_fastq.gz",

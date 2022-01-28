@@ -36,6 +36,14 @@ rule bowtie2_index:
         rm {params.ref_dir}_concat.fa 2>> {log}
         """
 
+def get_bowtie_reads(wildcards):
+    if param_mode == "paired":
+        return RESULTDIR + "/concat_reads/{wildcards.sample}_concat.fq".format(wildcards=wildcards)
+    elif config["qc"] == "true":
+        return RESULTDIR + "/01-QualityControl/trimmed_se/{wildcards.sample}.fastq.gz".format(wildcards=wildcards)
+    else:
+        return READDIR + "/{wildcards.sample}".format(wildcards=wildcards) + EXT
+
 rule bowtie2_map:
     input:
         one     = config["cacheDir"] + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1] + "/index.1.bt2l",
@@ -44,11 +52,12 @@ rule bowtie2_map:
         four    = config["cacheDir"] + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1] + "/index.4.bt2l",
         rev_one = config["cacheDir"] + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1] + "/index.rev.1.bt2l",
         rev_two = config["cacheDir"] + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1] + "/index.rev.2.bt2l",
-        reads   = config["resultDir"] + "/concat_reads/{sample}_concat.fq"
+        reads   = get_bowtie_reads
     output:
         unmapped = config["resultDir"] + "/bowtie2/{sample}_unmapped.fastq.gz"
     params:
-        ref_dir  = config["cacheDir"] + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1]
+        ref_dir     = config["cacheDir"] + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1],
+        file_format = FORMAT
     log:
         "log/bowtie2/bowtie2_map_{sample}.log"
     conda:
@@ -61,5 +70,5 @@ rule bowtie2_map:
         runtime=480
     shell:
         """
-        bowtie2 -x {params.ref_dir}/index -U {input.reads} --un-gz {output.unmapped} 2> {log}
+        bowtie2 {params.file_format} -x {params.ref_dir}/index -U {input.reads} --un-gz {output.unmapped} 2> {log}
         """

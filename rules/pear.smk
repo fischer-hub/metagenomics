@@ -1,7 +1,14 @@
+def merge_input(wildcards):
+    if config["qc"] == "true":
+        return  {   "R1" : RESULTDIR + "/01-QualityControl/trimmed_pe/{wildcards.sample}_1.fastq.gz".format(wildcards=wildcards),
+                    "R2" : RESULTDIR + "/01-QualityControl/trimmed_pe/{wildcards.sample}_2.fastq.gz".format(wildcards=wildcards)    }
+    else:
+        return  {   "R1" : READDIR + "/{wildcards.sample}_1".format(wildcards=wildcards) + EXT,
+                    "R2" : READDIR + "/{wildcards.sample}_2".format(wildcards=wildcards) + EXT   }
+
 rule pear:
     input:
-        R1 = READDIR + "/{sample}_1" + EXT,
-        R2 = READDIR + "/{sample}_2" + EXT
+        unpack(merge_input)
     output:
         assembled_pairs = config["resultDir"] + "/pear/{sample}.assembled.fastq",
         unassembled_fwd = config["resultDir"] + "/pear/{sample}.unassembled.forward.fastq",

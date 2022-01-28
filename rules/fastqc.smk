@@ -1,4 +1,4 @@
-rule fastqc_pre:
+rule fastqc_pe:
     input:
         read    = READDIR + "/{sample}_{mate}" + EXT
     output:
@@ -14,18 +14,19 @@ rule fastqc_pre:
     wrapper:
         "v0.86.0/bio/fastqc"
 
-rule fastqc_post:
+
+rule fastqc_se:
     input:
-        "reads/{sample}.fastq"
+        read    = READDIR + "/{sample}" + EXT
     output:
-        html="qc/fastqc/{sample}.html",
-        zip="qc/fastqc/{sample}_fastqc.zip"
+        html    = RESULTDIR + "/01-QualityControl/fastqc_se/{sample}.html",
+        zip     = TEMPDIR + "/qc/fastqc_se/{sample}_fastqc.zip"
     params: "--quiet"
     log:
-        "logs/fastqc/{sample}.log"
+        "log/fastqc/{sample}.log"
     threads: 
         1
     message:
-        "fastqc_post({wildcards.sample})"
+        "fastqc_se({wildcards.sample})"
     wrapper:
         "v0.86.0/bio/fastqc"

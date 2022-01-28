@@ -2,6 +2,9 @@
 import pandas as pd
 import glob
 import os
+import timeit
+
+start = timeit.default_timer()
 
 configfile: "profiles/config.yaml"
 include: "scripts/create_input_csv.py"
@@ -11,6 +14,9 @@ print(f"{BANNER}")
 
 param_reads = config["reads"]
 param_mode = config["mode"]
+MERGER = config["merger"] if param_mode == "paired" else "none"
+FASTQC = config["fastqc"]
+FORMAT = "-f" #"-q" fasta:fastq
 
 # read in samplesheet
 if ".csv" in param_reads:
@@ -23,7 +29,7 @@ elif config["reads"] == "":
     exit()
 else:
     # assume whatever is in 'reads=' is the path to read dir
-    print(f"{bcolors.OKBLUE}INFO: Loading samples from directory '{param_reads}', automatically created 'input.csv' in work directory.\n{bcolors.OKCYAN}NOTE: This requires the read mode to be set correctly. Set it with 'mode=[paired,single]'.\nRunning with read mode: {param_mode}.")
+    print(f"{bcolors.OKBLUE}INFO: Loading samples from directory '{param_reads}', automatically created 'input.csv' in work directory.\n{bcolors.OKCYAN}NOTE: This requires the read mode to be set correctly. Set it with 'mode=[paired,single]'.\nRunning with read mode: {param_mode}-end.")
     os.system(f"python3 scripts/create_input_csv.py {param_reads} {param_mode}")
     SAMPLESHEET = pd.read_csv("input.csv")
 
@@ -36,6 +42,10 @@ SAMPLE = list(SAMPLESHEET["Sample"])
 # get file extensions
 EXT  = '.' + SAMPLESHEET.loc[0, "R1"].rsplit(".", 2)[1]
 EXT += '.' + SAMPLESHEET.loc[0, "R1"].rsplit(".", 2)[2] if SAMPLESHEET.loc[0, "R1"].rsplit(".", 1)[1] == "gz" else + ""
+
+# check if input is fasta format -> omit fastqc checks
+if "fasta" in SAMPLESHEET.loc[0, "R1"]:
+    FASTQC = False
 
 # set constants
 READDIR     = SAMPLESHEET.loc[0, "R1"].rsplit("/", 1)[0]
@@ -64,7 +74,7 @@ def rule_all_input(wildcards):
                     config["resultDir"] + "/humann/pathabundance_" + config["humann_count_units"] + "_combined.tsv",
                     config["resultDir"] + "/humann/pathcoverage_combined.tsv"   ]
     elif "megan" in config["tools"]:
-        print(f"{bcolors.OKGREEN}Running pipeline with core tool MEGAN6 to classify input reads.{bcolors.OKGREEN}")
+        print(f"{bcolors.OKBLUE}INFO: Running pipeline with core tool MEGAN6 to classify input reads.{bcolors.OKGREEN}")
         return [    config["resultDir"] + "/megan/megan_combined.csv"   ]
     else:
         print(f"{bcolors.FAIL}WARNING: No core tool was chosen to classify the reads. Running all core tools now..{bcolors.FAIL}")
@@ -82,8 +92,11 @@ rule all:
     shell:
         "echo 'clean up'"
 
+
+stop = timeit.default_timer()
+
 onsuccess:
-    print("Workflow finished, starting cleanup..")
+    print(f"{bcolors.OKGREEN}Workflow finished successfully!\nTotal time passed: {stop - start}\nStarting cleanup..{bcolors.ENDC}")
     if RESULTDIR != "results":
         shell(f"if [ ! -d results ]; then ln -s {RESULTDIR} results; fi")
 

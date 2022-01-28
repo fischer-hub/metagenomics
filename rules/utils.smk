@@ -1,10 +1,10 @@
 def get_concat_input(wildcards):
-    if config["merger"] == "pear":
+    if MERGER == "pear":
         return  [   config["resultDir"] + "/pear/{wildcards.sample}.assembled.fastq".format(wildcards=wildcards),
                     config["resultDir"] + "/pear/{wildcards.sample}.unassembled.forward.fastq".format(wildcards=wildcards),
                     config["resultDir"] + "/pear/{wildcards.sample}.unassembled.reverse.fastq".format(wildcards=wildcards),
                     config["resultDir"] + "/pear/{wildcards.sample}.discarded.fastq".format(wildcards=wildcards) ]
-    elif config["merger"] == "bbmerge":
+    elif MERGER == "bbmerge":
         return [    RESULTDIR + "/01-QualityControl/merged/{wildcards.sample}_merged_fastq.gz".format(wildcards=wildcards),
                     RESULTDIR + "/01-QualityControl/merged/{wildcards.sample}_unmerged_fastq.gz".format(wildcards=wildcards)  ]
     else:

@@ -2,14 +2,17 @@
 reads: ""
 mode: "paired"
 ext: ""
-cores: 16
-use-conda: true
-latency-wait: 20
+help: "dummy value"
 
 # directory structure
 results: "results"
 temp: "temp"
 cache: "cache"
+
+# snakemake args
+cores: 16
+use-conda: true
+latency-wait: 20
 
 # tools
 fastqc: "true"
@@ -20,14 +23,14 @@ trim: "true"
 # humann args
 protDB_build: "uniref50_ec_filtered_diamond"
 nucDB_build: "full"
-humann_count_units: "cpm"
+count_units: "cpm"
 
 # diamond args, higher block size and lower idx chunks -> higher performance / mem usage
-dmnd_block_size: 12
-dmnd_num_index_chunks: 1
+block_size: 12
+num_index_chunks: 1
 
 # bowtie2 args
-bowtie2_reference: ""
+reference: ""
 
 # trimmomatic args
 adapters_pe: "assets/adapters/TruSeq3-PE.fa"

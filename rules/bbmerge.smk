@@ -1,5 +1,5 @@
 def merge_input(wildcards):
-    if config["qc"] == "true":
+    if TRIM == "true":
         return  {   "R1" : RESULTDIR + "/01-QualityControl/trimmed_pe/{wildcards.sample}_1.fastq.gz".format(wildcards=wildcards),
                     "R2" : RESULTDIR + "/01-QualityControl/trimmed_pe/{wildcards.sample}_2.fastq.gz".format(wildcards=wildcards)    }
     else:

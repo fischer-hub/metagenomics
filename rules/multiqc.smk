@@ -7,9 +7,9 @@ def get_reports(wildcards):
     if config["bowtie2_reference"] != "":
         reports.extend(expand("log/bowtie2/bowtie2_map_{sample}.log", sample = SAMPLE))
 
-    if FASTQC and param_mode == "paired":
+    if FASTQC and MODE == "paired":
         reports.extend(expand(TEMPDIR + "/qc/fastqc_pre/{sample}_{mate}_fastqc.zip", sample = SAMPLE, mate = ["1", "2"]))
-    if FASTQC:
+    if FASTQC and MODE == "single":
         reports.extend(expand(TEMPDIR + "/qc/fastqc_se/{sample}_fastqc.zip", sample = SAMPLE))
 
     return reports

@@ -1,20 +1,20 @@
 def get_humann_reads(wildcards):
     if config["bowtie2_reference"] != "":
-        return config["resultDir"] + "/bowtie2/{wildcards.sample}_unmapped.fastq.gz".format(wildcards=wildcards)
+        return RESULTDIR + "/bowtie2/{wildcards.sample}_unmapped.fastq.gz".format(wildcards=wildcards)
     else:
-        return config["resultDir"] + "/concat_reads/{wildcards.sample}_concat.fq".format(wildcards=wildcards) + EXT
+        return RESULTDIR + "/concat_reads/{wildcards.sample}_concat.fq".format(wildcards=wildcards) + EXT
 
 rule humann_databases:
     log:
         c = "log/humann/humann_databases_ChocoPhlAn.log",
         u = "log/humann/humann_databases_UniRef.log"
     output:
-        nucDB   = directory(config["cacheDir"] + "/databases/humann/nuc"),
-        protDB  = directory(config["cacheDir"] + "/databases/humann/prot")
+        nucDB   = directory(CACHEDIR + "/databases/humann/nuc"),
+        protDB  = directory(CACHEDIR + "/databases/humann/prot")
     params:
         u_build     = config["protDB_build"],
         c_build     = config["nucDB_build"],
-        installDir  = config["cacheDir"] + "/databases/humann"
+        installDir  = CACHEDIR + "/databases/humann"
     conda:
         WD + "envs/humann.yaml"
     threads:
@@ -30,13 +30,13 @@ rule humann_databases:
 
 rule humann_compute:
     input: 
-        nucDB   = config["cacheDir"] + "/databases/humann/nuc",
-        protDB  = config["cacheDir"] + "/databases/humann/prot",
+        nucDB   = CACHEDIR + "/databases/humann/nuc",
+        protDB  = CACHEDIR + "/databases/humann/prot",
         reads   = get_humann_reads
     output: 
-        genefamilies    = config["resultDir"] + "/humann/raw/{sample}_genefamilies.tsv",
-        pathways        = config["resultDir"] + "/humann/raw/{sample}_pathabundance.tsv",
-        pathCov         = config["resultDir"] + "/humann/raw/{sample}_pathcoverage.tsv"
+        genefamilies    = RESULTDIR + "/humann/raw/{sample}_genefamilies.tsv",
+        pathways        = RESULTDIR + "/humann/raw/{sample}_pathabundance.tsv",
+        pathCov         = RESULTDIR + "/humann/raw/{sample}_pathcoverage.tsv"
     log:
         "log/humann/compute/{sample}_humann.log"
     conda:
@@ -46,7 +46,7 @@ rule humann_compute:
     resources:
         runtime=960
     params:
-        outdir      = (config["resultDir"] + "/humann/raw/{sample}_genefamilies.tsv").rsplit('/',1)[0],
+        outdir      = (RESULTDIR + "/humann/raw/{sample}_genefamilies.tsv").rsplit('/',1)[0],
         read_len    = 45
     message:
         "humann_compute({wildcards.sample})"
@@ -55,13 +55,13 @@ rule humann_compute:
 
 rule humann_normalize:
     input: 
-        genefamilies    = config["resultDir"] + "/humann/raw/{sample}_genefamilies.tsv",
-        pathabundance   = config["resultDir"] + "/humann/raw/{sample}_pathabundance.tsv",
-        pathCov         = config["resultDir"] + "/humann/raw/{sample}_pathcoverage.tsv"
+        genefamilies    = RESULTDIR + "/humann/raw/{sample}_genefamilies.tsv",
+        pathabundance   = RESULTDIR + "/humann/raw/{sample}_pathabundance.tsv",
+        pathCov         = RESULTDIR + "/humann/raw/{sample}_pathcoverage.tsv"
     output:
-        genefamilies    = config["resultDir"] + "/humann/norm/{sample}_genefamilies_"  + config["humann_count_units"] + ".tsv",
-        pathabundance   = config["resultDir"] + "/humann/norm/{sample}_pathabundance_" + config["humann_count_units"] + ".tsv",
-        pathCov         = config["resultDir"] + "/humann/norm/{sample}_pathcoverage.tsv"
+        genefamilies    = RESULTDIR + "/humann/norm/{sample}_genefamilies_"  + UNITS + ".tsv",
+        pathabundance   = RESULTDIR + "/humann/norm/{sample}_pathabundance_" + UNITS + ".tsv",
+        pathCov         = RESULTDIR + "/humann/norm/{sample}_pathcoverage.tsv"
     log:
         "log/humann/normalize/{sample}_humann.log"
     conda:
@@ -71,8 +71,8 @@ rule humann_normalize:
     resources:
         runtime=240
     params:
-        outdir = (config["resultDir"] + "/humann/norm/{sample}_genefamilies.tsv").rsplit('/',1)[0],
-        units = config["humann_count_units"]
+        outdir = (RESULTDIR + "/humann/norm/{sample}_genefamilies.tsv").rsplit('/',1)[0],
+        units = UNITS
     message:
         "humann_norm({wildcards.sample})"
     shell:
@@ -84,13 +84,13 @@ rule humann_normalize:
 
 rule humann_join:
     input: 
-        genefamilies    = expand(config["resultDir"] + "/humann/norm/{sample}_genefamilies_"  + config["humann_count_units"] + ".tsv", sample = SAMPLE),
-        pathabundance   = expand(config["resultDir"] + "/humann/norm/{sample}_pathabundance_" + config["humann_count_units"] + ".tsv", sample = SAMPLE),
-        pathCov         = expand(config["resultDir"] + "/humann/norm/{sample}_pathcoverage.tsv", sample = SAMPLE)
+        genefamilies    = expand(RESULTDIR + "/humann/norm/{sample}_genefamilies_"  + UNITS + ".tsv", sample = SAMPLE),
+        pathabundance   = expand(RESULTDIR + "/humann/norm/{sample}_pathabundance_" + UNITS + ".tsv", sample = SAMPLE),
+        pathCov         = expand(RESULTDIR + "/humann/norm/{sample}_pathcoverage.tsv", sample = SAMPLE)
     output:
-        genefamilies    = config["resultDir"] + "/humann/genefamilies_" + config["humann_count_units"]  + "_combined.tsv",
-        pathways        = config["resultDir"] + "/humann/pathabundance_" + config["humann_count_units"] + "_combined.tsv",
-        pathCov         = config["resultDir"] + "/humann/pathcoverage_combined.tsv"
+        genefamilies    = RESULTDIR + "/humann/genefamilies_" + UNITS  + "_combined.tsv",
+        pathways        = RESULTDIR + "/humann/pathabundance_" + UNITS + "_combined.tsv",
+        pathCov         = RESULTDIR + "/humann/pathcoverage_combined.tsv"
     log:
         "log/humann/join/humann.log"
     conda:
@@ -100,8 +100,8 @@ rule humann_join:
     resources:
         runtime=240
     params:
-        tabledir    = (config["resultDir"] + "/humann/norm/{sample}_genefamilies.tsv").rsplit('/',1)[0],
-        units       = config["humann_count_units"]
+        tabledir    = (RESULTDIR + "/humann/norm/{sample}_genefamilies.tsv").rsplit('/',1)[0],
+        units       = UNITS
     message:
         "humann_join"
     shell:

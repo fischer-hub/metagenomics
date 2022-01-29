@@ -1,18 +1,18 @@
 def get_blast_mem(wildcards, attempt):
-    return ((config["dmnd_block_size"] * 7 + config["dmnd_block_size"] * attempt) * 1024)
+    return ((BLOCK_SIZE * 7 + BLOCK_SIZE * attempt) * 1024)
 
 def get_diamond_reads(wildcards):
     if config["bowtie2_reference"] != "":
-        return config["resultDir"] + "/bowtie2/{wildcards.sample}_unmapped.fastq.gz".format(wildcards=wildcards)
+        return RESULTDIR + "/bowtie2/{wildcards.sample}_unmapped.fastq.gz".format(wildcards=wildcards)
     else:
-        return config["resultDir"] + "/concat_reads/{wildcards.sample}_concat.fq".format(wildcards=wildcards)
+        return RESULTDIR + "/concat_reads/{wildcards.sample}_concat.fq".format(wildcards=wildcards)
 
 rule diamond_makedb:
     output:
-        config["cacheDir"] + "/databases/diamond/nr.dmnd"
+        CACHEDIR + "/databases/diamond/nr.dmnd"
     params:
         prot_ref_db_src = "https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz",
-        prot_ref_db_dir = config["cacheDir"] + "/databases/protein_reference/"
+        prot_ref_db_dir = CACHEDIR + "/databases/protein_reference/"
     threads:
         16
     conda:
@@ -32,13 +32,13 @@ rule diamond_makedb:
 
 rule diamond_blastx:
     input:
-        db      = config["cacheDir"] + "/databases/diamond/nr.dmnd",
+        db      = CACHEDIR + "/databases/diamond/nr.dmnd",
         reads   = get_diamond_reads
     output: 
-        config["resultDir"] + "/diamond/{sample}.daa"
+        RESULTDIR + "/diamond/{sample}.daa"
     params:
-        num_index_chunks = config["dmnd_num_index_chunks"],
-        block_size = config["dmnd_block_size"]
+        num_index_chunks = IDX_CHUNKS,
+        block_size = BLOCK_SIZE
     conda:
         WD + "envs/diamond.yaml"
     resources:

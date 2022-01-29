@@ -10,12 +10,12 @@ rule pear:
     input:
         unpack(merge_input)
     output:
-        assembled_pairs = config["resultDir"] + "/pear/{sample}.assembled.fastq",
-        unassembled_fwd = config["resultDir"] + "/pear/{sample}.unassembled.forward.fastq",
-        unassembled_rev = config["resultDir"] + "/pear/{sample}.unassembled.reverse.fastq",
-        discarded_reads = config["resultDir"] + "/pear/{sample}.discarded.fastq"
+        assembled_pairs = RESULTDIR + "/pear/{sample}.assembled.fastq",
+        unassembled_fwd = RESULTDIR + "/pear/{sample}.unassembled.forward.fastq",
+        unassembled_rev = RESULTDIR + "/pear/{sample}.unassembled.reverse.fastq",
+        discarded_reads = RESULTDIR + "/pear/{sample}.discarded.fastq"
     params:
-        resultDir = config["resultDir"]
+        resultDir = RESULTDIR
     log:
         "log/pear/{sample}_pear.log"
     conda:

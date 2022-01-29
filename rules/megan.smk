@@ -1,6 +1,6 @@
 rule megan_get_db:
     output:
-        directory(config["cacheDir"] + "/databases/megan/")
+        directory(CACHEDIR + "/databases/megan/")
     conda:
        WD + "envs/utils.yaml"
     resources:
@@ -19,12 +19,12 @@ rule megan_get_db:
 
 rule daa_meganize:
     input: 
-        megan_db_dir    = config["cacheDir"] + "/databases/megan",
-        daa             = config["resultDir"] + "/diamond/{sample}.daa"
+        megan_db_dir    = CACHEDIR + "/databases/megan",
+        daa             = RESULTDIR + "/diamond/{sample}.daa"
     output:
-        meganized_daa   = config["resultDir"] + "/megan/meganized_daa/{sample}_meganized.daa"
+        meganized_daa   = RESULTDIR + "/megan/meganized_daa/{sample}_meganized.daa"
     params:
-        megan_db_dir    = config["cacheDir"] + "/databases/megan/"
+        megan_db_dir    = CACHEDIR + "/databases/megan/"
     log:
         "log/megan/{sample}_daa_meganizer.log"
     conda:
@@ -51,15 +51,15 @@ rule daa_meganize:
 
 rule daa_to_info:
     input: 
-        meganized_daa   = config["resultDir"] + "/megan/meganized_daa/{sample}_meganized.daa"
+        meganized_daa   = RESULTDIR + "/megan/meganized_daa/{sample}_meganized.daa"
     output:
-        counts          = config["resultDir"] + "/megan/counts/{sample}.tsv"
+        counts          = RESULTDIR + "/megan/counts/{sample}.tsv"
     log:
         "log/megan/{sample}_daa2info.log"
     conda:
         WD + "envs/megan.yaml"
     params:
-        outdir = config["resultDir"] + "/megan/counts"
+        outdir = RESULTDIR + "/megan/counts"
     threads:
         1
     message:
@@ -74,9 +74,9 @@ rule daa_to_info:
 
 rule join_megan_tsv:
     input:
-        expand(config["resultDir"] + "/megan/counts/{sample}.tsv", sample = SAMPLE)
+        expand(RESULTDIR + "/megan/counts/{sample}.tsv", sample = SAMPLE)
     output:
-        combined = config["resultDir"] + "/megan/megan_combined.csv"
+        combined = RESULTDIR + "/megan/megan_combined.csv"
     message:
         "join_megan_tsv"
     run:

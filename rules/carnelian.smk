@@ -13,7 +13,7 @@ rule carnelian_train:
     input: 
         "temp/flags/carnelian.install.done"
     output:
-        model_dir = dir( config["resultDir"] + '/' + config["carnelian_model_dir"] )
+        model_dir = dir( RESULTDIR + '/' + config["carnelian_model_dir"] )
     params:
         number_hash_fcts = config["carnelian_hash_fcts"] 
     shell:

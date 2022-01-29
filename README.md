@@ -1,13 +1,3 @@
-```
- __  __      _                                         _          
-|  \/  |    | |                                       (_)         
-| \  / | ___| |_ __ _  __ _  ___ _ __   ___  _ __ ___  _  ___ ___ 
-| |\/| |/ _ \ __/ _` |/ _` |/ _ \ '_ \ / _ \| '_ ` _ \| |/ __/ __|
-| |  | |  __/ || (_| | (_| |  __/ | | | (_) | | | | | | | (__\__ \
-|_|  |_|\___|\__\__,_|\__, |\___|_| |_|\___/|_| |_| |_|_|\___|___/
-                       __/ |                                      
-genes without jeans   |___ /                                       
-```
 # WGS-Metagenomics
 This is a `Snakemake` based pipeline for functional profiling of (WGS) metagenomic read data.
 When finished, it is supposed to provide multiple modes to analyse the (relative) gene abundance and genetic profile of your samples and do some statistical analysis and visualisation on it as well.

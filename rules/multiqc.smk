@@ -4,7 +4,7 @@ def get_reports(wildcards):
     if MERGER == "bbmerge":
         reports.extend(expand(TEMPDIR   + "/bbmerge/{sample}_ihist.txt", sample = SAMPLE))
 
-    if config["bowtie2_reference"] != "":
+    if REFERENCE != "":
         reports.extend(expand("log/bowtie2/bowtie2_map_{sample}.log", sample = SAMPLE))
 
     if FASTQC and MODE == "paired":

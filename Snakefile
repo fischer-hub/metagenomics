@@ -21,7 +21,7 @@ elif READS == "":
     exit()
 else:
     # assume whatever is in 'reads=' is the path to read dir
-    print(f"{bcolors.OKBLUE}INFO: Loading samples from directory '{READS}', automatically created 'input.csv' in work directory.\n{bcolors.OKCYAN}NOTE: This requires the read mode to be set correctly. Set it with 'mode=[paired,single]'.\nRunning with read mode: {MODE}-end.")
+    print(f"{bcolors.OKBLUE}INFO: Loading samples from directory '{READS}', automatically created 'input.csv' in working directory.\n{bcolors.OKCYAN}NOTE: This requires the read mode to be set correctly. Set it with 'mode=[paired,single]'.\nRunning with read mode: {MODE}-end.")
     os.system(f"python3 scripts/create_input_csv.py {READS} {MODE}")
     SAMPLESHEET = pd.read_csv("input.csv")
 

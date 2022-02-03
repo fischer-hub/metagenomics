@@ -22,9 +22,9 @@ rule bbmerge:
     message:
         "bbmerge({wildcards.sample})"
     resources:
-        runtime=480,
+        time=480,
         mem_mb=10240
-    shell: # check other params!! (ram, threads etc)
+    shell:
         """
         bbmerge.sh t={threads} ziplevel=5 default -Xmx10240m in1={input.R1} in2={input.R2} out={output.merged} outu={output.unmerged} ihist={output.inserthist} 2> {log}
         """

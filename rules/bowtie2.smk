@@ -8,14 +8,14 @@ rule bowtie2_index:
     input:  
         get_references
     output:
-        one     = CACHEDIR + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1] + "/index.1.bt2l",
-        two     = CACHEDIR + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1] + "/index.2.bt2l",
-        three   = CACHEDIR + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1] + "/index.3.bt2l",
-        four    = CACHEDIR + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1] + "/index.4.bt2l",
-        rev_one = CACHEDIR + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1] + "/index.rev.1.bt2l",
-        rev_two = CACHEDIR + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1] + "/index.rev.2.bt2l"
+        one     = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1] + "/index.1.bt2l",
+        two     = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1] + "/index.2.bt2l",
+        three   = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1] + "/index.3.bt2l",
+        four    = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1] + "/index.4.bt2l",
+        rev_one = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1] + "/index.rev.1.bt2l",
+        rev_two = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1] + "/index.rev.2.bt2l"
     params:
-        index_dir   = CACHEDIR + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1],
+        index_dir   = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1],
         ref_dir     = REFERENCE
     log:
         "log/bowtie2/bowtie2_index.log"
@@ -26,7 +26,7 @@ rule bowtie2_index:
     message:
         "bowtie2_index"
     resources:
-        runtime=240
+        time=240
     shell:
         """
         cat {input} > {params.ref_dir}_concat.fa 2> {log}
@@ -38,7 +38,7 @@ rule bowtie2_index:
 
 def get_bowtie_reads(wildcards):
     if MODE == "paired":
-        return RESULTDIR + "/concat_reads/{wildcards.sample}_concat.fq".format(wildcards=wildcards)
+        return RESULTDIR + "/concat_reads/{wildcards.sample}_concat.fq.gz".format(wildcards=wildcards)
     elif TRIM == "true":
         return RESULTDIR + "/01-QualityControl/trimmed_se/{wildcards.sample}.fastq.gz".format(wildcards=wildcards)
     else:
@@ -46,28 +46,28 @@ def get_bowtie_reads(wildcards):
 
 rule bowtie2_map:
     input:
-        one     = CACHEDIR + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1] + "/index.1.bt2l",
-        two     = CACHEDIR + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1] + "/index.2.bt2l",
-        three   = CACHEDIR + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1] + "/index.3.bt2l",
-        four    = CACHEDIR + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1] + "/index.4.bt2l",
-        rev_one = CACHEDIR + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1] + "/index.rev.1.bt2l",
-        rev_two = CACHEDIR + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1] + "/index.rev.2.bt2l",
+        one     = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1] + "/index.1.bt2l",
+        two     = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1] + "/index.2.bt2l",
+        three   = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1] + "/index.3.bt2l",
+        four    = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1] + "/index.4.bt2l",
+        rev_one = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1] + "/index.rev.1.bt2l",
+        rev_two = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1] + "/index.rev.2.bt2l",
         reads   = get_bowtie_reads
     output:
         unmapped = RESULTDIR + "/bowtie2/{sample}_unmapped.fastq.gz"
     params:
-        ref_dir     = CACHEDIR + "/bowtie2/" + config["bowtie2_reference"].split("/")[-1],
+        ref_dir     = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1],
         file_format = FORMAT
     log:
         "log/bowtie2/bowtie2_map_{sample}.log"
     conda:
         WD + "envs/bowtie2.yaml"
     threads:
-        16
+        28
     message:
         "bowtie2_map({wildcards.sample})"
     resources:
-        runtime=480
+        time=lambda _, attempt: 480 + ((attempt - 1) * 480)
     shell:
         """
         bowtie2 {params.file_format} -x {params.ref_dir}/index -U {input.reads} --un-gz {output.unmapped} 2> {log}

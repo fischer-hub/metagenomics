@@ -25,7 +25,7 @@ rule pear:
     message:
         "pear({wildcards.sample})"
     resources:
-        runtime=240
+        time=240
     shell:
         """
         mkdir -p {params.resultDir}/pear/

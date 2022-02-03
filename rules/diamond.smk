@@ -2,10 +2,10 @@ def get_blast_mem(wildcards, attempt):
     return ((BLOCK_SIZE * 7 + BLOCK_SIZE * attempt) * 1024)
 
 def get_diamond_reads(wildcards):
-    if config["bowtie2_reference"] != "":
+    if REFERENCE != "":
         return RESULTDIR + "/bowtie2/{wildcards.sample}_unmapped.fastq.gz".format(wildcards=wildcards)
     else:
-        return RESULTDIR + "/concat_reads/{wildcards.sample}_concat.fq".format(wildcards=wildcards)
+        return RESULTDIR + "/concat_reads/{wildcards.sample}_concat.fq.gz".format(wildcards=wildcards)
 
 rule diamond_makedb:
     output:
@@ -18,7 +18,7 @@ rule diamond_makedb:
     conda:
         WD + "envs/diamond.yaml"
     resources:
-        runtime=1200
+        time=1200
     message:
         "diamond_makedb"
     log:
@@ -42,8 +42,9 @@ rule diamond_blastx:
     conda:
         WD + "envs/diamond.yaml"
     resources:
-        runtime=1200,
-        mem_mb=get_blast_mem
+        time=1200,
+        mem_mb=get_blast_mem,
+        partition="big"
     threads:
         24
     message:

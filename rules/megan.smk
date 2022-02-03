@@ -4,7 +4,7 @@ rule megan_get_db:
     conda:
        WD + "envs/utils.yaml"
     resources:
-        runtime=120
+        time=120
     message:
         "megan_get_db"
     log:
@@ -34,7 +34,8 @@ rule daa_meganize:
     message:
         "daa_meganize({wildcards.sample})"
     resources:
-        runtime=960
+        time=1200,
+        partition="big"
     shell:
         """
         # set memory limit to 32 GB for MEGAN if not set already

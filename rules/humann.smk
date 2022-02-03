@@ -1,8 +1,8 @@
 def get_humann_reads(wildcards):
-    if config["bowtie2_reference"] != "":
+    if REFERENCE != "":
         return RESULTDIR + "/bowtie2/{wildcards.sample}_unmapped.fastq.gz".format(wildcards=wildcards)
     else:
-        return RESULTDIR + "/concat_reads/{wildcards.sample}_concat.fq".format(wildcards=wildcards) + EXT
+        return RESULTDIR + "/concat_reads/{wildcards.sample}_concat.fq.gz".format(wildcards=wildcards)
 
 rule humann_databases:
     log:
@@ -17,6 +17,8 @@ rule humann_databases:
         installDir  = CACHEDIR + "/databases/humann"
     conda:
         WD + "envs/humann.yaml"
+    resources:
+        time=240
     threads:
         2
     message:
@@ -44,7 +46,8 @@ rule humann_compute:
     threads:
         24
     resources:
-        runtime=960
+        time=1200,
+        partition="big"
     params:
         outdir      = (RESULTDIR + "/humann/raw/{sample}_genefamilies.tsv").rsplit('/',1)[0],
         read_len    = 45
@@ -69,7 +72,7 @@ rule humann_normalize:
     threads:
         8
     resources:
-        runtime=240
+        time=240
     params:
         outdir = (RESULTDIR + "/humann/norm/{sample}_genefamilies.tsv").rsplit('/',1)[0],
         units = UNITS
@@ -98,7 +101,7 @@ rule humann_join:
     threads:
         8
     resources:
-        runtime=240
+        time=240
     params:
         tabledir    = (RESULTDIR + "/humann/norm/{sample}_genefamilies.tsv").rsplit('/',1)[0],
         units       = UNITS

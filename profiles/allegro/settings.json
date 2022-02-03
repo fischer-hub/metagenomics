@@ -1,5 +1,5 @@
 {
-    "SBATCH_DEFAULTS": "--error=/data/scratch2/fisched99/slurm/%j.err --output=/data/scratch2/fisched99/slurm/%j.out",
+    "SBATCH_DEFAULTS": "--parsable --error=/data/scratch2/fisched99/slurm/%j.err --output=/data/scratch2/fisched99/slurm/%j.out",
     "CLUSTER_NAME": "",
     "CLUSTER_CONFIG": "",
     "ADVANCED_ARGUMENT_CONVERSION": "no"

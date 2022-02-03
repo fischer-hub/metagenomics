@@ -92,11 +92,19 @@ onsuccess:
     print(f"{bcolors.OKGREEN}Workflow finished successfully!\nStarting cleanup..{bcolors.ENDC}")
     if RESULTDIR != "results":
         shell(f"if [ ! -d results ]; then ln -s {RESULTDIR} results; fi")
+    if CACHEDIR != "cache":
+        shell(f"if [ ! -d cache ]; then ln -s {CACHEDIR} cache; fi")
+    if TEMPDIR != "temp":
+        shell(f"if [ ! -d temp ]; then ln -s {TEMPDIR} temp; fi")
 
 onerror:
     print("An error occurred, looking for temporary files to clean up..")
     if RESULTDIR != "results":
         shell(f"if [ ! -d results ]; then ln -s {RESULTDIR} results; fi")
+    if CACHEDIR != "cache":
+        shell(f"if [ ! -d cache ]; then ln -s {CACHEDIR} cache; fi")
+    if TEMPDIR != "temp":
+        shell(f"if [ ! -d temp ]; then ln -s {TEMPDIR} temp; fi")
 
 
 include: "rules/humann.smk"

@@ -7,9 +7,11 @@ params:
   counts: "/Users/user/Downloads/sim_genefamilies_cpm_combined.tsv"
   metadata: "/Users/user/Downloads/SraRunTable.txt"
   show_code: TRUE
-  comparisons: "cond,seed"
+  comparisons: "/Users/user/Desktop/code/R/contrast.csv"
+  formula: "cond+seed"
   cpus: 4
-  count_threshold: 2
+  abundance_threshold: 10
+  prevalence_threshold: 0.4
   alpha: 0.05
   fc_threshold: 1
 ---
@@ -35,22 +37,19 @@ pacman::p_load(DESeq2, tidyverse, broom, Maaslin2, foreach, doParallel, httr, js
 ```{r echo=params$show_code}
 counts_df <- read.csv(file = params$counts, row.names = 1, header = TRUE, sep = '\t') 
 counts_df <- counts_df[ , order(names(counts_df))]
+
 metadata_df <- read.csv(file = params$metadata, row.names = 1, header = TRUE, sep = ',', stringsAsFactors=FALSE) %>% mutate_if(is.numeric, as.character)
 metadata_df <- metadata_df[order(row.names(metadata_df)), ]
+
+comparisons_df <- read.csv(file = params$comparisons, header = TRUE, sep = ',') 
 ```
 
 ### functions
 ```{r echo=show_code}
 plot.volcano <-function(df, title_txt, label_col, subtitle_txt){
-  EnhancedVolcano(df,
-                  lab = label_col, 
-                  x = "logFC", 
-                  y = "qval",
-                  ylab = expression(-Log[10]~p-value),
-                  title = title_txt, 
-                  subtitle = paste("Volcano plot", subtitle_txt, sep = ": "),
-                  pCutoff = params$alpha,
-                  FCcutoff = params$fc_threshold,
+  EnhancedVolcano(df,lab = label_col, x = "logFC", y = "qval", ylab = expression(-Log[10]~p-value),
+                  title = title_txt, subtitle = paste("Volcano plot", subtitle_txt, sep = ": "),
+                  pCutoff = params$alpha, FCcutoff = params$fc_threshold,
                   legendLabels = c('not significant', expression(Log[2]~FC~sig), "adj. p - value sig", expression(adj.~p-value~and~log[2]~FC~sig)))
 }
 
@@ -70,31 +69,35 @@ plot.pca <- function(df, meta, group){
     theme(plot.title = element_text(hjust = 0.5))
 }
 
-### T0D0: split if input list is bigger than 10k entries, call recursivly until < 10k
-#im too scraed to test this
+plot.heatmap <- function(df, n, anno){
+  pheatmap(dist(df[1:n, ]), cluster_cols = FALSE, cluster_rows = TRUE,
+        scale = "row", border_color = NA,
+        labels_row = as.character(rownames(df)[1:n]),
+        labels_col = as.character(colnames(df)),
+        height = 15, width = 15,
+        cellheight = 15, cellwidth = 15,
+        annotation_row = anno,
+        clustering_distance_rows = sampleDists, 
+        clustering_distance_cols = sampleDists)
+}
+
 
 uniprot.map <- function(ids1, ids2, from_str, to_str, mapping_df){
-  mapping <- mapping_df
-  if(length(ids1 == 0)){
-    return (mapping)
+
+  post <- function(f, t, ids){
+    response <- POST(url = "https://www.uniprot.org/uploadlists/", body = list(from = f, to = t, format = 'tab', query = paste(ids, collapse = ' ')))
+    httr::content(response, type = 'text/tab-separated-values', encoding = "UTF-8")
   }
-  if(length(ids1) > 1000){
-    uniprot.map(ids1[1:10000],  ids1[10000:length(ids1)], from_str, to_str, mapping_df)
-  }
-  if(length(ids1) <= 10000){
-    response <- POST(url = "https://www.uniprot.org/uploadlists/",
-                    body = list(from = from_str,
-                                to = to_str,
-                                format = 'tab',
-                                query = paste(ids1, collapse = ' ')))
-  
-    mapping <- rbind(mapping, httr::content(response, type = 'text/tab-separated-values', encoding = "UTF-8"))
-    uniprot.map(ids2[1:min(length(ids2), 10000)], ids2[min(length(ids2), 10000):length(ids2)], from_str, to_str, mapping_df)
-  }
+  if(length(ids1) <= 2){ return(rbind(mapping_df, post(from_str, to_str, ids1))) }
+  if(length(ids1) > 5000){ return(uniprot.map(ids1[1:5000],  ids1[5001:length(ids1)], from_str, to_str, mapping_df)) }
+  if(length(ids1) <= 5000){
+      return(uniprot.map(ids2[1:min(length(ids2), 5000)], ids2[min(length(ids2)+1, 5001):length(ids2)], 
+                  from_str, to_str, rbind(mapping_df, post(from_str, to_str, ids1)))) }
 }
+  
 ```
 
-## clean data
+## clean row and col names
 ```{r echo=params$show_code}
 # clean count_df colnames (sample names)
 colnames(counts_df) <- gsub(".RPKs", "", colnames(counts_df), fixed = TRUE)
@@ -102,6 +105,11 @@ colnames(counts_df) <- gsub("_Abundance", "", colnames(counts_df), fixed = TRUE)
 
 # clean metadata rownames (sample names)
 rownames(metadata_df) <- gsub("_", ".", rownames(metadata_df), fixed = TRUE)
+
+# create list of comparisons to do from input string
+#bin <- ifelse(params$comparisons != "null",
+#              comparisons_ls <- strsplit(params$comparisons, ';')[[1]],
+#              comparisons_ls <- colnames(metadata_df))
 ```
 
 ### remove stratified duplicate hits, low abundant hits and NAs
@@ -110,127 +118,148 @@ rownames(metadata_df) <- gsub("_", ".", rownames(metadata_df), fixed = TRUE)
 counts_unstratified_df <- counts_df[!grepl("\\|",rownames(counts_df)),]
 
 # drop genes with on average less than 2 counts per sample
-counts_clean_df <- counts_unstratified_df[rowSums(counts_unstratified_df) > params$count_threshold * length(colnames(counts_unstratified_df)) / 1000000, ] 
+#counts_clean_df <- counts_unstratified_df[rowSums(counts_unstratified_df) > params$count_threshold * length(colnames(counts_unstratified_df)) / 1000000, ] 
+# let maaslin2 do this internally
 
-# drop rows containing NAs
-counts_clean_df <- na.omit(counts_clean_df)
-
-# add pseudo count to prevent MaAslin2 model fit from crashing
-counts_clean_df <- counts_clean_df+1
+# drop rows containing NAs and add pseudo count to prevent MaAslin2 model fit from crashing
+counts_clean_df <- na.omit(counts_unstratified_df + 1)
 
 # remove unmapped counts
 counts_clean_df <- counts_clean_df[!(row.names(counts_clean_df) %in% "UNMAPPED"), ]
 
 # gene abundance distribution over all samples
-hist(rowSums(counts_clean_df[-1, ]), br = 100, main = "Cleaned gene count distribution over all samples", xlab = "Genes counts")
-hist(log2(rowSums(counts_clean_df[-1, ])), br = 100, main = "Log2 transformed, cleaned gene count distribution over all samples", xlab = "Log2 transformed genes counts")
+hist_plot <- hist(rowSums(counts_clean_df[-1, ]), br = 100, main = "Cleaned gene count distribution over all samples", xlab = "Genes counts")
+hist_log_plot <- hist(log2(rowSums(counts_clean_df[-1, ])), br = 100, main = "Log2 transformed, cleaned gene count distribution over all samples", xlab = "Log2 transformed genes counts")
 ```
 
 ### set feature display names
 ```{r echo=params$show_code}
-# map uniref IDs to genename
-  feature_ids <- unlist(strsplit(rownames(counts_clean_df), "_"))
-  from <- "NF50"
-  if(feature_ids[1] == "UniRef90"){ from <- "NF90" }
-  if(feature_ids[1] == "UniRef100"){ from <- "NF100" }
-  feature_ids <- feature_ids[!grepl("UniRef", feature_ids)]
-  feature_ids <- gsub(":.*", "", feature_ids)
-  feature_names <- as.data.frame(uniprot.map(feature_ids, c(), from, "GENENAME"), row.names = "From", data.frame())
-  colnames(feature_names)[1] <- "id"
-  colnames(feature_names)[2] <- "gene_name"
+# map uniref IDs to gene name
+feature_ids <- unlist(strsplit(rownames(counts_clean_df), "_"))
+from <- "NF50"
+if(feature_ids[1] == "UniRef90"){ from <- "NF90" }
+if(feature_ids[1] == "UniRef100"){ from <- "NF100" }
+feature_ids <- feature_ids[!grepl("UniRef", feature_ids)]
+feature_ids <- gsub(":.*", "", feature_ids)
+feature_names <- uniprot.map(feature_ids, c(), from, "GENENAME", data.frame())
+colnames(feature_names)[1] <- "id"
+colnames(feature_names)[2] <- "gene_name"
+
+# add display names to significants features
+counts_clean_df$id <- gsub(":.*", "", gsub(".*_", "", rownames(counts_clean_df)))
+counts_clean_df$feature <- rownames(counts_clean_df)
+counts_clean_anno_df <- merge(counts_clean_df, as.data.frame(feature_names), by = "id",  all = TRUE)
+
+# add cols for gene name, synonyme name and display name, where disp name is whatever is available of gene name|synonyme, gene name, ID in this order
+counts_clean_anno_df$synonym <- ifelse(grepl(":", counts_clean_anno_df$feature), gsub(".*:", "", counts_clean_anno_df$feature), NA)
+counts_clean_anno_df$display_name <- ifelse(!is.na(counts_clean_anno_df$synonym),
+                                       paste(counts_clean_anno_df$gene_name, counts_clean_anno_df$synonym, sep = " | "), 
+                                       ifelse(!is.na(counts_clean_anno_df$gene_name), 
+                                              counts_clean_anno_df$gene_name, 
+                                              counts_clean_anno_df$feature))
 ```
 
-### count plots
+### plots on count data
 ```{r echo=params$show_code}
-
 # general pca colored by sample
 metadata_df$sample <- row.names(metadata_df)
-pca_gen <- plot.pca(counts_clean_df, metadata_df, "sample")
-pca_gen_log <- plot.pca(log2(counts_clean_df), metadata_df, "sample")
+pca_gen <- plot.pca(counts_clean_df[, 1:(length(colnames(counts_clean_df)) - 2)], metadata_df, "sample")
+pca_gen_log <- plot.pca(log2(counts_clean_df[, 1:(length(colnames(counts_clean_df)) - 2)]), metadata_df, "sample")
 
-#test <- as.data.frame(rownames(counts_clean_df))
-#plot.pca(t(counts_clean_df), test, "rownames(counts_clean_df)")
 # heatmap
-pheatmap(dist(counts_clean_df[1:10, ]), cluster_cols = FALSE, cluster_rows = TRUE,
-          scale = "row", border_color = NA,
-          labels_row = as.character(rownames(counts_clean_df)[1:10]),
-          labels_col = as.character(colnames(counts_clean_df)),
-          height = 15, width = 15,
-          cellheight = 15, cellwidth = 15)
+plot.heatmap(counts_clean_df, 15, feature_names)
+plot.heatmap(counts_clean_df, 15, feature_names)
+
+```
+
+### run MaAslin2 model
+```{r echo=show_code}
+# run model once for all variables
+fit <- Maaslin2(
+    input_data = counts_clean_df, 
+    input_metadata = metadata_df, 
+    output = "maaslin2_model_output",
+    analysis_method = "CPLM",
+    normalization = "NONE",
+    transform = "NONE",
+    fixed_effects = gsub("+", ",", params$formula, fixed = TRUE),
+    cores = params$cpus,
+    min_abundance = params$abundance_threshold,
+    min_prevalence = params$prevalence_threshold,
+    plot_scatter = FALSE)
+
+results_df <- fit$results
+results_df <- na.omit(results_df)
+results_df <- mutate(results_df, count_mean = log2(rowMeans(counts_clean_df[results_df$feature, ])))
+results_df <- mutate(results_df, logFC = log2(exp(results_df$coef))) 
+
+# filter for significance
+res_sig_df <- results_df[ results_df$qval < params$alpha, ]
+
+# order by ascending adjusted pval and descending logFC
+res_sig_ordered_df <- res_sig_df[order(res_sig_df$qval, -abs(res_sig_df$logFC)), ]
+
+# get top 100 significant features ordered by logFC
+top_100_df <- res_sig_ordered_df[1:100, ]
+
+# add display names to significants features
+top_100_df$id <- gsub(":.*", "", gsub(".*_", "", top_100_df$feature))
+top_100_anno_df <- merge(top_100_df, feature_names, by = "id",  all = TRUE)
+
+# add cols for gene name, synonyme name and display name, where disp name is whatever is available of gene name|synonyme, gene name, ID in this order
+top_100_anno_df$synonym <- ifelse(grepl(":", top_100_anno_df$feature), gsub(".*:", "", top_100_anno_df$feature), NA)
+top_100_anno_df$display_name <- ifelse(!is.na(top_100_anno_df$synonym),
+                                       paste(top_100_anno_df$gene_name, top_100_anno_df$synonym, sep = " | "), 
+                                       ifelse(!is.na(top_100_anno_df$gene_name), 
+                                              top_100_anno_df$gene_name, 
+                                              top_100_anno_df$feature))
+
+### plots
+# MA
+ma_plot <- plot.ma(results_df[!grepl("UNMAPPED", results_df$feature), ], out_dir) # maybe more color?? significance..
+library(affy)
+test <- na.omit(results_df[!grepl("UNMAPPED", results_df$feature), ])
+ma.plot(test$logFC, test$count_mean)
+
+# volcano
+volcano_plot_total <- plot.volcano(results_df, "Total differential abundant features", results_df$feature, out_dir)
+volcano_plot_top_100 <- plot.volcano(top_100_anno_df, "Top 100 differential abundant significant features", top_100_anno_df$display_name, out_dir)
+
+# heatmap
+# pheatmap(sampleDistMatrix, clustering_distance_rows = sampleDists, clustering_distance_cols = sampleDists, color = colors)
 
 ```
 
 ### run comparisons
 ```{r echo=params$show_code}
-# create list of comparisons to do from input string
-bin <- ifelse(params$comparisons != "null",
-              comparisons_ls <- strsplit(params$comparisons, ',')[[1]],
-              comparisons_ls <- colnames(metadata_df))
-
 # setup backend for parallel execution
 cl <- makeCluster(min(params$cpus, length(comparisons_ls))) #, outfile=""
 registerDoParallel(cl)
 
 # do each comparison in one thread
-worker_array <- foreach(i = 1:length(comparisons_ls), .packages = c("Maaslin2", "EnhancedVolcano", "httr", "dplyr", "ggplot2", "pheatmap")) %dopar% {
+worker_array <- foreach(i = 1:length(rownames(comparisons_df)), .packages = c("Maaslin2", "EnhancedVolcano", "httr", "dplyr", "ggplot2", "pheatmap")) %dopar% {
   
-  out_dir <- ifelse(is.na(strsplit(comparisons_ls[i], ":")[[1]][2]), 
-                    strsplit(comparisons_ls[i], ":")[[1]][1], 
-                    paste(strsplit(comparisons_ls[i], ":")[[1]][1], strsplit(comparisons_ls[i], ":")[[1]][2], sep = "+"))
+  reference <- comparisons_df$Group1[i]
+  altered <- comparisons_df$Group2[i]
 
-  fit <- Maaslin2(
-    input_data = counts_clean_df, 
-    input_metadata = metadata_df, 
-    output = out_dir,
-    analysis_method = "CPLM",
-    normalization = "NONE",
-    transform = "NONE",
-    fixed_effects = gsub(":",",",comparisons_ls[i], fixed = TRUE),
-    cores = 1,
-    plot_scatter = FALSE)
+  out_dir <- paste(reference, "vs", altered, sep = "_")
+
+# only run if we cant derive the effect for new reference level from the first model
+  #fit <- Maaslin2(
+  #  input_data = counts_clean_df, 
+  #  input_metadata = metadata_df, 
+  #  output = out_dir,
+  # analysis_method = "CPLM",
+  #  normalization = "NONE",
+  #  transform = "NONE",
+  #  fixed_effects = gsub(":",",",comparisons_ls[i], fixed = TRUE),
+  #  cores = 1,
+  #  plot_scatter = FALSE)
   
-  gc()
+  #gc()
   
   # get results and calculate log fold change and count mean row wise
-  results_df <- fit$results
-  results_df <- na.omit(results_df)
-  results_df <- mutate(results_df, count_mean = log2(rowMeans(counts_clean_df[results_df$feature, ])))
-  results_df <- mutate(results_df, logFC = log2(exp(results_df$coef))) 
-
-  # filter for significance
-  res_sig_df <- results_df[ results_df$qval < params$alpha, ]
   
-  # order by ascending adjusted pval and descending logFC
-  res_sig_ordered_df <- res_sig_df[order(res_sig_df$qval, -abs(res_sig_df$logFC)), ]
-  
-  # get top 100 significant features ordered by logFC
-  top_100_df <- res_sig_ordered_df[1:100, ]
-
-  # add display names to significants features
-  top_100_df$id <- gsub(":.*", "", gsub(".*_", "", top_100_df$feature))
-  top_100_anno_df <- merge(top_100_df, feature_names, by = "id",  all = TRUE)
-  
-  # add cols for gene name, synonyme name and display name, where disp name is whatever is available of gene name|synonyme, gene name, ID in this order
-  top_100_anno_df$synonym <- ifelse(grepl(":", top_100_anno_df$feature), gsub(".*:", "", top_100_anno_df$feature), NA)
-  top_100_anno_df$display_name <- ifelse(!is.na(top_100_anno_df$synonym),
-                                         paste(top_100_anno_df$gene_name, top_100_anno_df$synonym, sep = " | "), 
-                                         ifelse(!is.na(top_100_anno_df$gene_name), 
-                                                top_100_anno_df$gene_name, 
-                                                top_100_anno_df$feature))
-  
-  ### plots
-  # MA
-  ma_plot <- plot.ma(results_df[!grepl("UNMAPPED", results_df$feature), ], out_dir) # maybe more color?? significance..
-  library(affy)
-  test <- na.omit(results_df[!grepl("UNMAPPED", results_df$feature), ])
-  ma.plot(test$logFC, test$count_mean)
-  
-  # volcano
-  volcano_plot_total <- plot.volcano(results_df, "Total differential abundant features", results_df$feature, out_dir)
-  volcano_plot_top_100 <- plot.volcano(top_100_anno_df, "Top 100 differential abundant significant features", top_100_anno_df$display_name, out_dir)
-  
-  # heatmap
-  # pheatmap(sampleDistMatrix, clustering_distance_rows = sampleDists, clustering_distance_cols = sampleDists, color = colors)
 }
 
 stopCluster(cl)

@@ -1,3 +1,6 @@
+from genericpath import exists
+
+
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -28,14 +31,23 @@ help is on the way
 {bcolors.ENDC}
 """
 
+def path_check(path):
+    if path[-1] == "/":
+        path = path[0:-1]
+    if exists(path):
+        return path
+    else:
+        print(f"{bcolors.FAIL}CRITICAL: {path} does not exist, exiting..")
+        exit()
+
 # set static vars from config file here
-READS           = config["reads"]
+READS           = path_check(config["reads"])
 MODE            = config["mode"]
 MERGER          = config["merger"] if MODE == "paired" else "none"
 FASTQC          = config["fastqc"] 
-RESULTDIR       = config["results"] if config["results"][-1] != '/' else config["results"][:-1]
-CACHEDIR        = config["cache"] if config["cache"][-1] != '/' else config["cache"][:-1]
-TEMPDIR         = config["temp"] if config["temp"][-1] != '/' else config["temp"][:-1]
+RESULTDIR       = path_check(config["results"])
+CACHEDIR        = path_check(config["cache"])
+TEMPDIR         = path_check(config["temp"])
 CORETOOLS       = config["coretools"]
 UNITS           = config["count_units"]
 IDX_CHUNKS      = config["num_index_chunks"]
@@ -46,4 +58,4 @@ MAX_MISMATCH    = config["max_mismatch"]
 P_TH            = config["pThreshold"]
 S_TH            = config["sThreshold"]
 TRIM            = config["trim"]
-REFERENCE       = config["reference"]
+REFERENCE       = path_check(config["reference"])

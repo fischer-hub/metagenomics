@@ -42,7 +42,7 @@ rule diamond_blastx:
     conda:
         WD + "envs/diamond.yaml"
     resources:
-        time=1200,
+        time=2880,
         mem_mb=get_blast_mem,
         partition="big"
     threads:

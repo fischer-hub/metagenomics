@@ -4,12 +4,12 @@ author: "David Fischer"
 date: "04.02.2022"
 output: html_document
 params:
-  counts: "/Users/user/Downloads/sim_genefamilies_cpm_combined.tsv"
-  metadata: "/Users/user/Downloads/SraRunTable.txt"
+  counts: "/home/david/bachelorarbeit/metagenomics/genefamilies_cpm_combined.tsv"
+  metadata: "/home/david/Downloads/SraRunTable.txt"
   show_code: TRUE
-  comparisons: "/Users/user/Desktop/code/R/contrast.csv"
+  comparisons: "/home/david/bachelorarbeit/metagenomics/contrast.csv"
   formula: "cond+seed"
-  cpus: 4
+  cpus: 8
   abundance_threshold: 10
   prevalence_threshold: 0.4
   alpha: 0.05
@@ -17,7 +17,7 @@ params:
 ---
 
 ```{r setup, include=FALSE}
-# run with: cript -e "rmarkdown::render('differential_abundance_humann.Rmd',params=list(counts = '', metadata = ''))"
+# run with: Rscript -e "rmarkdown::render('differential_abundance_humann.Rmd',params=list(counts = '', metadata = ''))"
 knitr::opts_chunk$set(echo = TRUE)
 # cond:Wolbachia_pipientis_walbb_abundance,
 ```
@@ -29,12 +29,12 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ### load librarys
-```{r echo=params$show_code}
-pacman::p_load(DESeq2, tidyverse, broom, Maaslin2, foreach, doParallel, httr, jsonlite, xml2, EnhancedVolcano, UniProt.ws, ggplot2, pheatmap)
+```{r echo=show_code}
+pacman::p_load(tidyverse, broom, Maaslin2, foreach, doParallel, httr, jsonlite, xml2, EnhancedVolcano, UniProt.ws, ggplot2, pheatmap)
 ```
 
 ### load necessary files
-```{r echo=params$show_code}
+```{r echo=show_code}
 counts_df <- read.csv(file = params$counts, row.names = 1, header = TRUE, sep = '\t') 
 counts_df <- counts_df[ , order(names(counts_df))]
 
@@ -64,9 +64,11 @@ plot.ma <- function(df, title_txt){
 
 plot.pca <- function(df, meta, group){
   pca <- prcomp(t(df), center = TRUE, scale = FALSE)
-  autoplot(pca, data = meta, colour = group) +
-    ggtitle(paste("PCA colorized by variable", group, sep = ": ")) +
-    theme(plot.title = element_text(hjust = 0.5))
+  dtp <- data.frame(meta, pca$x[,1:2])
+  ggplot(data = dtp) + 
+       geom_point(aes(x = PC1, y = PC2, col = dtp[, group])) + 
+       labs(color = group) +
+       theme_minimal() 
 }
 
 plot.heatmap <- function(df, n, anno){
@@ -98,7 +100,7 @@ uniprot.map <- function(ids1, ids2, from_str, to_str, mapping_df){
 ```
 
 ## clean row and col names
-```{r echo=params$show_code}
+```{r echo=show_code}
 # clean count_df colnames (sample names)
 colnames(counts_df) <- gsub(".RPKs", "", colnames(counts_df), fixed = TRUE)
 colnames(counts_df) <- gsub("_Abundance", "", colnames(counts_df), fixed = TRUE)
@@ -113,7 +115,7 @@ rownames(metadata_df) <- gsub("_", ".", rownames(metadata_df), fixed = TRUE)
 ```
 
 ### remove stratified duplicate hits, low abundant hits and NAs
-```{r echo=params$show_code}
+```{r echo=show_code}
 # drop stratified duplicate rows
 counts_unstratified_df <- counts_df[!grepl("\\|",rownames(counts_df)),]
 
@@ -133,7 +135,10 @@ hist_log_plot <- hist(log2(rowSums(counts_clean_df[-1, ])), br = 100, main = "Lo
 ```
 
 ### set feature display names
-```{r echo=params$show_code}
+```{r echo=show_code}
+# tell tidy to stop spamming my console with col info <3
+show_col_types = FALSE
+
 # map uniref IDs to gene name
 feature_ids <- unlist(strsplit(rownames(counts_clean_df), "_"))
 from <- "NF50"
@@ -145,12 +150,13 @@ feature_names <- uniprot.map(feature_ids, c(), from, "GENENAME", data.frame())
 colnames(feature_names)[1] <- "id"
 colnames(feature_names)[2] <- "gene_name"
 
-# add display names to significants features
+# add display names to significant features
 counts_clean_df$id <- gsub(":.*", "", gsub(".*_", "", rownames(counts_clean_df)))
 counts_clean_df$feature <- rownames(counts_clean_df)
 counts_clean_anno_df <- merge(counts_clean_df, as.data.frame(feature_names), by = "id",  all = TRUE)
 
-# add cols for gene name, synonyme name and display name, where disp name is whatever is available of gene name|synonyme, gene name, ID in this order
+# !!! NOT WORKING WE DONT WANT SMTH LIKE NA|FEATURE NAME!!!
+# add cols for gene name, synonym name and display name, where disp name is whatever is available of gene name|synonym, gene name, ID in this order
 counts_clean_anno_df$synonym <- ifelse(grepl(":", counts_clean_anno_df$feature), gsub(".*:", "", counts_clean_anno_df$feature), NA)
 counts_clean_anno_df$display_name <- ifelse(!is.na(counts_clean_anno_df$synonym),
                                        paste(counts_clean_anno_df$gene_name, counts_clean_anno_df$synonym, sep = " | "), 
@@ -160,7 +166,7 @@ counts_clean_anno_df$display_name <- ifelse(!is.na(counts_clean_anno_df$synonym)
 ```
 
 ### plots on count data
-```{r echo=params$show_code}
+```{r echo=show_code}
 # general pca colored by sample
 metadata_df$sample <- row.names(metadata_df)
 pca_gen <- plot.pca(counts_clean_df[, 1:(length(colnames(counts_clean_df)) - 2)], metadata_df, "sample")
@@ -265,8 +271,17 @@ worker_array <- foreach(i = 1:length(rownames(comparisons_df)), .packages = c("M
 stopCluster(cl)
 ```
 
-```{r echo=params$show_code}
+```{r echo=show_code}
 
+metadata_df$sample <- row.names(metadata_df)
+pca_gen <- plot.pca(counts_clean_df[, 1:(length(colnames(counts_clean_df)) - 2)], metadata_df, sample)
+
+pca <- prcomp(t(counts_clean_df[, 1:(length(colnames(counts_clean_df)) - 2)]), center = TRUE, scale = FALSE)
+dtp <- data.frame(metadata_df, pca$x[,1:2])
+
+ggplot(data = dtp) + 
+     geom_point(aes(x = PC1, y = PC2, col = sample)) + 
+     theme_minimal()
 ```
 
 ```{r echo=params$show_code}

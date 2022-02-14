@@ -4,10 +4,10 @@ author: "David Fischer"
 date: "04.02.2022"
 output: html_document
 params:
-  counts: "/home/david/bachelorarbeit/metagenomics/genefamilies_cpm_combined.tsv"
-  metadata: "/home/david/Downloads/SraRunTable.txt"
+  counts: "/home/david/bachelorarbeit/metagenomics/assets/genefamilies_cpm_combined.tsv"
+  metadata: "/home/david/bachelorarbeit/metagenomics/assets/SraRunTable.txt"
   show_code: TRUE
-  comparisons: "/home/david/bachelorarbeit/metagenomics/contrast.csv"
+  comparisons: "/home/david/bachelorarbeit/metagenomics/assets/contrast.csv"
   formula: "cond+seed"
   cpus: 8
   abundance_threshold: 10
@@ -19,7 +19,6 @@ params:
 ```{r setup, include=FALSE}
 # run with: Rscript -e "rmarkdown::render('differential_abundance_humann.Rmd',params=list(counts = '', metadata = ''))"
 knitr::opts_chunk$set(echo = TRUE)
-# cond:Wolbachia_pipientis_walbb_abundance,
 ```
 
 ## R Markdown
@@ -68,21 +67,28 @@ plot.pca <- function(df, meta, group){
   ggplot(data = dtp) + 
        geom_point(aes(x = PC1, y = PC2, col = dtp[, group])) + 
        labs(color = group) +
-       theme_minimal() 
+       ggtitle(paste("PCA", title_txt, sep = ": ")) +
+       theme(plot.title = element_text(hjust = 0.5)) +
+       coord_fixed()
 }
 
-plot.heatmap <- function(df, n, anno){
-  pheatmap(dist(df[1:n, ]), cluster_cols = FALSE, cluster_rows = TRUE,
-        scale = "row", border_color = NA,
+plot.heatmap <- function(df, n, anno, cluster_rows = TRUE, cluster_cols = TRUE){
+  pheatmap(df[1:n, ], scale = "row", annotation_row = anno, main = title_txt,
         labels_row = as.character(rownames(df)[1:n]),
         labels_col = as.character(colnames(df)),
-        height = 15, width = 15,
-        cellheight = 15, cellwidth = 15,
-        annotation_row = anno,
-        clustering_distance_rows = sampleDists, 
-        clustering_distance_cols = sampleDists)
+        cluster_rows = cluster_rows, 
+        cluster_cols = cluster_cols)
 }
 
+plot.dist <- function(df, n, anno ){
+  pheatmap(df, cluster_cols = FALSE, cluster_rows = FALSE,
+        scale = "row", main = title_txt,
+        labels_row = as.character(rownames(df)[1:n]),
+        labels_col = as.character(colnames(df)),
+        annotation_row = anno,
+        cluster_rows = cluster_rows, 
+        cluster_cols = cluster_cols)
+}
 
 uniprot.map <- function(ids1, ids2, from_str, to_str, mapping_df){
 
@@ -108,20 +114,12 @@ colnames(counts_df) <- gsub("_Abundance", "", colnames(counts_df), fixed = TRUE)
 # clean metadata rownames (sample names)
 rownames(metadata_df) <- gsub("_", ".", rownames(metadata_df), fixed = TRUE)
 
-# create list of comparisons to do from input string
-#bin <- ifelse(params$comparisons != "null",
-#              comparisons_ls <- strsplit(params$comparisons, ';')[[1]],
-#              comparisons_ls <- colnames(metadata_df))
 ```
 
 ### remove stratified duplicate hits, low abundant hits and NAs
 ```{r echo=show_code}
 # drop stratified duplicate rows
 counts_unstratified_df <- counts_df[!grepl("\\|",rownames(counts_df)),]
-
-# drop genes with on average less than 2 counts per sample
-#counts_clean_df <- counts_unstratified_df[rowSums(counts_unstratified_df) > params$count_threshold * length(colnames(counts_unstratified_df)) / 1000000, ] 
-# let maaslin2 do this internally
 
 # drop rows containing NAs and add pseudo count to prevent MaAslin2 model fit from crashing
 counts_clean_df <- na.omit(counts_unstratified_df + 1)
@@ -146,7 +144,7 @@ if(feature_ids[1] == "UniRef90"){ from <- "NF90" }
 if(feature_ids[1] == "UniRef100"){ from <- "NF100" }
 feature_ids <- feature_ids[!grepl("UniRef", feature_ids)]
 feature_ids <- gsub(":.*", "", feature_ids)
-feature_names <- uniprot.map(feature_ids, c(), from, "GENENAME", data.frame())
+feature_names <- read.csv("/home/david/feature_ids.csv")  #uniprot.map(feature_ids, c(), from, "GENENAME", data.frame())
 colnames(feature_names)[1] <- "id"
 colnames(feature_names)[2] <- "gene_name"
 

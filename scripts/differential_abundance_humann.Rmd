@@ -14,11 +14,22 @@ params:
   prevalence_threshold: 0.0001
   alpha: 0.9
   fc_threshold: 1
+  work_dir: "/home/david"
 ---
 
 ```{r setup, include=FALSE}
 # run with: Rscript -e "rmarkdown::render('differential_abundance_humann.Rmd',params=list(counts = '', metadata = ''))"
 knitr::opts_chunk$set(echo = TRUE)
+
+# set directory variables
+out_dir_gen <-paste(params$work_dir, "Overview", sep = "/")
+out_dir_gen_plots <-paste(out_dir_gen, "Plots", sep = "/")
+out_dir_gen_data <-paste(out_dir_gen, "Data", sep = "/")
+
+# create directories
+dir.create(out_dir_gen_plots, showWarnings = FALSE)
+dir.create(out_dir_gen_data, showWarnings = FALSE)
+
 ```
 
 ## R Markdown
@@ -152,6 +163,7 @@ feature_ids <- feature_ids[!grepl("UniRef", feature_ids)]
 feature_ids <- gsub(":.*", "", feature_ids)
 feature_ids <- gsub(" .*", "", feature_ids)
 feature_names <- read.csv("/home/david/feature_ids.csv")  #uniprot.map(feature_ids, c(), from, "GENENAME", data.frame())
+write.csv(feature_names, file = paste(out_dir_gen_data, "feature_id_mapping.csv", sep = "/"))
 colnames(feature_names)[1] <- "id"
 colnames(feature_names)[2] <- "gene_name"
 
@@ -186,16 +198,21 @@ counts_clean_num_df <- counts_clean_anno_df[ , 2:(length(counts_clean_anno_df)-4
 # general pca colored by sample
 metadata_df$sample <- row.names(metadata_df)
 pca_gen <- plot.pca(counts_clean_df[, 1:(length(colnames(counts_clean_df)) - 2)], metadata_df, "sample", "sample")
+ggsave(filename = "pca_general.png", plot = pca_gen, device = png, path = out_dir_gen_plots)
 pca_gen_log <- plot.pca(log2(counts_clean_df[, 1:(length(colnames(counts_clean_df)) - 2)]), metadata_df, "sample", "sample")
+ggsave(filename = "pca__log_general.png", plot = pca_gen_log, device = png, path = out_dir_gen_plots)
 
 # heatmap of top 50
 heat_gen <- plot.heatmap(counts_clean_num_df, 50, counts_clean_anno_df$display_name, "Heatmap top 50 counts")
+ggsave(filename = "heatmap_top_50_count_gen.png", plot = heat_gen, device = png, path = out_dir_gen_plots)
 heat_gen_log <- plot.heatmap(log2(counts_clean_num_df), 50, counts_clean_anno_df$display_name, "Heatmap top 50 counts")
+ggsave(filename = "heatmap_top_50_count_log_gen.png", plot = heat_gen_log, device = png, path = out_dir_gen_plots)
 
 # sample to sample distance
 sample_dist <- plot.dist(t(counts_clean_num_df), "Sample to sample count distance (euclidean)")
+ggsave(filename = "sample_to_sample_dist_count.png", plot = sample_dist, device = png, path = out_dir_gen_plots)
 sample_dist_log <- plot.dist(t(log2(counts_clean_num_df)), "Sample to sample log count distance (euclidean)")
-
+ggsave(filename = "sample_to_sample_dist_log_count.png", plot = sample_dist_log, device = png, path = out_dir_gen_plots)
 ```
 
 ### run MaAslin2 model for given formula
@@ -212,7 +229,7 @@ sink("/dev/null") # make maaslin2 shut up for once
 fit <- Maaslin2(
     input_data = counts_clean_anno_df, 
     input_metadata = metadata_df, 
-    output = "maaslin2_model_output",
+    output = paste(out_dir_gen_data, "maaslin2_model_output", sep = "/"),
     analysis_method = "CPLM",
     normalization = "NONE",
     transform = "NONE",
@@ -231,7 +248,10 @@ results_df <- mutate(results_df, count_mean = rowMeans(results_df[ , 12:(length(
 results_df <- mutate(results_df, logFC = log2(exp(results_df$coef))) 
 
 ma_plot_gen <- plot.ma(results_df, "all groups")
-volcano_plot_total <- plot.volcano(results_df, "Total differential abundant features", results_df$display_name, "all groups")
+ggsave(filename = "ma_plot_general.png", plot = ma_plot_gen, device = png, path = out_dir_gen_plots)
+
+volcano_plot_gen <- plot.volcano(results_df, "Total differential abundant features", results_df$display_name, "all groups")
+ggsave(filename = "volcano_plot_general.png", plot = volcano_plot_gen, device = png, path = out_dir_gen_plots)
 ```
 
 ### run comparisons

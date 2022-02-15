@@ -144,14 +144,16 @@ if(feature_ids[1] == "UniRef90"){ from <- "NF90" }
 if(feature_ids[1] == "UniRef100"){ from <- "NF100" }
 feature_ids <- feature_ids[!grepl("UniRef", feature_ids)]
 feature_ids <- gsub(":.*", "", feature_ids)
+feature_ids <- gsub(" .*", "", feature_ids)
 feature_names <- read.csv("/home/david/feature_ids.csv")  #uniprot.map(feature_ids, c(), from, "GENENAME", data.frame())
 colnames(feature_names)[1] <- "id"
 colnames(feature_names)[2] <- "gene_name"
 
 # add display names to significant features
 counts_clean_df$id <- gsub(":.*", "", gsub(".*_", "", rownames(counts_clean_df)))
+counts_clean_df$id <- gsub(" .*", "", counts_clean_df$id)
 counts_clean_df$feature <- rownames(counts_clean_df)
-counts_clean_anno_df <- merge(counts_clean_df, as.data.frame(feature_names), by = "id",  all = TRUE)
+counts_clean_anno_df <- merge(counts_clean_df, as.data.frame(feature_names), by = "id",  all.x = TRUE)
 
 # do not touch this for the love of god
 # add cols for gene name, synonym name and display name, where disp name is whatever is available of gene name|synonym, gene name, ID in this order

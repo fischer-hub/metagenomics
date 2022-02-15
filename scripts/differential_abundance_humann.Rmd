@@ -14,9 +14,9 @@ params:
   prevalence_threshold: 0.0001
   alpha: 0.9
   fc_threshold: 1
-  work_dir: "/home/david"
-  plot_height: 10 
-  plot_width: 10
+  work_dir: "/home/david/abundance_analysis"
+  plot_height: 11 
+  plot_width: 11
 ---
 
 ```{r setup, include=FALSE}
@@ -29,8 +29,10 @@ out_dir_gen_plots <-paste(out_dir_gen, "Plots", sep = "/")
 out_dir_gen_data <-paste(out_dir_gen, "Data", sep = "/")
 
 # create directories
+dir.create(out_dir_gen, showWarnings = FALSE)
 dir.create(out_dir_gen_plots, showWarnings = FALSE)
 dir.create(out_dir_gen_data, showWarnings = FALSE)
+dir.create(paste(params$work_dir, "Contrasts", sep = "/"), showWarnings = FALSE)
 
 ```
 
@@ -95,19 +97,20 @@ plot.pca <- function(df, meta, group, title_txt){
 }
 
 plot.heatmap <- function(df, n, anno, title_txt, cluster_rows = TRUE, cluster_cols = TRUE, group = NA){
-  pheatmap(df[1:n, ], scale = "row", annotation_row = group, main = title_txt,
+  pheatmap(df[1:n, ], scale = "row", annotation_col = group, main = title_txt,
         labels_row = anno[1:n],
         labels_col = as.character(colnames(df)),
         cluster_rows = cluster_rows, 
         cluster_cols = cluster_cols)
 }
 
-plot.dist <- function(df, title_txt, group = NA){
-  pheatmap(dist(df), cluster_cols = FALSE, cluster_rows = FALSE,
+plot.dist <- function(df, title_txt, group = NA, cluster_cols = FALSE, cluster_rows = FALSE){
+  pheatmap(dist(df), cluster_cols = cluster_cols, cluster_rows = cluster_rows,
         scale = "row", main = title_txt,
         labels_row = as.character(rownames(df)),
         labels_col = as.character(rownames(df)),
-        annotation_row = group)
+        annotation_row = group,
+        annotation_col = group)
 }
 
 uniprot.map <- function(ids1, ids2, from_str, to_str, mapping_df){
@@ -193,7 +196,7 @@ rownames(counts_clean_anno_df) <- counts_clean_anno_df$feature
 ```
 
 ### plots on count data
-```{r echo=show_code}
+```{r echo=show_code, message=FALSE}
 # sort data by most counts per row
 counts_clean_anno_df <- counts_clean_anno_df[order(-rowSums(counts_clean_anno_df[ , 2:(length(counts_clean_anno_df)-4)])), ]
 counts_clean_num_df <- counts_clean_anno_df[ , 2:(length(counts_clean_anno_df)-4)]
@@ -259,37 +262,59 @@ ggsave(filename = "volcano_plot_general.png", plot = volcano_plot_gen, device = 
 
 ### run comparisons
 ```{r echo=show_code}
-# filter for significance
-res_sig_df <- results_df[ results_df$qval < params$alpha, ]
+for(i in 1:length(rownames(comparisons_df))){
+  
+  cond <- comparisons_df$Condition[i]
+  ref <- comparisons_df$Group1[i]
+  alt <- comparisons_df$Group2[i]
+  
+  # create directory structure for current contrast
+  contrast <- paste(ref, "vs", alt, sep = "_")
+  out_dir_con <- paste(params$work_dir, "Contrasts", contrast, sep = "/")
+  dir.create(out_dir_con, showWarnings = FALSE)
+  
+  out_dir_con_plots <- paste(out_dir_con, "Plots", sep = "/")
+  dir.create(out_dir_con_plots, showWarnings = FALSE)
+  
+  # select rows with current condition
+  results_df <- results_df[results_df$metadata %in% cond, ]
+  
+  # filter for significance
+  res_sig_df <- results_df[ results_df$qval < params$alpha, ]
 
-# order by ascending adjusted pval and descending logFC
-res_sig_ordered_df <- res_sig_df[order(res_sig_df$qval, -abs(res_sig_df$logFC)), ]
+  # order by ascending adjusted pval and descending logFC
+  res_sig_ordered_df <- res_sig_df[order(res_sig_df$qval, -abs(res_sig_df$logFC)), ]
 
-# get top 100 significant features ordered by logFC
-top_100_df <- res_sig_ordered_df[1:100, ]
+  # get top 100 significant features ordered by logFC
+  top_100_df <- res_sig_ordered_df[1:min(length(rownames(res_sig_ordered_df)), 100), ]
+  write.csv(top_100_df, file = paste(out_dir_con, paste(contrast, "top_100_features.csv", sep = "_"), sep = "/"))
 
-# add display names to significants features
-top_100_df$id <- gsub(":.*", "", gsub(".*_", "", top_100_df$feature))
-top_100_anno_df <- merge(top_100_df, feature_names, by = "id",  all = TRUE)
-
-# add cols for gene name, synonyme name and display name, where disp name is whatever is available of gene name|synonyme, gene name, ID in this order
-top_100_anno_df$synonym <- ifelse(grepl(":", top_100_anno_df$feature), gsub(".*:", "", top_100_anno_df$feature), NA)
-top_100_anno_df$display_name <- ifelse(!is.na(top_100_anno_df$synonym),
-                                       paste(top_100_anno_df$gene_name, top_100_anno_df$synonym, sep = " | "), 
-                                       ifelse(!is.na(top_100_anno_df$gene_name), 
-                                              top_100_anno_df$gene_name, 
-                                              top_100_anno_df$feature))
-
-### plots
-# MA
-ma_plot <- plot.ma(results_df[!grepl("UNMAPPED", results_df$feature), ], out_dir) # maybe more color?? significance..
-library(affy)
-test <- na.omit(results_df[!grepl("UNMAPPED", results_df$feature), ])
-ma.plot(test$logFC, test$count_mean)
-
-# volcano
-volcano_plot_total <- plot.volcano(results_df, "Total differential abundant features", results_df$feature, out_dir)
-volcano_plot_top_100 <- plot.volcano(top_100_anno_df, "Top 100 differential abundant significant features", top_100_anno_df$display_name, out_dir)
+  # plot pca colored by current condition
+  pca_con <- plot.pca(counts_clean_df[, 1:(length(colnames(counts_clean_df)) - 2)], metadata_df, cond, cond)
+  ggsave(filename = paste(contrast, "pca.png"), plot = pca_con, device = png, path = out_dir_con_plots, height = params$plot_height, width = params$plot_width)
+  pca_con_log <- plot.pca(log2(counts_clean_df[, 1:(length(colnames(counts_clean_df)) - 2)]), metadata_df, cond, cond)
+  ggsave(filename = paste(contrast, "pca_log.png"), plot = pca_con_log, device = png, path = out_dir_con_plots, height = params$plot_height, width = params$plot_width)
+  
+  # heatmap of top 50
+  top_100_anno_df <- merge(top_100_df, counts_clean_anno_df, all.x = TRUE)
+  top_100_num_df <- top_100_anno_df[ , 3:(length(top_100_anno_df)-14)]
+  
+  groups <- data.frame(metadata_df[[cond]])
+  colnames(groups)[1] <- cond
+  rownames(groups) <- rownames(metadata_df)
+  heat_con <- plot.heatmap(top_100_num_df, min(length(rownames(top_100_num_df)), 50), top_100_anno_df$display_name, paste("Heatmap of top 50 significant feature counts by logFC colored by", cond, sep = " "), group = groups)
+  ggsave(filename = paste(contrast, "heatmap_top_50_count_by_FC.png", sep = "_"), plot = heat_con, device = png, path = out_dir_con_plots, height = params$plot_height, width = params$plot_width)
+  heat_con_log <- plot.heatmap(log2(counts_clean_num_df), 50, counts_clean_anno_df$display_name, paste("Heatmap of top 50 significant feature counts by logFC colored by", cond, "(log)", sep = " "))
+  ggsave(filename = paste(contrast, "heatmap_top_50_log_count_by_FC.png", sep = "_"), plot = heat_con_log, device = png, path = out_dir_con_plots, height = params$plot_height, width = params$plot_width)
+  
+  # sample to sample distance
+  sample_dist_con <- plot.dist(t(top_100_num_df), paste("Sample to sample count distance colored by ", cond, "(euclidean)", sep = " "), group = groups, TRUE, TRUE)
+  ggsave(filename = paste(contrast, "sample_to_sample_dist_count.png", sep = "_"), plot = sample_dist_con, device = png, path = out_dir_con_plots, height = params$plot_height, width = params$plot_width)
+  sample_dist_log <- plot.dist(t(log2(counts_clean_num_df)), paste("Sample to sample log count distance colored by ", cond, "(euclidean)", sep = " "), group = groups, TRUE, TRUE)
+  ggsave(filename = paste(contrast, "sample_to_sample_dist_log_count.png", sep = "_"), plot = sample_dist_log, device = png, path = out_dir_con_plots, height = params$plot_height, width = params$plot_width)
+  
+  
+}
 
 # heatmap
 # pheatmap(sampleDistMatrix, clustering_distance_rows = sampleDists, clustering_distance_cols = sampleDists, color = colors)

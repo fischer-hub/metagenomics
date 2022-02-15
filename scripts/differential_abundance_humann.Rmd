@@ -262,13 +262,16 @@ ggsave(filename = "volcano_plot_general.png", plot = volcano_plot_gen, device = 
 
 ### run comparisons
 ```{r echo=show_code}
+logFC_by_cond <- as.data.frame(rownames(counts_clean_anno_df))
+colnames(logFC_by_cond)[1] <- "feature"
+
 for(i in 1:length(rownames(comparisons_df))){
   
   cond <- comparisons_df$Condition[i]
   ref <- comparisons_df$Group1[i]
   alt <- comparisons_df$Group2[i]
   
-  # create directory structure for current contrast
+  # create directory structure for current contrast 
   contrast <- paste(ref, "vs", alt, sep = "_")
   out_dir_con <- paste(params$work_dir, "Contrasts", contrast, sep = "/")
   dir.create(out_dir_con, showWarnings = FALSE)
@@ -277,16 +280,23 @@ for(i in 1:length(rownames(comparisons_df))){
   dir.create(out_dir_con_plots, showWarnings = FALSE)
   
   # select rows with current condition
-  results_df <- results_df[results_df$metadata %in% cond, ]
+  results_cond_df <- results_df[results_df$metadata %in% cond, ]
   
+  # save logFC for this condition for later heatmap
+  if(!(cond %in% colnames(logFC_by_cond))){
+    temp <- as.data.frame(results_df$logFC)
+    temp$feature <- rownames(results_df)
+    colnames(temp)[1] <- cond 
+    logFC_by_cond <- merge(logFC_by_cond, temp, by = "feature", all = TRUE)
+  }
   # filter for significance
-  res_sig_df <- results_df[ results_df$qval < params$alpha, ]
+  res_sig_df <- results_cond_df[ results_cond_df$qval < params$alpha, ]
 
   # order by ascending adjusted pval and descending logFC
   res_sig_ordered_df <- res_sig_df[order(res_sig_df$qval, -abs(res_sig_df$logFC)), ]
 
   # get top 100 significant features ordered by logFC
-  top_100_df <- res_sig_ordered_df[1:min(length(rownames(res_sig_ordered_df)), 100), ]
+  top_100_df <- res_sig_ordered_df[1:min(nrow(res_sig_ordered_df), 100), ]
   write.csv(top_100_df, file = paste(out_dir_con, paste(contrast, "top_100_features.csv", sep = "_"), sep = "/"))
 
   # plot pca colored by current condition
@@ -302,9 +312,9 @@ for(i in 1:length(rownames(comparisons_df))){
   groups <- data.frame(metadata_df[[cond]])
   colnames(groups)[1] <- cond
   rownames(groups) <- rownames(metadata_df)
-  heat_con <- plot.heatmap(top_100_num_df, min(length(rownames(top_100_num_df)), 50), top_100_anno_df$display_name, paste("Heatmap of top 50 significant feature counts by logFC colored by", cond, sep = " "), group = groups)
+  heat_con <- plot.heatmap(top_100_num_df, min(nrow(top_100_num_df), 50), top_100_anno_df$display_name, paste("Heatmap of top 50 significant feature counts by logFC colored by", cond, sep = " "), group = groups)
   ggsave(filename = paste(contrast, "heatmap_top_50_count_by_FC.png", sep = "_"), plot = heat_con, device = png, path = out_dir_con_plots, height = params$plot_height, width = params$plot_width)
-  heat_con_log <- plot.heatmap(log2(counts_clean_num_df), 50, counts_clean_anno_df$display_name, paste("Heatmap of top 50 significant feature counts by logFC colored by", cond, "(log)", sep = " "))
+  heat_con_log <- plot.heatmap(log2(counts_clean_num_df), min(nrow(top_100_num_df), 50), top_100_anno_df$display_name, paste("Heatmap of top 50 significant feature counts by logFC colored by", cond, "(log)", sep = " "), group = groups)
   ggsave(filename = paste(contrast, "heatmap_top_50_log_count_by_FC.png", sep = "_"), plot = heat_con_log, device = png, path = out_dir_con_plots, height = params$plot_height, width = params$plot_width)
   
   # sample to sample distance
@@ -313,12 +323,11 @@ for(i in 1:length(rownames(comparisons_df))){
   sample_dist_log <- plot.dist(t(log2(counts_clean_num_df)), paste("Sample to sample log count distance colored by ", cond, "(euclidean)", sep = " "), group = groups, TRUE, TRUE)
   ggsave(filename = paste(contrast, "sample_to_sample_dist_log_count.png", sep = "_"), plot = sample_dist_log, device = png, path = out_dir_con_plots, height = params$plot_height, width = params$plot_width)
   
-  
 }
 
-# heatmap
-# pheatmap(sampleDistMatrix, clustering_distance_rows = sampleDists, clustering_distance_cols = sampleDists, color = colors)
-
+rownames(logFC_by_cond) <- logFC_by_cond$feature
+logFC_by_cond <- logFC_by_cond[-1]
+logFC_by_cond <- logFC_by_cond[rowSums(is.na(logFC_by_cond)) != ncol(logFC_by_cond), ]
 ```
 
 ### run comparisons

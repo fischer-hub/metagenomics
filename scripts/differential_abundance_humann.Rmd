@@ -8,11 +8,11 @@ params:
   metadata: "/home/david/bachelorarbeit/metagenomics/assets/SraRunTable.txt"
   show_code: TRUE
   comparisons: "/home/david/bachelorarbeit/metagenomics/assets/contrast.csv"
-  formula: "cond+seed"
+  formula: "sex+antibiotic_12m+Fam_hx_stone+diet_type"
   cpus: 8
   abundance_threshold: 10
-  prevalence_threshold: 0.4
-  alpha: 0.05
+  prevalence_threshold: 0.0001
+  alpha: 0.90
   fc_threshold: 1
 ---
 
@@ -165,6 +165,10 @@ counts_clean_anno_df$display_name <- ifelse(!is.na(counts_clean_anno_df$synonym)
                                             ifelse(!is.na(counts_clean_anno_df$gene_name),
                                                    counts_clean_anno_df$gene_name,
                                                    counts_clean_anno_df$id))
+counts_clean_anno_df$feature <- gsub(":", ".", counts_clean_anno_df$feature, fixed = TRUE)
+counts_clean_anno_df$feature <- gsub(" ", ".", counts_clean_anno_df$feature, fixed = TRUE)
+counts_clean_anno_df$feature <- gsub("-", ".", counts_clean_anno_df$feature, fixed = TRUE)
+rownames(counts_clean_anno_df) <- counts_clean_anno_df$feature
 ```
 
 ### plots on count data
@@ -188,27 +192,46 @@ sample_dist_log <- plot.dist(t(log2(counts_clean_num_df)), "Sample to sample log
 
 ```
 
-### run MaAslin2 model
-```{r echo=show_code}
-# run model once for all variables
+### run MaAslin2 model for given formula
+```{r echo=show_code,  message=FALSE}
+# set reference level for each condition assuming first occurence is reference for now
+ref_levels <- c()
+conditions <- strsplit(params$formula, "\\+")[[1]]
+for(i in 1:length(conditions)){
+  ref_levels <- rbind(ref_levels, paste(conditions[i], metadata_df[1, conditions[i]], sep = ","))
+}
+
+# run model once for given formula, assume first entry in metadata is the reference level
+sink("/dev/null") # make maaslin2 shut up for once
 fit <- Maaslin2(
-    input_data = counts_clean_df, 
+    input_data = counts_clean_anno_df, 
     input_metadata = metadata_df, 
     output = "maaslin2_model_output",
     analysis_method = "CPLM",
     normalization = "NONE",
     transform = "NONE",
-    fixed_effects = gsub("+", ",", params$formula, fixed = TRUE),
+    fixed_effects = strsplit(params$formula, "\\+")[[1]],
+    reference = paste(ref_levels, collapse = ";"),
     cores = params$cpus,
     min_abundance = params$abundance_threshold,
     min_prevalence = params$prevalence_threshold,
     plot_scatter = FALSE)
+sink() 
 
 results_df <- fit$results
 results_df <- na.omit(results_df)
-results_df <- mutate(results_df, count_mean = log2(rowMeans(counts_clean_df[results_df$feature, ])))
+results_df <- merge(results_df, counts_clean_anno_df, all.x = TRUE)
+results_df <- mutate(results_df, count_mean = rowMeans(results_df[ , 12:(length(results_df)-3)]))
 results_df <- mutate(results_df, logFC = log2(exp(results_df$coef))) 
 
+ma_plot_gen <- plot.ma(results_df, "all groups") # maybe more color?? significance..
+volcano_plot_total <- plot.volcano(results_df, "Total differential abundant features", results_df, "all groups")
+
+
+```
+
+### run comparisons
+```{r echo=show_code}
 # filter for significance
 res_sig_df <- results_df[ results_df$qval < params$alpha, ]
 
@@ -283,15 +306,6 @@ stopCluster(cl)
 
 ```{r echo=show_code}
 
-metadata_df$sample <- row.names(metadata_df)
-pca_gen <- plot.pca(counts_clean_df[, 1:(length(colnames(counts_clean_df)) - 2)], metadata_df, sample)
-
-pca <- prcomp(t(counts_clean_df[, 1:(length(colnames(counts_clean_df)) - 2)]), center = TRUE, scale = FALSE)
-dtp <- data.frame(metadata_df, pca$x[,1:2])
-
-ggplot(data = dtp) + 
-     geom_point(aes(x = PC1, y = PC2, col = sample)) + 
-     theme_minimal()
 ```
 
 ```{r echo=params$show_code}

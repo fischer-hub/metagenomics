@@ -15,6 +15,8 @@ params:
   alpha: 0.9
   fc_threshold: 1
   work_dir: "/home/david"
+  plot_height: 10 
+  plot_width: 10
 ---
 
 ```{r setup, include=FALSE}
@@ -64,6 +66,7 @@ plot.volcano <-function(df, title_txt, label_col, subtitle_txt){
                   drawConnectors = TRUE,
                   widthConnectors = 1.0,
                   colConnectors = 'black',
+                  max.overlaps = 30,
                   legendLabels = c('not significant', expression(Log[2]~FC~sig), expression(adj.~p-value~sig), expression(adj.~p-value~and~log[2]~FC~sig)))
 }
 
@@ -198,21 +201,21 @@ counts_clean_num_df <- counts_clean_anno_df[ , 2:(length(counts_clean_anno_df)-4
 # general pca colored by sample
 metadata_df$sample <- row.names(metadata_df)
 pca_gen <- plot.pca(counts_clean_df[, 1:(length(colnames(counts_clean_df)) - 2)], metadata_df, "sample", "sample")
-ggsave(filename = "pca_general.png", plot = pca_gen, device = png, path = out_dir_gen_plots)
+ggsave(filename = "pca_general.png", plot = pca_gen, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
 pca_gen_log <- plot.pca(log2(counts_clean_df[, 1:(length(colnames(counts_clean_df)) - 2)]), metadata_df, "sample", "sample")
-ggsave(filename = "pca__log_general.png", plot = pca_gen_log, device = png, path = out_dir_gen_plots)
+ggsave(filename = "pca__log_general.png", plot = pca_gen_log, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
 
 # heatmap of top 50
 heat_gen <- plot.heatmap(counts_clean_num_df, 50, counts_clean_anno_df$display_name, "Heatmap top 50 counts")
-ggsave(filename = "heatmap_top_50_count_gen.png", plot = heat_gen, device = png, path = out_dir_gen_plots)
+ggsave(filename = "heatmap_top_50_count_gen.png", plot = heat_gen, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
 heat_gen_log <- plot.heatmap(log2(counts_clean_num_df), 50, counts_clean_anno_df$display_name, "Heatmap top 50 counts")
-ggsave(filename = "heatmap_top_50_count_log_gen.png", plot = heat_gen_log, device = png, path = out_dir_gen_plots)
+ggsave(filename = "heatmap_top_50_count_log_gen.png", plot = heat_gen_log, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
 
 # sample to sample distance
 sample_dist <- plot.dist(t(counts_clean_num_df), "Sample to sample count distance (euclidean)")
-ggsave(filename = "sample_to_sample_dist_count.png", plot = sample_dist, device = png, path = out_dir_gen_plots)
+ggsave(filename = "sample_to_sample_dist_count.png", plot = sample_dist, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
 sample_dist_log <- plot.dist(t(log2(counts_clean_num_df)), "Sample to sample log count distance (euclidean)")
-ggsave(filename = "sample_to_sample_dist_log_count.png", plot = sample_dist_log, device = png, path = out_dir_gen_plots)
+ggsave(filename = "sample_to_sample_dist_log_count.png", plot = sample_dist_log, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
 ```
 
 ### run MaAslin2 model for given formula
@@ -248,10 +251,10 @@ results_df <- mutate(results_df, count_mean = rowMeans(results_df[ , 12:(length(
 results_df <- mutate(results_df, logFC = log2(exp(results_df$coef))) 
 
 ma_plot_gen <- plot.ma(results_df, "all groups")
-ggsave(filename = "ma_plot_general.png", plot = ma_plot_gen, device = png, path = out_dir_gen_plots)
+ggsave(filename = "ma_plot_general.png", plot = ma_plot_gen, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
 
 volcano_plot_gen <- plot.volcano(results_df, "Total differential abundant features", results_df$display_name, "all groups")
-ggsave(filename = "volcano_plot_general.png", plot = volcano_plot_gen, device = png, path = out_dir_gen_plots)
+ggsave(filename = "volcano_plot_general.png", plot = volcano_plot_gen, device = png, path = out_dir_gen_plots, width = 15, height = 10)
 ```
 
 ### run comparisons

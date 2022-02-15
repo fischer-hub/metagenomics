@@ -156,7 +156,7 @@ counts_clean_df$feature <- rownames(counts_clean_df)
 counts_clean_anno_df <- merge(counts_clean_df, as.data.frame(feature_names), by = "id",  all.x = TRUE)
 
 # do not touch this for the love of god
-# add cols for gene name, synonym name and display name, where disp name is whatever is available of gene name|synonym, gene name, ID in this order
+# add cols for gene name, synonym name and display name, where display name is whatever is available of gene name|synonym, gene name, ID in this order
 counts_clean_anno_df$synonym <- ifelse(grepl(":", counts_clean_anno_df$feature), gsub(".*:", "", counts_clean_anno_df$feature), NA)
 counts_clean_anno_df$display_name <- ifelse(!is.na(counts_clean_anno_df$synonym), 
                                             ifelse(!is.na(counts_clean_anno_df$gene_name),

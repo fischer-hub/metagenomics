@@ -61,33 +61,33 @@ plot.ma <- function(df, title_txt){
     ylab("log2 mean normalized counts") 
 }
 
-plot.pca <- function(df, meta, group){
+plot.pca <- function(df, meta, group, title_txt){
   pca <- prcomp(t(df), center = TRUE, scale = FALSE)
   dtp <- data.frame(meta, pca$x[,1:2])
   ggplot(data = dtp) + 
        geom_point(aes(x = PC1, y = PC2, col = dtp[, group])) + 
        labs(color = group) +
-       ggtitle(paste("PCA", title_txt, sep = ": ")) +
+       ggtitle(paste("PCA, colored by", title_txt, sep = " ")) +
        theme(plot.title = element_text(hjust = 0.5)) +
+       xlab(paste0("PC1: ",   summary(pca)$importance[2,1], "% variance")) +
+       ylab(paste0("PC2: ",   summary(pca)$importance[2,2] ,"% variance")) + 
        coord_fixed()
 }
 
-plot.heatmap <- function(df, n, anno, cluster_rows = TRUE, cluster_cols = TRUE){
-  pheatmap(df[1:n, ], scale = "row", annotation_row = anno, main = title_txt,
-        labels_row = as.character(rownames(df)[1:n]),
+plot.heatmap <- function(df, n, anno, title_txt, cluster_rows = TRUE, cluster_cols = TRUE, group = NA){
+  pheatmap(df[1:n, ], scale = "row", annotation_row = group, main = title_txt,
+        labels_row = anno[1:n],
         labels_col = as.character(colnames(df)),
         cluster_rows = cluster_rows, 
         cluster_cols = cluster_cols)
 }
 
-plot.dist <- function(df, n, anno ){
-  pheatmap(df, cluster_cols = FALSE, cluster_rows = FALSE,
+plot.dist <- function(df, title_txt, group = NA){
+  pheatmap(dist(df), cluster_cols = FALSE, cluster_rows = FALSE,
         scale = "row", main = title_txt,
-        labels_row = as.character(rownames(df)[1:n]),
-        labels_col = as.character(colnames(df)),
-        annotation_row = anno,
-        cluster_rows = cluster_rows, 
-        cluster_cols = cluster_cols)
+        labels_row = as.character(rownames(df)),
+        labels_col = as.character(rownames(df)),
+        annotation_row = group)
 }
 
 uniprot.map <- function(ids1, ids2, from_str, to_str, mapping_df){
@@ -169,14 +169,22 @@ counts_clean_anno_df$display_name <- ifelse(!is.na(counts_clean_anno_df$synonym)
 
 ### plots on count data
 ```{r echo=show_code}
+# sort data by most counts per row
+counts_clean_anno_df <- counts_clean_anno_df[order(-rowSums(counts_clean_anno_df[ , 2:(length(counts_clean_anno_df)-4)])), ]
+counts_clean_num_df <- counts_clean_anno_df[ , 2:(length(counts_clean_anno_df)-4)]
+
 # general pca colored by sample
 metadata_df$sample <- row.names(metadata_df)
-pca_gen <- plot.pca(counts_clean_df[, 1:(length(colnames(counts_clean_df)) - 2)], metadata_df, "sample")
-pca_gen_log <- plot.pca(log2(counts_clean_df[, 1:(length(colnames(counts_clean_df)) - 2)]), metadata_df, "sample")
+pca_gen <- plot.pca(counts_clean_df[, 1:(length(colnames(counts_clean_df)) - 2)], metadata_df, "sample", "sample")
+pca_gen_log <- plot.pca(log2(counts_clean_df[, 1:(length(colnames(counts_clean_df)) - 2)]), metadata_df, "sample", "sample")
 
-# heatmap
-plot.heatmap(counts_clean_df, 15, feature_names)
-plot.heatmap(counts_clean_df, 15, feature_names)
+# heatmap of top 50
+heat_gen <- plot.heatmap(counts_clean_num_df, 50, counts_clean_anno_df$display_name, "Heatmap top 50 counts")
+heat_gen_log <- plot.heatmap(log2(counts_clean_num_df), 50, counts_clean_anno_df$display_name, "Heatmap top 50 counts")
+
+# sample to sample distance
+sample_dist <- plot.dist(t(counts_clean_num_df), "Sample to sample count distance (euclidean)")
+sample_dist_log <- plot.dist(t(log2(counts_clean_num_df)), "Sample to sample log count distance (euclidean)")
 
 ```
 

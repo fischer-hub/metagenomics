@@ -12,7 +12,7 @@ params:
   cpus: 8
   abundance_threshold: 10
   prevalence_threshold: 0.0001
-  alpha: 0.90
+  alpha: 0.9
   fc_threshold: 1
 ---
 
@@ -46,19 +46,25 @@ comparisons_df <- read.csv(file = params$comparisons, header = TRUE, sep = ',')
 ### functions
 ```{r echo=show_code}
 plot.volcano <-function(df, title_txt, label_col, subtitle_txt){
-  EnhancedVolcano(df,lab = label_col, x = "logFC", y = "qval", ylab = expression(-Log[10]~p-value),
-                  title = title_txt, subtitle = paste("Volcano plot", subtitle_txt, sep = ": "),
+  EnhancedVolcano(df,lab = label_col, x = "logFC", y = "qval", ylab = expression(-Log[10]~(p-value)),
+                  title = title_txt, subtitle = paste("Volcano plot:", subtitle_txt, ", \u03b1 = ", params$alpha, sep = " "),
                   pCutoff = params$alpha, FCcutoff = params$fc_threshold,
-                  legendLabels = c('not significant', expression(Log[2]~FC~sig), "adj. p - value sig", expression(adj.~p-value~and~log[2]~FC~sig)))
+                  colAlpha = 1, boxedLabels = TRUE,
+                  drawConnectors = TRUE,
+                  widthConnectors = 1.0,
+                  colConnectors = 'black',
+                  legendLabels = c('not significant', expression(Log[2]~FC~sig), expression(adj.~p-value~sig), expression(adj.~p-value~and~log[2]~FC~sig)))
 }
 
 plot.ma <- function(df, title_txt){
+  df$sig <- ifelse(df$qval < params$alpha, "1", "0")
   ggplot() +
-    geom_point(data = df, aes(x = count_mean, y = logFC), size = 0.5) +
-    ggtitle(paste("MA-Plot", title_txt, sep = ": ")) +
+    geom_point(data = df, aes(x = count_mean, y = logFC, col = sig), size = 0.5, show.legend = FALSE) +
+    ggtitle(paste("MA-Plot:", title_txt, ", \u03b1 = ", params$alpha, sep = " ")) +
     theme(plot.title = element_text(hjust = 0.5)) +
-    xlab("log2 fold change") +
-    ylab("log2 mean normalized counts") 
+    scale_colour_manual(values = c("1" = "red", "0" = "black")) +
+    ylab("log2 fold change") +
+    xlab("mean of normalized counts") 
 }
 
 plot.pca <- function(df, meta, group, title_txt){
@@ -224,10 +230,8 @@ results_df <- merge(results_df, counts_clean_anno_df, all.x = TRUE)
 results_df <- mutate(results_df, count_mean = rowMeans(results_df[ , 12:(length(results_df)-3)]))
 results_df <- mutate(results_df, logFC = log2(exp(results_df$coef))) 
 
-ma_plot_gen <- plot.ma(results_df, "all groups") # maybe more color?? significance..
-volcano_plot_total <- plot.volcano(results_df, "Total differential abundant features", results_df, "all groups")
-
-
+ma_plot_gen <- plot.ma(results_df, "all groups")
+volcano_plot_total <- plot.volcano(results_df, "Total differential abundant features", results_df$display_name, "all groups")
 ```
 
 ### run comparisons

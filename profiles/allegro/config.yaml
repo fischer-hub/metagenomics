@@ -1,15 +1,19 @@
 cluster:
-  mkdir -p log/{rule} &&
+  mkdir -p /data/scratch2/fisched99/slurm/{rule} &&
   sbatch
     --partition={resources.partition}
     --cpus-per-task={threads}
     --mem={resources.mem_mb}
     --job-name=smk-{rule}-{wildcards}
-    --output=log/{rule}/{rule}-{wildcards}-%j.out
+    --output=/data/scratch2/fisched99/slurm/{rule}/{rule}-{wildcards}-%j.out
+    --error=/data/scratch2/fisched99/slurm/{rule}/{rule}-{wildcards}-%j.err
+    --time={resources.time}
+    --parsable
 default-resources:
   - partition=small
   - mem=1000
-restart-times: 3
+  - time=60
+restart-times: 5
 max-jobs-per-second: 10
 max-status-checks-per-second: 1
 local-cores: 1
@@ -17,7 +21,7 @@ latency-wait: 60
 jobs: 100
 keep-going: True
 rerun-incomplete: True
-printshellcmds: True
+printshellcmds: False
 scheduler: greedy
 use-conda: True
 cluster-status: status-scontrol.sh

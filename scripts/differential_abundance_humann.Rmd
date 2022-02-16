@@ -44,7 +44,18 @@ When you click the **Knit** button a document will be generated that includes bo
 
 ### load librarys
 ```{r echo=show_code}
-pacman::p_load(tidyverse, broom, Maaslin2, foreach, doParallel, httr, jsonlite, xml2, EnhancedVolcano, UniProt.ws, ggplot2, pheatmap)
+library(tidyverse)
+library(broom)
+library(Maaslin2)
+library(foreach)
+library(doParallel)
+library(httr)
+library(jsonlite)
+library(xml2)
+library(EnhancedVolcano)
+library(UniProt.ws)
+library(ggplot2)
+library(pheatmap)
 ```
 
 ### load necessary files

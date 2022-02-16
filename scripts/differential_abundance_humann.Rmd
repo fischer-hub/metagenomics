@@ -282,11 +282,12 @@ for(i in 1:length(rownames(comparisons_df))){
   # select rows with current condition
   results_cond_df <- results_df[results_df$metadata %in% cond, ]
   
-  # save logFC for this condition for later heatmap
-  if(!(cond %in% colnames(logFC_by_cond))){
-    temp <- as.data.frame(results_df$logFC)
-    temp$feature <- rownames(results_df)
-    colnames(temp)[1] <- cond 
+  # save logFC for this contrast for later heatmap
+  if(!(contrast %in% colnames(logFC_by_cond))){
+    temp <- as.data.frame(results_df[results_df$value %in% alt  , "logFC"])
+    temp$feature <- results_df[results_df$value %in% alt  , "feature"]
+    temp$qval <- results_df[results_df$value %in% alt  , "qval"]
+    colnames(temp)[c(1,2,3)] <- c(contrast, "feature", paste("qval", contrast, sep = "_"))
     logFC_by_cond <- merge(logFC_by_cond, temp, by = "feature", all = TRUE)
   }
   # filter for significance
@@ -307,7 +308,7 @@ for(i in 1:length(rownames(comparisons_df))){
   
   # heatmap of top 50
   top_100_anno_df <- merge(top_100_df, counts_clean_anno_df, all.x = TRUE)
-  top_100_num_df <- top_100_anno_df[ , 3:(length(top_100_anno_df)-14)]
+  top_100_num_df <- top_100_anno_df[ , 3:(ncol(top_100_anno_df)-14)]
   
   groups <- data.frame(metadata_df[[cond]])
   colnames(groups)[1] <- cond
@@ -327,42 +328,31 @@ for(i in 1:length(rownames(comparisons_df))){
 
 rownames(logFC_by_cond) <- logFC_by_cond$feature
 logFC_by_cond <- logFC_by_cond[-1]
+
+# remove rows with only NA
 logFC_by_cond <- logFC_by_cond[rowSums(is.na(logFC_by_cond)) != ncol(logFC_by_cond), ]
+
+# sort by ascending qval and descending abs(logFC)
+logFC_by_cond <- logFC_by_cond[order(-rowSums(abs(logFC_by_cond[ , seq(1, ncol(logFC_by_cond), 2)])),
+                                     rowSums(logFC_by_cond[ , seq(2, ncol(logFC_by_cond), 2)])), ]
+logFC_by_cond_num <- logFC_by_cond[ , seq(1, ncol(logFC_by_cond), 2)]
+# get display names
+logFC_by_cond <- merge(logFC_by_cond, counts_clean_anno_df, by.x = 0, by.y = 0, all.x = TRUE)
+
+heat_FC <- plot.heatmap(logFC_by_cond_num, min(nrow(logFC_by_cond_num), 50), logFC_by_cond$display_name, "Heatmap of top 50 significant, expressed features by contrasts")
+ggsave(filename = paste(contrast, "heatmap_top_50_FC_by_contrast.png", sep = "_"), plot = heat_FC, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
 ```
 
-### run comparisons
+### parallel stuff
 ```{r echo=params$show_code}
 # setup backend for parallel execution
-cl <- makeCluster(min(params$cpus, length(comparisons_ls))) #, outfile=""
-registerDoParallel(cl)
+#cl <- makeCluster(min(params$cpus, length(comparisons_ls))) #, outfile=""
+#registerDoParallel(cl)
 
 # do each comparison in one thread
-worker_array <- foreach(i = 1:length(rownames(comparisons_df)), .packages = c("Maaslin2", "EnhancedVolcano", "httr", "dplyr", "ggplot2", "pheatmap")) %dopar% {
-  
-  reference <- comparisons_df$Group1[i]
-  altered <- comparisons_df$Group2[i]
-
-  out_dir <- paste(reference, "vs", altered, sep = "_")
-
-# only run if we cant derive the effect for new reference level from the first model
-  #fit <- Maaslin2(
-  #  input_data = counts_clean_df, 
-  #  input_metadata = metadata_df, 
-  #  output = out_dir,
-  # analysis_method = "CPLM",
-  #  normalization = "NONE",
-  #  transform = "NONE",
-  #  fixed_effects = gsub(":",",",comparisons_ls[i], fixed = TRUE),
-  #  cores = 1,
-  #  plot_scatter = FALSE)
-  
-  #gc()
-  
-  # get results and calculate log fold change and count mean row wise
-  
-}
-
-stopCluster(cl)
+#worker_array <- foreach(i = 1:length(rownames(comparisons_df)), .packages = c("Maaslin2", "EnhancedVolcano", "httr", "dplyr", "ggplot2", "pheatmap")) %dopar% {
+#}
+#stopCluster(cl)
 ```
 
 ```{r echo=show_code}

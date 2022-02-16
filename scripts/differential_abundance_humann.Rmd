@@ -339,8 +339,15 @@ logFC_by_cond_num <- logFC_by_cond[ , seq(1, ncol(logFC_by_cond), 2)]
 # get display names
 logFC_by_cond <- merge(logFC_by_cond, counts_clean_anno_df, by.x = 0, by.y = 0, all.x = TRUE)
 
+# heatmap of top significant and expressed features by contrasts
 heat_FC <- plot.heatmap(logFC_by_cond_num, min(nrow(logFC_by_cond_num), 50), logFC_by_cond$display_name, "Heatmap of top 50 significant, expressed features by contrasts")
 ggsave(filename = paste(contrast, "heatmap_top_50_FC_by_contrast.png", sep = "_"), plot = heat_FC, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
+
+# pca of top significant and expressed features by contrasts
+temp <- as.data.frame(colnames(logFC_by_cond_num))
+colnames(temp)[1] <- "contrast"
+pca_FC <- plot.pca(logFC_by_cond_num, temp, "contrast", "contrast")
+  ggsave(filename = "contrasts_pca.png", plot = pca_FC, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
 ```
 
 ### parallel stuff
@@ -353,20 +360,4 @@ ggsave(filename = paste(contrast, "heatmap_top_50_FC_by_contrast.png", sep = "_"
 #worker_array <- foreach(i = 1:length(rownames(comparisons_df)), .packages = c("Maaslin2", "EnhancedVolcano", "httr", "dplyr", "ggplot2", "pheatmap")) %dopar% {
 #}
 #stopCluster(cl)
-```
-
-```{r echo=show_code}
-
-```
-
-```{r echo=params$show_code}
-
-```
-
-```{r echo=params$show_code}
-
-```
-
-```{r echo=params$show_code}
-
 ```

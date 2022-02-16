@@ -38,3 +38,14 @@ adapters_se: "assets/adapters/TruSeq3-SE.fa"
 max_mismatch: "2"
 pThreshold: "30"
 sThreshold: "10" 
+
+#dga
+metadata_csv: ""
+contrast_csv: ""
+formula: ""
+plot_height: 11
+plot_width: 11
+fc_th: 1
+ab_th: 10
+pr_th: 0.1
+sig_th: 0.05

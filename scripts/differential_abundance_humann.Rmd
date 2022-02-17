@@ -139,6 +139,7 @@ uniprot.map <- function(ids1, ids2, from_str, to_str, mapping_df){
   catch_empty_df <- function(df){
     if(nrows(df) <=1 ){
       print("Oopsie, seems like there is no data in here..\n This means that either the input data is empty, or all feature counts were filtered out because of low abundance or significance.\nYou can try to change the thresholds for these values [fc_th, ab_th, pr_th, sig_th] in the config file under profiles/config.yaml !")
+      quit(save = "no", status = 0)
     }
   }
 }
@@ -148,10 +149,12 @@ uniprot.map <- function(ids1, ids2, from_str, to_str, mapping_df){
 ## clean row and col names
 ```{r echo=params$show_code}
 # clean count_df colnames (sample names)
+catch_empty_df(counts_df)
 colnames(counts_df) <- gsub(".RPKs", "", colnames(counts_df), fixed = TRUE)
 colnames(counts_df) <- gsub("_Abundance", "", colnames(counts_df), fixed = TRUE)
 
 # clean metadata rownames (sample names)
+catch_empty_df(metadata_df)
 rownames(metadata_df) <- gsub("_", ".", rownames(metadata_df), fixed = TRUE)
 
 ```
@@ -266,6 +269,7 @@ sink()
 
 results_df <- fit$results
 results_df <- na.omit(results_df)
+catch_empty_df(results_df)
 results_df <- merge(results_df, counts_clean_anno_df, all.x = TRUE)
 results_df <- mutate(results_df, count_mean = rowMeans(results_df[ , 12:(length(results_df)-3)]))
 results_df <- mutate(results_df, logFC = log2(exp(results_df$coef))) 
@@ -288,6 +292,9 @@ for(i in 1:length(rownames(comparisons_df))){
   ref <- comparisons_df$Group1[i]
   alt <- comparisons_df$Group2[i]
   
+  # CONTRAST BASED MAASLIN2 CALL HERE
+  catch_empty_df(results_df)
+
   # create directory structure for current contrast 
   contrast <- paste(ref, "vs", alt, sep = "_")
   out_dir_con <- paste(params$work_dir, "Contrasts", contrast, sep = "/")

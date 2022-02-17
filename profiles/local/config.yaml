@@ -1,0 +1,4 @@
+# local profile
+cores: 16
+use-conda: true
+latency-wait: 20

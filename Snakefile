@@ -14,14 +14,14 @@ if config["help"] != "dummy value": print(f"{HELPMSG}")
 if ".csv" in READS:
     # reads= is a csv file containing read info
     SAMPLESHEET = pd.read_csv(READS)
-    print(f"{bcolors.OKBLUE}INFO: Loading samples from file '{READS}'.")
+    print(f"{bcolors.OKBLUE}INFO: Loading samples from file '{READS}'.{bcolors.ENDC}")
 elif READS == "":
     # reads is empty, exit
-    print(f"{bcolors.FAIL}CRITICAL: No samplesheet or directory containing reads were provided to parameter 'reads='! Exiting..")
+    print(f"{bcolors.FAIL}CRITICAL: No samplesheet or directory containing reads were provided to parameter 'reads='! Exiting..{bcolors.ENDC}")
     exit()
 else:
     # assume whatever is in 'reads=' is the path to read dir
-    print(f"{bcolors.OKBLUE}INFO: Loading samples from directory '{READS}', automatically created 'input.csv' in working directory.\n{bcolors.OKCYAN}NOTE: This requires the read mode to be set correctly. Set it with 'mode=[paired,single]'.\nRunning with read mode: {MODE}-end.")
+    print(f"{bcolors.OKBLUE}INFO: Loading samples from directory '{READS}', automatically created 'input.csv' in working directory.\n{bcolors.OKCYAN}NOTE: This requires the read mode to be set correctly. Set it with 'mode=[paired,single]'.\nRunning with read mode: {MODE}-end.{bcolors.ENDC}")
     os.system(f"python3 scripts/create_input_csv.py {READS} {MODE}")
     SAMPLESHEET = pd.read_csv("input.csv")
 
@@ -55,7 +55,7 @@ print(f"{bcolors.OKBLUE}INFO: Found sample files:", SAMPLE)
 def rule_all_input(wildcards):
     
     if "humann" in CORETOOLS and "megan" in CORETOOLS:
-        print(f"{bcolors.OKBLUE}INFO: Running pipeline with core tools MEGAN6 and HUMAnN 3.0 to classify input reads.{bcolors.OKBLUE}")
+        print(f"{bcolors.OKBLUE}INFO: Running pipeline with core tools MEGAN6 and HUMAnN 3.0 to classify input reads.{bcolors.ENDC}")
         return [    RESULTDIR + "/humann/genefamilies_"  + UNITS + "_combined.tsv",
                     RESULTDIR + "/humann/pathabundance_" + UNITS + "_combined.tsv",
                     RESULTDIR + "/humann/pathcoverage_combined.tsv", 
@@ -68,11 +68,11 @@ def rule_all_input(wildcards):
                     RESULTDIR + "/humann/pathcoverage_combined.tsv"   ]
 
     elif "megan" in CORETOOLS:
-        print(f"{bcolors.OKBLUE}INFO: Running pipeline with core tool MEGAN6 to classify input reads.{bcolors.OKGREEN}")
+        print(f"{bcolors.OKBLUE}INFO: Running pipeline with core tool MEGAN6 to classify input reads.{bcolors.ENDC}")
         return [    RESULTDIR + "/megan/megan_combined.csv"   ]
 
     else:
-        print(f"{bcolors.FAIL}WARNING: No core tool was chosen to classify the reads. Running all core tools now..{bcolors.FAIL}")
+        print(f"{bcolors.FAIL}WARNING: No core tool was chosen to classify the reads. Running all core tools now..{bcolors.ENDC}")
         return [    RESULTDIR + "/humann/genefamilies_"  + UNITS + "_combined.tsv",
                     RESULTDIR + "/humann/pathabundance_" + UNITS + "_combined.tsv",
                     RESULTDIR + "/humann/pathcoverage_combined.tsv", 
@@ -98,7 +98,7 @@ onsuccess:
         shell(f"if [ ! -d temp ]; then ln -s {TEMPDIR} temp; fi")
 
 onerror:
-    print("An error occurred, looking for temporary files to clean up..")
+    print(f"{bcolors.FAIL}An error occurred, looking for temporary files to clean up..{bcolors.ENDC}")
     if RESULTDIR != "results":
         shell(f"if [ ! -d results ]; then ln -s {RESULTDIR} results; fi")
     if CACHEDIR != "cache":

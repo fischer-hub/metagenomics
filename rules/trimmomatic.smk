@@ -15,7 +15,7 @@ rule trimmomatic_pe:
         "log/trimmomatic_pe/{sample}.log"
     params:
         # list of trimmers (see manual)
-        trimmer=[f"ILLUMINACLIP:{ADPT_PE}:{MAX_MISMATCH}:{P_TH}:{S_TH}"],
+        trimmer=[f"ILLUMINACLIP:{ADPT_PE}:{MAX_MISMATCH}:{P_TH}:{S_TH}:True"],
         #trimmer=["TRAILING:3"],
         # optional parameters
         extra="",
@@ -39,7 +39,7 @@ rule trimmomatic_se:
         "log/trimmomatic_se/{sample}.log"
     params:
         # list of trimmers (see manual)
-        trimmer=[f"ILLUMINACLIP:{ADPT_SE}:{MAX_MISMATCH}:{P_TH}:{S_TH}"],
+        trimmer=[f"ILLUMINACLIP:{ADPT_SE}:{MAX_MISMATCH}:{P_TH}:{S_TH}:True"],
         # optional parameters
         extra="",
         # optional compression levels from -0 to -9 and -11

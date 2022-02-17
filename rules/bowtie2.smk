@@ -31,7 +31,7 @@ rule bowtie2_index:
         """
         cat {input} > {params.ref_dir}_concat.fa 2> {log}
         mkdir -p {params.index_dir} 2>> {log}
-        bowtie2-build --large-index --threads {threads} {params.ref_dir}_concat.fa {params.index_dir}/index 2>> {log}
+        bowtie2-build --quiet --large-index --threads {threads} {params.ref_dir}_concat.fa {params.index_dir}/index 2>> {log}
         export BOWTIE2_INDEXES={params.index_dir} 2>> {log}
         rm {params.ref_dir}_concat.fa 2>> {log}
         """
@@ -70,5 +70,5 @@ rule bowtie2_map:
         time=lambda _, attempt: 480 + ((attempt - 1) * 480)
     shell:
         """
-        bowtie2 {params.file_format} -x {params.ref_dir}/index -U {input.reads} --un-gz {output.unmapped} 2> {log}
+        bowtie2 --quiet {params.file_format} -x {params.ref_dir}/index -U {input.reads} --un-gz {output.unmapped} 2> {log}
         """

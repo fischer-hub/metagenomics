@@ -1,0 +1,11 @@
+name: analysis
+channels:
+  - conda-forge
+dependencies:
+  - r-tidyverse
+  - bioconductor-maaslin2
+  - ca-certificates
+  - openssl
+  - r-doparallel
+  - bioconductor-enhancedvolcano
+  - bioconductor-uniprot.ws

@@ -135,6 +135,12 @@ uniprot.map <- function(ids1, ids2, from_str, to_str, mapping_df){
   if(length(ids1) <= 5000){
       return(uniprot.map(ids2[1:min(length(ids2), 5000)], ids2[min(length(ids2)+1, 5001):length(ids2)], 
                   from_str, to_str, rbind(mapping_df, post(from_str, to_str, ids1)))) }
+  
+  catch_empty_df <- function(df){
+    if(nrows(df) <=1 ){
+      print("Oopsie, seems like there is no data in here..\n This means that either the input data is empty, or all feature counts were filtered out because of low abundance or significance.\nYou can try to change the thresholds for these values [fc_th, ab_th, pr_th, sig_th] in the config file under profiles/config.yaml !")
+    }
+  }
 }
   
 ```

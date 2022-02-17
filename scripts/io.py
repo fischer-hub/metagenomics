@@ -31,23 +31,27 @@ help is on the way
 {bcolors.ENDC}
 """
 
-def path_check(path):
+def path_check(path, is_file):
     if path[-1] == "/":
         path = path[0:-1]
     if exists(path):
         return path
     else:
-        print(f"{bcolors.FAIL}CRITICAL: {path} does not exist, exiting..")
-        exit()
+        if is_file:
+            print(f"{bcolors.FAIL}CRITICAL: File {path} does not exist, exiting..")
+            exit()
+        else:
+            print(f"{bcolors.OKBLUE}INFO: Directory {path} does not exist, creating and hoping for the best now..")
+            return path
 
 # set static vars from config file here
-READS           = path_check(config["reads"])
+READS           = path_check(config["reads"], True)
 MODE            = config["mode"]
 MERGER          = config["merger"] if MODE == "paired" else "none"
 FASTQC          = config["fastqc"] 
-RESULTDIR       = path_check(config["results"])
-CACHEDIR        = path_check(config["cache"])
-TEMPDIR         = path_check(config["temp"])
+RESULTDIR       = path_check(config["results"], False)
+CACHEDIR        = path_check(config["cache"], False)
+TEMPDIR         = path_check(config["temp"], False)
 CORETOOLS       = config["coretools"]
 UNITS           = config["count_units"]
 IDX_CHUNKS      = config["num_index_chunks"]
@@ -58,4 +62,12 @@ MAX_MISMATCH    = config["max_mismatch"]
 P_TH            = config["pThreshold"]
 S_TH            = config["sThreshold"]
 TRIM            = config["trim"]
-REFERENCE       = path_check(config["reference"])
+REFERENCE       = path_check(config["reference"], True)
+#work_dir    = #project dir,
+FORMULA     = config["formula"]
+HEIGHT      = config["plot_height"]
+WIDTH       = config["plot_width"]
+FC_TH       = config["fc_th"]
+AB_TH       = config["ab_th"]
+PR_TH       = config["pr_th"]
+SIG_TH      = config["sig_th"]

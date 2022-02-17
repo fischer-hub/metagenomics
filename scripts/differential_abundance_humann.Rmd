@@ -43,12 +43,23 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ### load librarys
-```{r echo=show_code}
-pacman::p_load(tidyverse, broom, Maaslin2, foreach, doParallel, httr, jsonlite, xml2, EnhancedVolcano, UniProt.ws, ggplot2, pheatmap)
+```{r echo=params$show_code}
+library(tidyverse)
+library(broom)
+library(Maaslin2)
+library(foreach)
+library(doParallel)
+library(httr)
+library(jsonlite)
+library(xml2)
+library(EnhancedVolcano)
+library(UniProt.ws)
+library(ggplot2)
+library(pheatmap)
 ```
 
 ### load necessary files
-```{r echo=show_code}
+```{r echo=params$show_code}
 counts_df <- read.csv(file = params$counts, row.names = 1, header = TRUE, sep = '\t') 
 counts_df <- counts_df[ , order(names(counts_df))]
 
@@ -59,7 +70,7 @@ comparisons_df <- read.csv(file = params$comparisons, header = TRUE, sep = ',')
 ```
 
 ### functions
-```{r echo=show_code}
+```{r echo=params$show_code}
 plot.volcano <-function(df, title_txt, label_col, subtitle_txt){
   EnhancedVolcano(df,lab = label_col, x = "logFC", y = "qval", ylab = expression(-Log[10]~(p-value)),
                   title = title_txt, subtitle = paste("Volcano plot:", subtitle_txt, ", \u03b1 = ", params$alpha, sep = " "),
@@ -129,7 +140,7 @@ uniprot.map <- function(ids1, ids2, from_str, to_str, mapping_df){
 ```
 
 ## clean row and col names
-```{r echo=show_code}
+```{r echo=params$show_code}
 # clean count_df colnames (sample names)
 colnames(counts_df) <- gsub(".RPKs", "", colnames(counts_df), fixed = TRUE)
 colnames(counts_df) <- gsub("_Abundance", "", colnames(counts_df), fixed = TRUE)
@@ -140,7 +151,7 @@ rownames(metadata_df) <- gsub("_", ".", rownames(metadata_df), fixed = TRUE)
 ```
 
 ### remove stratified duplicate hits, low abundant hits and NAs
-```{r echo=show_code}
+```{r echo=params$show_code}
 # drop stratified duplicate rows
 counts_unstratified_df <- counts_df[!grepl("\\|",rownames(counts_df)),]
 
@@ -156,7 +167,7 @@ hist_log_plot <- hist(log2(rowSums(counts_clean_df[-1, ])), br = 100, main = "Lo
 ```
 
 ### set feature display names
-```{r echo=show_code}
+```{r echo=params$show_code}
 # tell tidy to stop spamming my console with col info <3
 show_col_types = FALSE
 
@@ -196,7 +207,7 @@ rownames(counts_clean_anno_df) <- counts_clean_anno_df$feature
 ```
 
 ### plots on count data
-```{r echo=show_code, message=FALSE}
+```{r echo=params$show_code, message=FALSE}
 # sort data by most counts per row
 counts_clean_anno_df <- counts_clean_anno_df[order(-rowSums(counts_clean_anno_df[ , 2:(length(counts_clean_anno_df)-4)])), ]
 counts_clean_num_df <- counts_clean_anno_df[ , 2:(length(counts_clean_anno_df)-4)]
@@ -222,7 +233,7 @@ ggsave(filename = "sample_to_sample_dist_log_count.png", plot = sample_dist_log,
 ```
 
 ### run MaAslin2 model for given formula
-```{r echo=show_code,  message=FALSE}
+```{r echo=params$show_code,  message=FALSE}
 # set reference level for each condition assuming first occurence is reference for now
 ref_levels <- c()
 conditions <- strsplit(params$formula, "\\+")[[1]]
@@ -261,7 +272,7 @@ ggsave(filename = "volcano_plot_general.png", plot = volcano_plot_gen, device = 
 ```
 
 ### run comparisons
-```{r echo=show_code}
+```{r echo=params$show_code}
 logFC_by_cond <- as.data.frame(rownames(counts_clean_anno_df))
 colnames(logFC_by_cond)[1] <- "feature"
 
@@ -348,10 +359,13 @@ temp <- as.data.frame(colnames(logFC_by_cond_num))
 colnames(temp)[1] <- "contrast"
 pca_FC <- plot.pca(logFC_by_cond_num, temp, "contrast", "contrast")
   ggsave(filename = "contrasts_pca.png", plot = pca_FC, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
+
+# create finish flag
+file.create("dga_humann.done")
 ```
 
 ### parallel stuff
-```{r echo=params$show_code}
+```{r echo=params$params$show_code}
 # setup backend for parallel execution
 #cl <- makeCluster(min(params$cpus, length(comparisons_ls))) #, outfile=""
 #registerDoParallel(cl)

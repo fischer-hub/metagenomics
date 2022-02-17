@@ -1,4 +1,3 @@
-#snakemake --config yourparam=1.5
 import pandas as pd
 import glob
 import os

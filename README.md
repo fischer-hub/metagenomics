@@ -42,9 +42,9 @@ With `Snakemake` and `Conda` set up you can just clone and cd into this project 
 ```
 git clone https://github.com/fischer-hub/metagenomics && cd metagenomics
 ```
-Start the pipeline with: 
+Start the pipeline locally with: 
 ```
-snakemake --config reads=input.csv
+snakemake --config reads=input.csv --profile profiles/local
 ```
 Where `input.csv` is the csv file created before, providing information of your read data. On first run, the pipeline will download all necessary packages and install them into the according environments. This can take a while depending on your machine and internet connection.
 After that the pipeline is independant of any network connection.

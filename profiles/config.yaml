@@ -38,6 +38,7 @@ adapters_se: "assets/adapters/TruSeq3-SE.fa"
 max_mismatch: "2"
 pThreshold: "30"
 sThreshold: "10" 
+min_adpt_len: 8
 
 #dga
 metadata_csv: ""

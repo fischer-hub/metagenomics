@@ -1,34 +1,34 @@
 rule megan_get_db:
     output:
-        directory(CACHEDIR + "/databases/megan/")
+        directory(os.path.join(CACHEDIR, "databases", "megan"))
     conda:
-       WD + "envs/utils.yaml"
+       os.path.join("..", "envs", "utils.yaml")
     resources:
         time=120
     message:
         "megan_get_db"
     log:
-        wget = "log/megan/wget.log",
-        gunzip = "log/megan/gunzip.log"
+        wget = os.path.join("log", "megan", "wget.log"),
+        gunzip = os.path.join("log", "megan", "gunzip.log")
     shell:
         """
-        wget --directory-prefix={output} https://software-ab.informatik.uni-tuebingen.de/download/megan6/megan-map-Jan2021.db.zip 2> {log.wget}
-        unzip {output}/megan-map-Jan2021.db.zip -d {output} 2> {log.gunzip}
+        wget --directory-prefix={output} https://software-ab.informatik.uni-tuebingen.de/download/megan6/megan-map-Jan2021.db.zip 2> {log.wget} > /dev/null
+        unzip {output}/megan-map-Jan2021.db.zip -d {output} 2> {log.gunzip} > /dev/null
         """
 
 
 rule daa_meganize:
     input: 
-        megan_db_dir    = CACHEDIR + "/databases/megan",
-        daa             = RESULTDIR + "/diamond/{sample}.daa"
+        megan_db_dir    = os.path.join(CACHEDIR, "databases", "megan"),
+        daa             = os.path.join(RESULTDIR, "diamond", "{sample}.daa")
     output:
-        meganized_daa   = RESULTDIR + "/megan/meganized_daa/{sample}_meganized.daa"
+        meganized_daa   = os.path.join(RESULTDIR, "megan", "meganized_daa", "{sample}_meganized.daa")
     params:
-        megan_db_dir    = CACHEDIR + "/databases/megan/"
+        megan_db_dir    = os.path.join(CACHEDIR, "databases", "megan")
     log:
-        "log/megan/{sample}_daa_meganizer.log"
+        os.path.join("log", "megan", "{sample}_daa_meganizer.log")
     conda:
-        WD + "envs/megan.yaml"
+        os.path.join("..", "envs", "megan.yaml")
     threads:
         16
     message:
@@ -52,15 +52,15 @@ rule daa_meganize:
 
 rule daa_to_info:
     input: 
-        meganized_daa   = RESULTDIR + "/megan/meganized_daa/{sample}_meganized.daa"
+        meganized_daa   = os.path.join(RESULTDIR, "megan", "meganized_daa", "{sample}_meganized.daa")
     output:
-        counts          = RESULTDIR + "/megan/counts/{sample}.tsv"
+        counts          = os.path.join(RESULTDIR, "megan", "counts", "{sample}.tsv")
     log:
-        "log/megan/{sample}_daa2info.log"
+        os.path.join("log", "megan", "{sample}_daa2info.log")
     conda:
-        WD + "envs/megan.yaml"
+        os.path.join("..", "envs", "megan.yaml")
     params:
-        outdir = RESULTDIR + "/megan/counts"
+        outdir = os.path.join(RESULTDIR, "megan", "counts")
     threads:
         1
     message:
@@ -75,9 +75,9 @@ rule daa_to_info:
 
 rule join_megan_tsv:
     input:
-        expand(RESULTDIR + "/megan/counts/{sample}.tsv", sample = SAMPLE)
+        expand(os.path.join(RESULTDIR, "megan", "counts", "{sample}.tsv"), sample = SAMPLE)
     output:
-        combined = RESULTDIR + "/megan/megan_combined.csv"
+        combined = os.path.join(RESULTDIR, "megan", "megan_combined.csv")
     message:
         "join_megan_tsv"
     run:

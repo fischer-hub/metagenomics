@@ -1,6 +1,6 @@
 rule carnelian_setup:
     output:
-        "temp/flags/carnelian.install.done"
+        os.path.join("temp", "flags", "carnelian.install.done")
     shell: 
         """
         # download and set up carnelian
@@ -11,9 +11,9 @@ rule carnelian_setup:
 
 rule carnelian_train:
     input: 
-        "temp/flags/carnelian.install.done"
+        os.path.join("temp", "flags", "carnelian.install.done")
     output:
-        model_dir = dir( RESULTDIR + '/' + config["carnelian_model_dir"] )
+        model_dir = dir( os.path.join(RESULTDIR, config["carnelian_model_dir"]) )
     params:
         number_hash_fcts = config["carnelian_hash_fcts"] 
     shell:

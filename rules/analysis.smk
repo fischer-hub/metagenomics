@@ -1,14 +1,14 @@
 rule dga_humann:
     input: 
-        counts      = RESULTDIR + "/humann/genefamilies_" + UNITS  + "_combined.tsv"
+        counts      = os.path.join(RESULTDIR, "humann", "genefamilies_", UNITS, "_combined.tsv")
         metadata    = config["metadata_csv"]
         comparisons = config["comparisons_csv"]
     output:
-        flag        = config["work_dir"] + "/dga_humann.done"
+        flag        = os.path.join(config["work_dir"], "dga_humann.done")
     log:
-        "log/humann/normalize/{sample}_humann.log"
+        os.path.join("log", "humann", "normalize", "{sample}_humann.log")
     conda:
-        "../envs/analysis.yaml"
+        os.path.join("..", "envs", "analysis.yaml")
     threads:
         8
     resources:

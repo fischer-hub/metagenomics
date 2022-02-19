@@ -71,6 +71,10 @@ comparisons_df <- read.csv(file = params$comparisons, header = TRUE, sep = ',')
 
 ### functions
 ```{r echo=params$show_code}
+
+# create flag in case the script exits early
+file.create("dga_humann.done")
+
 plot.volcano <-function(df, title_txt, label_col, subtitle_txt){
   EnhancedVolcano(df,lab = label_col, x = "logFC", y = "qval", ylab = expression(-Log[10]~(p-value)),
                   title = title_txt, subtitle = paste("Volcano plot:", subtitle_txt, ", \u03b1 = ", params$alpha, sep = " "),
@@ -397,7 +401,4 @@ temp <- as.data.frame(colnames(logFC_by_cond_num))
 colnames(temp)[1] <- "contrast"
 pca_FC <- plot.pca(logFC_by_cond_num, temp, "contrast", "contrast")
   ggsave(filename = "contrasts_pca.png", plot = pca_FC, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
-
-# create finish flag
-file.create("dga_humann.done")
 ```

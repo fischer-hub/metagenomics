@@ -41,8 +41,8 @@ sThreshold: "10"
 min_adpt_len: 8
 
 #dga
-metadata_csv: ""
-contrast_csv: ""
+metadata_csv: "assets/test-data/contrasts.csv"
+contrast_csv: "assets/test-data/metadata.csv"
 formula: ""
 plot_height: 11
 plot_width: 11

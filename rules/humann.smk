@@ -1,22 +1,22 @@
 def get_humann_reads(wildcards):
     if REFERENCE != "":
-        return RESULTDIR + "/bowtie2/{wildcards.sample}_unmapped.fastq.gz".format(wildcards=wildcards)
+        return os.path.join(RESULTDIR, "bowtie2", "{wildcards.sample}_unmapped.fastq.gz".format(wildcards=wildcards))
     else:
-        return RESULTDIR + "/concat_reads/{wildcards.sample}_concat.fq.gz".format(wildcards=wildcards)
+        return os.path.join(RESULTDIR, "concat_reads", "{wildcards.sample}_concat.fq.gz".format(wildcards=wildcards))
 
 rule humann_databases:
     log:
-        c = "log/humann/humann_databases_ChocoPhlAn.log",
-        u = "log/humann/humann_databases_UniRef.log"
+        c = os.path.join("log", "humann", "humann_databases_ChocoPhlAn.log"),
+        u = os.path.join("log", "humann", "humann_databases_UniRef.log")
     output:
-        nucDB   = directory(CACHEDIR + "/databases/humann/nuc"),
-        protDB  = directory(CACHEDIR + "/databases/humann/prot")
+        nucDB   = directory(os.path.join(CACHEDIR, "databases", "humann", "nuc")),
+        protDB  = directory(os.path.join(CACHEDIR, "databases", "humann", "prot"))
     params:
         u_build     = config["protDB_build"],
         c_build     = config["nucDB_build"],
-        installDir  = CACHEDIR + "/databases/humann"
+        installDir  = os.path.join(CACHEDIR, "databases", "humann")
     conda:
-        WD + "envs/humann.yaml"
+        os.path.join("..", "envs", "humann.yaml")
     resources:
         time=240
     threads:
@@ -32,49 +32,49 @@ rule humann_databases:
 
 rule humann_compute:
     input: 
-        nucDB   = CACHEDIR + "/databases/humann/nuc",
-        protDB  = CACHEDIR + "/databases/humann/prot",
+        nucDB   = os.path.join(CACHEDIR, "databases", "humann", "nuc"),
+        protDB  = os.path.join(CACHEDIR, "databases", "humann", "prot"),
         reads   = get_humann_reads
     output: 
-        genefamilies    = RESULTDIR + "/humann/raw/{sample}_genefamilies.tsv",
-        pathways        = RESULTDIR + "/humann/raw/{sample}_pathabundance.tsv",
-        pathCov         = RESULTDIR + "/humann/raw/{sample}_pathcoverage.tsv"
+        genefamilies    = os.path.join(RESULTDIR, "humann", "raw", "{sample}_genefamilies.tsv"),
+        pathways        = os.path.join(RESULTDIR, "humann", "raw", "{sample}_pathabundance.tsv"),
+        pathCov         = os.path.join(RESULTDIR, "humann", "raw", "{sample}_pathcoverage.tsv")
     log:
-        "log/humann/compute/{sample}_humann.log"
+        os.path.join("log", "humann", "compute", "{sample}_humann.log")
     conda:
-        WD + "envs/humann.yaml"
+        os.path.join("..", "envs", "humann.yaml")
     threads:
         24
     resources:
         time=1200,
         partition="big"
     params:
-        outdir      = (RESULTDIR + "/humann/raw/{sample}_genefamilies.tsv").rsplit('/',1)[0],
+        outdir      = os.path.join(RESULTDIR, "humann", "raw", "{sample}_genefamilies.tsv").rsplit('/',1)[0],
         read_len    = 45
     message:
         "humann_compute({wildcards.sample})"
     shell: 
-        "humann --metaphlan-options=\"--read_min_len {params.read_len}\" --threads {threads} -i {input.reads} -o {params.outdir} --nucleotide-database {input.nucDB}/*/ --protein-database {input.protDB}/*/ --output-basename {wildcards.sample} --verbose 2> {log}"
+        "humann --metaphlan-options=\"--read_min_len {params.read_len}\" --threads {threads} -i {input.reads} -o {params.outdir} --nucleotide-database {input.nucDB}/*/ --protein-database {input.protDB}/*/ --output-basename {wildcards.sample} --verbose 2> {log} > /dev/null"
 
 rule humann_normalize:
     input: 
-        genefamilies    = RESULTDIR + "/humann/raw/{sample}_genefamilies.tsv",
-        pathabundance   = RESULTDIR + "/humann/raw/{sample}_pathabundance.tsv",
-        pathCov         = RESULTDIR + "/humann/raw/{sample}_pathcoverage.tsv"
+        genefamilies    = os.path.join(RESULTDIR, "humann", "raw", "{sample}_genefamilies.tsv"),
+        pathabundance   = os.path.join(RESULTDIR, "humann", "raw", "{sample}_pathabundance.tsv"),
+        pathCov         = os.path.join(RESULTDIR, "humann", "raw", "{sample}_pathcoverage.tsv")
     output:
-        genefamilies    = RESULTDIR + "/humann/norm/{sample}_genefamilies_"  + UNITS + ".tsv",
-        pathabundance   = RESULTDIR + "/humann/norm/{sample}_pathabundance_" + UNITS + ".tsv",
-        pathCov         = RESULTDIR + "/humann/norm/{sample}_pathcoverage.tsv"
+        genefamilies    = os.path.join(RESULTDIR, "humann", "norm", "{sample}_genefamilies_"  + UNITS + ".tsv"),
+        pathabundance   = os.path.join(RESULTDIR, "humann", "norm", "{sample}_pathabundance_" + UNITS + ".tsv"),
+        pathCov         = os.path.join(RESULTDIR, "humann", "norm", "{sample}_pathcoverage.tsv")
     log:
-        "log/humann/normalize/{sample}_humann.log"
+        os.path.join("log", "humann", "normalize", "{sample}_humann.log")
     conda:
-        WD + "envs/humann.yaml"
+        os.path.join("..", "envs", "humann.yaml")
     threads:
         8
     resources:
         time=240
     params:
-        outdir = (RESULTDIR + "/humann/norm/{sample}_genefamilies.tsv").rsplit('/',1)[0],
+        outdir = os.path.join(RESULTDIR, "humann", "norm", "{sample}_genefamilies.tsv").rsplit('/',1)[0],
         units = UNITS
     message:
         "humann_norm({wildcards.sample})"
@@ -87,23 +87,23 @@ rule humann_normalize:
 
 rule humann_join:
     input: 
-        genefamilies    = expand(RESULTDIR + "/humann/norm/{sample}_genefamilies_"  + UNITS + ".tsv", sample = SAMPLE),
-        pathabundance   = expand(RESULTDIR + "/humann/norm/{sample}_pathabundance_" + UNITS + ".tsv", sample = SAMPLE),
-        pathCov         = expand(RESULTDIR + "/humann/norm/{sample}_pathcoverage.tsv", sample = SAMPLE)
+        genefamilies    = expand(os.path.join(RESULTDIR, "humann", "norm", "{sample}_genefamilies_"  + UNITS + ".tsv"), sample = SAMPLE),
+        pathabundance   = expand(os.path.join(RESULTDIR, "humann", "norm", "{sample}_pathabundance_" + UNITS + ".tsv"), sample = SAMPLE),
+        pathCov         = expand(os.path.join(RESULTDIR, "humann", "norm", "{sample}_pathcoverage.tsv"), sample = SAMPLE)
     output:
-        genefamilies    = RESULTDIR + "/humann/genefamilies_" + UNITS  + "_combined.tsv",
-        pathways        = RESULTDIR + "/humann/pathabundance_" + UNITS + "_combined.tsv",
-        pathCov         = RESULTDIR + "/humann/pathcoverage_combined.tsv"
+        genefamilies    = os.path.join(RESULTDIR, "humann", "genefamilies_" + UNITS  + "_combined.tsv"),
+        pathways        = os.path.join(RESULTDIR, "humann", "pathabundance_" + UNITS + "_combined.tsv"),
+        pathCov         = os.path.join(RESULTDIR, "humann", "pathcoverage_combined.tsv")
     log:
-        "log/humann/join/humann.log"
+        os.path.join("log", "humann", "join", "humann.log")
     conda:
-        WD + "envs/humann.yaml"
+        os.path.join("..", "envs", "humann.yaml")
     threads:
         8
     resources:
         time=240
     params:
-        tabledir    = (RESULTDIR + "/humann/norm/{sample}_genefamilies.tsv").rsplit('/',1)[0],
+        tabledir    = os.path.join(RESULTDIR, "humann", "norm", "{sample}_genefamilies.tsv").rsplit('/',1)[0],
         units       = UNITS
     message:
         "humann_join"

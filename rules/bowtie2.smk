@@ -38,30 +38,30 @@ rule bowtie2_index:
 
 def get_bowtie_reads(wildcards):
     if MODE == "paired":
-        return RESULTDIR + "/concat_reads/{wildcards.sample}_concat.fq.gz".format(wildcards=wildcards)
+        return os.path.join(RESULTDIR, "concat_reads", "{wildcards.sample}_concat.fq.gz".format(wildcards=wildcards))
     elif TRIM == "true":
-        return RESULTDIR + "/01-QualityControl/trimmed_se/{wildcards.sample}.fastq.gz".format(wildcards=wildcards)
+        return os.path.join(RESULTDIR, "01-QualityControl", "trimmed_se", "{wildcards.sample}.fastq.gz".format(wildcards=wildcards))
     else:
-        return READDIR + "/{wildcards.sample}".format(wildcards=wildcards) + EXT
+        return os.path.join(READDIR, "{wildcards.sample}".format(wildcards=wildcards), EXT)
 
 rule bowtie2_map:
     input:
-        one     = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1] + "/index.1.bt2l",
-        two     = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1] + "/index.2.bt2l",
-        three   = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1] + "/index.3.bt2l",
-        four    = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1] + "/index.4.bt2l",
-        rev_one = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1] + "/index.rev.1.bt2l",
-        rev_two = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1] + "/index.rev.2.bt2l",
+        one     = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "index.1.bt2l"),
+        two     = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "index.2.bt2l"),
+        three   = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "index.3.bt2l"),
+        four    = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "index.4.bt2l"),
+        rev_one = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "index.rev.1.bt2l"),
+        rev_two = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "index.rev.2.bt2l"),
         reads   = get_bowtie_reads
     output:
-        unmapped = RESULTDIR + "/bowtie2/{sample}_unmapped.fastq.gz"
+        unmapped = os.path.join(RESULTDIR, "bowtie2", "{sample}_unmapped.fastq.gz")
     params:
-        ref_dir     = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1],
+        ref_dir     = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1]),
         file_format = FORMAT
     log:
-        "log/bowtie2/bowtie2_map_{sample}.log"
+        os.path.join("log", "bowtie2", "bowtie2_map_{sample}.log")
     conda:
-        WD + "envs/bowtie2.yaml"
+        os.path.join("..", "envs", "bowtie2.yaml")
     threads:
         28
     message:

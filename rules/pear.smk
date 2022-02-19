@@ -1,25 +1,25 @@
 def merge_input(wildcards):
     if config["qc"] == "true":
-        return  {   "R1" : RESULTDIR + "/01-QualityControl/trimmed_pe/{wildcards.sample}_1.fastq.gz".format(wildcards=wildcards),
-                    "R2" : RESULTDIR + "/01-QualityControl/trimmed_pe/{wildcards.sample}_2.fastq.gz".format(wildcards=wildcards)    }
+        return  {   "R1" : os.path.join(RESULTDIR, "01-QualityControl", "trimmed_pe", "{wildcards.sample}_1.fastq.gz".format(wildcards=wildcards)),
+                    "R2" : os.path.join(RESULTDIR, "01-QualityControl", "trimmed_pe", "{wildcards.sample}_2.fastq.gz".format(wildcards=wildcards))    }
     else:
-        return  {   "R1" : READDIR + "/{wildcards.sample}_1".format(wildcards=wildcards) + EXT,
-                    "R2" : READDIR + "/{wildcards.sample}_2".format(wildcards=wildcards) + EXT   }
+        return  {   "R1" : os.path.join(READDIR, "{wildcards.sample}_1".format(wildcards=wildcards), EXT),
+                    "R2" : os.path.join(READDIR, "{wildcards.sample}_2".format(wildcards=wildcards), EXT)   }
 
 rule pear:
     input:
         unpack(merge_input)
     output:
-        assembled_pairs = RESULTDIR + "/pear/{sample}.assembled.fastq",
-        unassembled_fwd = RESULTDIR + "/pear/{sample}.unassembled.forward.fastq",
-        unassembled_rev = RESULTDIR + "/pear/{sample}.unassembled.reverse.fastq",
-        discarded_reads = RESULTDIR + "/pear/{sample}.discarded.fastq"
+        assembled_pairs = os.path.join(RESULTDIR, "pear", "{sample}.assembled.fastq"),
+        unassembled_fwd = os.path.join(RESULTDIR, "pear", "{sample}.unassembled.forward.fastq"),
+        unassembled_rev = os.path.join(RESULTDIR, "pear", "{sample}.unassembled.reverse.fastq"),
+        discarded_reads = os.path.join(RESULTDIR, "pear", "{sample}.discarded.fastq")
     params:
         resultDir = RESULTDIR
     log:
-        "log/pear/{sample}_pear.log"
+        os.path.join("log", "pear", "{sample}_pear.log")
     conda:
-        WD + "envs/pear.yaml"
+        os.path.join("..", "envs", "pear.yaml")
     threads:
         8
     message:

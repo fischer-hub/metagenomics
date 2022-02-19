@@ -1,18 +1,18 @@
 
 rule trimmomatic_pe:
     input:
-        r1 = READDIR + "/{sample}_1" + EXT,
-        r2 = READDIR + "/{sample}_2" + EXT
+        r1 = os.path.join(READDIR, "{sample}_1",  EXT),
+        r2 = os.path.join(READDIR, "{sample}_2",  EXT)
     output:
-        r1 = RESULTDIR + "/01-QualityControl/trimmed_pe/{sample}_1.fastq.gz",
-        r2 = RESULTDIR + "/01-QualityControl/trimmed_pe/{sample}_2.fastq.gz",
+        r1 = os.path.join(RESULTDIR, "01-QualityControl", "trimmed_pe", "{sample}_1.fastq.gz"),
+        r2 = os.path.join(RESULTDIR, "01-QualityControl", "trimmed_pe", "{sample}_2.fastq.gz"),
         # reads where trimming entirely removed the mate
         # this should not happen to us since we only trim adapters meaning one read would have to consist of only adapter sequence
         # EDIT: this seems to actually happen 
-        r1_unpaired = TEMPDIR + "/TRIMMOMATIC/untrimmed_pe/{sample}_1.unpaired.fastq.gz",
-        r2_unpaired = TEMPDIR + "/TRIMMOMATIC/untrimmed_pe/{sample}_2.unpaired.fastq.gz"
+        r1_unpaired = os.path.join(TEMPDIR, "TRIMMOMATIC", "untrimmed_pe", "{sample}_1.unpaired.fastq.gz"),
+        r2_unpaired = os.path.join(TEMPDIR, "TRIMMOMATIC", "untrimmed_pe", "{sample}_2.unpaired.fastq.gz")
     log:
-        "log/trimmomatic_pe/{sample}.log"
+        os.path.join("log", "trimmomatic_pe", "{sample}.log")
     params:
         # list of trimmers (see manual)
         trimmer=[f"ILLUMINACLIP:{ADPT_PE}:{MAX_MISMATCH}:{P_TH}:{S_TH}:{MIN_ADPT_LEN}:True"],
@@ -32,11 +32,11 @@ rule trimmomatic_pe:
 
 rule trimmomatic_se:
     input:
-        READDIR + "/{sample}" + EXT
+        os.path.join(READDIR, "{sample}", EXT)
     output:
-        RESULTDIR + "/01-QualityControl/trimmed_se/{sample}.fastq.gz"
+        os.path.join(RESULTDIR, "01-QualityControl", "trimmed_se", "{sample}.fastq.gz")
     log:
-        "log/trimmomatic_se/{sample}.log"
+        os.path.join("log", "trimmomatic_se", "{sample}.log")
     params:
         # list of trimmers (see manual)
         # :2:True LEADING:3 TRAILING:3 MINLEN:36

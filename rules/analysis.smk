@@ -1,6 +1,15 @@
-rule dga_humann:
+def dga_counts(wildcards):
+
+    humann  = os.path.join(RESULTDIR, "humann", "genefamilies_" + UNITS  + "_combined.tsv")
+    megan   = os.path.join(RESULTDIR, "megan", "megan_combined.csv")
+
+    if "humann" in CORETOOLS and not "megan" in CORETOOLS: return humann
+    elif "megan" in CORETOOLS and not "humann" in CORETOOLS: return megan
+    else: return humann + megan
+
+rule differential_gene_analysis:
     input: 
-        counts      = os.path.join(RESULTDIR, "humann", "genefamilies_", UNITS, "_combined.tsv")
+        counts      = dga_counts
         metadata    = config["metadata_csv"]
         comparisons = config["comparisons_csv"]
     output:
@@ -23,7 +32,7 @@ rule dga_humann:
         pr_th       = PR_TH,
         sig_th      = SIG_TH
     message:
-        "dga_humann"
+        "differential_gene_analysis()"
     shell:
         """
         Rscript -e "rmarkdown::render('differential_abundance_humann.Rmd', params=list(\

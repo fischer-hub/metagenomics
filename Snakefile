@@ -6,7 +6,6 @@ configfile: "profiles/config.yaml"
 include: "scripts/create_input_csv.py"
 include: "scripts/io.py"
 
-print(f"{BANNER}")
 if config["help"] != "dummy value": print(f"{HELPMSG}")
 
 # read in samplesheet

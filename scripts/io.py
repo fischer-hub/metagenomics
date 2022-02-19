@@ -24,6 +24,7 @@ BANNER = f"""
 genes without jeans   |___ /                                       
 {bcolors.ENDC}
 """
+print(f"{BANNER}")
 
 HELPMSG = f"""
 {bcolors.HEADER}

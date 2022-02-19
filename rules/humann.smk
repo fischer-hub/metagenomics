@@ -26,8 +26,8 @@ rule humann_databases:
     shell:
         """
         mkdir -p {params.installDir}
-        humann_databases --download chocophlan {params.c_build} {params.installDir}/nuc 2> {log.c}
-        humann_databases --download uniref {params.u_build} {params.installDir}/prot 2> {log.u}       
+        humann_databases --download chocophlan {params.c_build} {params.installDir}/nuc 2> {log.c} > /dev/null
+        humann_databases --download uniref {params.u_build} {params.installDir}/prot 2> {log.u} > /dev/null     
         """
 
 rule humann_compute:

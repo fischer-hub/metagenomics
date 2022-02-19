@@ -9,11 +9,11 @@ def dga_counts(wildcards):
 
 rule differential_gene_analysis:
     input: 
-        counts      = dga_counts
-        metadata    = config["metadata_csv"]
+        counts      = dga_counts,
+        metadata    = config["metadata_csv"],
         comparisons = config["comparisons_csv"]
     output:
-        flag        = os.path.join(config["work_dir"], "dga_humann.done")
+        flag        = os.path.join(TEMP, "dga_humann.done")
     log:
         os.path.join("log", "humann", "normalize", "{sample}_humann.log")
     conda:
@@ -23,7 +23,7 @@ rule differential_gene_analysis:
     resources:
         time=240
     params:
-        work_dir    = #project dir,
+        tmp_dir     = TEMPDIR,
         formula     = FORMULA,
         height      = HEIGHT,
         width       = WIDTH,
@@ -46,7 +46,7 @@ rule differential_gene_analysis:
                                                         prevalence_threshold = {params.pr_th}, \
                                                         alpha = {params.sig_th}, \
                                                         fc_threshold = {params.fc_th}, \
-                                                        work_dir = '{params.work_dir}', \
+                                                        work_dir = '{params.tmp_dir}', \
                                                         plot_height = {params.height}, \
                                                         plot_width = {params.width})) 2> {log}"
         """ 

@@ -1,12 +1,12 @@
 rule fastqc_pe:
     input:
-        read    = READDIR + "/{sample}_{mate}" + EXT
+        read    = os.path.join(READDIR, f"{{sample}}_{{mate}}{EXT}")
     output:
-        html    = RESULTDIR + "/01-QualityControl/fastqcPre/{sample}_{mate}.html",
-        zip     = TEMPDIR + "/qc/fastqc_pre/{sample}_{mate}_fastqc.zip"
+        html    = os.path.join(RESULTDIR, "01-QualityControl", "fastqcPre", "{sample}_{mate}.html"),
+        zip     = os.path.join(TEMPDIR, "qc", "fastqc_pre", "{sample}_{mate}_fastqc.zip")
     params: "--quiet"
     log:
-        "log/fastqc/{sample}_{mate}.log"
+        os.path.join("log", "fastqc", "{sample}_{mate}.log")
     threads: 
         1
     message:
@@ -17,13 +17,13 @@ rule fastqc_pe:
 
 rule fastqc_se:
     input:
-        read    = READDIR + "/{sample}" + EXT
+        read    = os.path.join(READDIR, f"{{sample}}{EXT}")
     output:
-        html    = RESULTDIR + "/01-QualityControl/fastqc_se/{sample}.html",
-        zip     = TEMPDIR + "/qc/fastqc_se/{sample}_fastqc.zip"
+        html    = os.path.join(RESULTDIR, "01-QualityControl", "fastqc_se", "{sample}.html"),
+        zip     = os.path.join(TEMPDIR, "qc", "fastqc_se", "{sample}_fastqc.zip")
     params: "--quiet"
     log:
-        "log/fastqc/{sample}.log"
+        os.path.join("log", "fastqc", "{sample}.log")
     threads: 
         1
     message:

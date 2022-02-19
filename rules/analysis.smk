@@ -1,10 +1,19 @@
-rule dga_humann:
+def dga_counts(wildcards):
+
+    humann  = os.path.join(RESULTDIR, "humann", "genefamilies_" + UNITS  + "_combined.tsv")
+    megan   = os.path.join(RESULTDIR, "megan", "megan_combined.csv")
+
+    if "humann" in CORETOOLS and not "megan" in CORETOOLS: return humann
+    elif "megan" in CORETOOLS and not "humann" in CORETOOLS: return megan
+    else: return humann + megan
+
+rule differential_gene_analysis:
     input: 
-        counts      = os.path.join(RESULTDIR, "humann", "genefamilies_", UNITS, "_combined.tsv")
-        metadata    = config["metadata_csv"]
+        counts      = dga_counts,
+        metadata    = config["metadata_csv"],
         comparisons = config["comparisons_csv"]
     output:
-        flag        = os.path.join(config["work_dir"], "dga_humann.done")
+        flag        = os.path.join(TEMP, "dga_humann.done")
     log:
         os.path.join("log", "humann", "normalize", "{sample}_humann.log")
     conda:
@@ -14,7 +23,7 @@ rule dga_humann:
     resources:
         time=240
     params:
-        work_dir    = #project dir,
+        tmp_dir     = TEMPDIR,
         formula     = FORMULA,
         height      = HEIGHT,
         width       = WIDTH,
@@ -23,7 +32,7 @@ rule dga_humann:
         pr_th       = PR_TH,
         sig_th      = SIG_TH
     message:
-        "dga_humann"
+        "differential_gene_analysis()"
     shell:
         """
         Rscript -e "rmarkdown::render('differential_abundance_humann.Rmd', params=list(\
@@ -37,7 +46,7 @@ rule dga_humann:
                                                         prevalence_threshold = {params.pr_th}, \
                                                         alpha = {params.sig_th}, \
                                                         fc_threshold = {params.fc_th}, \
-                                                        work_dir = '{params.work_dir}', \
+                                                        work_dir = '{params.tmp_dir}', \
                                                         plot_height = {params.height}, \
                                                         plot_width = {params.width})) 2> {log}"
         """ 

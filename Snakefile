@@ -52,35 +52,31 @@ print(f"{bcolors.OKBLUE}INFO: Found sample files:", SAMPLE)
 
 
 def rule_all_input(wildcards):
+
+    humann  = [    os.path.join(TEMPDIR, "dga_humann.done")     ]
+    megan   = [    os.path.join(TEMPDIR, "dga_megan.done")     ]
     
     if "humann" in CORETOOLS and "megan" in CORETOOLS:
         print(f"{bcolors.OKBLUE}INFO: Running pipeline with core tools MEGAN6 and HUMAnN 3.0 to classify input reads.{bcolors.ENDC}")
-        return [    RESULTDIR + "/humann/genefamilies_"  + UNITS + "_combined.tsv",
-                    RESULTDIR + "/humann/pathabundance_" + UNITS + "_combined.tsv",
-                    RESULTDIR + "/humann/pathcoverage_combined.tsv", 
-                    RESULTDIR + "/megan/megan_combined.csv"   ]
+        return humann + megan
 
     elif "humann" in CORETOOLS:
         print(f"{bcolors.OKBLUE}INFO: Running pipeline with core tool HUMAnN 3.0.")
-        return [    RESULTDIR + "/humann/genefamilies_"  + UNITS + "_combined.tsv",
-                    RESULTDIR + "/humann/pathabundance_" + UNITS + "_combined.tsv",
-                    RESULTDIR + "/humann/pathcoverage_combined.tsv"   ]
+        return humann
 
     elif "megan" in CORETOOLS:
         print(f"{bcolors.OKBLUE}INFO: Running pipeline with core tool MEGAN6 to classify input reads.{bcolors.ENDC}")
-        return [    RESULTDIR + "/megan/megan_combined.csv"   ]
+        return megan
 
     else:
         print(f"{bcolors.FAIL}WARNING: No core tool was chosen to classify the reads. Running all core tools now..{bcolors.ENDC}")
-        return [    RESULTDIR + "/humann/genefamilies_"  + UNITS + "_combined.tsv",
-                    RESULTDIR + "/humann/pathabundance_" + UNITS + "_combined.tsv",
-                    RESULTDIR + "/humann/pathcoverage_combined.tsv", 
-                    RESULTDIR + "/megan/megan_combined.csv"   ]
+        return humann + megan
+
 
 rule all:
     input:
         rule_all_input,
-        RESULTDIR + "/Summary/multiqc.html"
+        os.path.join(RESULTDIR , "Summary", "multiqc.html")
     message:
         "rule all"
     shell:
@@ -116,6 +112,7 @@ include: "rules/trimmomatic.smk"
 include: "rules/fastqc.smk"
 include: "rules/multiqc.smk"
 include: "rules/bbmerge.smk"
+include: "rules/analysis.smk"
 
 
 

@@ -1,6 +1,6 @@
 rule fastqc_pe:
     input:
-        read    = os.path.join(READDIR, "{sample}_{mate}", EXT)
+        read    = os.path.join(READDIR, f"{{sample}}_{{mate}}{EXT}")
     output:
         html    = os.path.join(RESULTDIR, "01-QualityControl", "fastqcPre", "{sample}_{mate}.html"),
         zip     = os.path.join(TEMPDIR, "qc", "fastqc_pre", "{sample}_{mate}_fastqc.zip")
@@ -17,7 +17,7 @@ rule fastqc_pe:
 
 rule fastqc_se:
     input:
-        read    = os.path.join(READDIR, "{sample}", EXT)
+        read    = os.path.join(READDIR, f"{{sample}}{EXT}")
     output:
         html    = os.path.join(RESULTDIR, "01-QualityControl", "fastqc_se", "{sample}.html"),
         zip     = os.path.join(TEMPDIR, "qc", "fastqc_se", "{sample}_fastqc.zip")

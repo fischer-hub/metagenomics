@@ -1,8 +1,8 @@
 
 rule trimmomatic_pe:
     input:
-        r1 = os.path.join(READDIR, "{sample}_1",  EXT),
-        r2 = os.path.join(READDIR, "{sample}_2",  EXT)
+        r1 = os.path.join(READDIR, f"{{sample}}_1{EXT}"),
+        r2 = os.path.join(READDIR, f"{{sample}}_2{EXT}")
     output:
         r1 = os.path.join(RESULTDIR, "01-QualityControl", "trimmed_pe", "{sample}_1.fastq.gz"),
         r2 = os.path.join(RESULTDIR, "01-QualityControl", "trimmed_pe", "{sample}_2.fastq.gz"),

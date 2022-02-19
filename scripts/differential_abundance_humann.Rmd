@@ -276,7 +276,10 @@ ggsave(filename = "volcano_plot_general.png", plot = volcano_plot_gen, device = 
 logFC_by_cond <- as.data.frame(rownames(counts_clean_anno_df))
 colnames(logFC_by_cond)[1] <- "feature"
 
-for(i in 1:length(rownames(comparisons_df))){
+cl <- makeCluster(min(params$cpus, nrow(comparisons_df))) #, outfile=""
+registerDoParallel(cl)
+
+worker_array <- foreach(i = 1:nrow(comparisons_df), .combine = 'rbind', .packages = c("Maaslin2", "EnhancedVolcano", "pheatmap", "tidyverse"), outfile="") %dopar% {
   
   cond <- comparisons_df$Condition[i]
   ref <- comparisons_df$Group1[i]
@@ -304,7 +307,7 @@ for(i in 1:length(rownames(comparisons_df))){
       transform = "NONE",
       fixed_effects = cond,
       reference = paste(cond, ref, sep = ","),
-      cores = params$cpus,
+      cores = 1,
       min_abundance = params$abundance_threshold,
       min_prevalence = params$prevalence_threshold,
       plot_scatter = FALSE)
@@ -319,13 +322,11 @@ for(i in 1:length(rownames(comparisons_df))){
   results_cond_df <- mutate(results_cond_df, logFC = log2(exp(results_cond_df$coef)))
   
   # save logFC for this contrast for later heatmap
-  if(!(contrast %in% colnames(logFC_by_cond))){
-    temp <- as.data.frame(results_cond_df[results_cond_df$value %in% alt  , "logFC"])
-    temp$feature <- results_cond_df[results_cond_df$value %in% alt  , "feature"]
-    temp$qval <- results_cond_df[results_cond_df$value %in% alt  , "qval"]
-    colnames(temp)[c(1,2,3)] <- c(contrast, "feature", paste("qval", contrast, sep = "_"))
-    logFC_by_cond <- merge(logFC_by_cond, temp, by = "feature", all = TRUE)
-  }
+  temp <- as.data.frame(results_cond_df[results_cond_df$value %in% alt  , "logFC"])
+  temp$feature <- results_cond_df[results_cond_df$value %in% alt  , "feature"]
+  temp$qval <- results_cond_df[results_cond_df$value %in% alt  , "qval"]
+  colnames(temp)[c(1,2,3)] <- c(contrast, "feature", paste("qval", contrast, sep = "_"))
+
   # filter for significance
   res_sig_df <- results_cond_df[ results_cond_df$qval < params$alpha, ]
 
@@ -368,7 +369,11 @@ for(i in 1:length(rownames(comparisons_df))){
   ma_plot_con <- plot.ma(results_cond_df, contrast)
   ggsave(filename = paste(contrast, "ma_plot.png", sep = "_"), plot = ma_plot_con, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
   
+  return(merge(logFC_by_cond, temp, by = "feature", all = TRUE))
+
 }
+
+stopCluster(cl)
 
 rownames(logFC_by_cond) <- logFC_by_cond$feature
 logFC_by_cond <- logFC_by_cond[-1]
@@ -395,16 +400,4 @@ pca_FC <- plot.pca(logFC_by_cond_num, temp, "contrast", "contrast")
 
 # create finish flag
 file.create("dga_humann.done")
-```
-
-### parallel stuff
-```{r echo=params$params$show_code}
-# setup backend for parallel execution
-#cl <- makeCluster(min(params$cpus, length(comparisons_ls))) #, outfile=""
-#registerDoParallel(cl)
-
-# do each comparison in one thread
-#worker_array <- foreach(i = 1:length(rownames(comparisons_df)), .packages = c("Maaslin2", "EnhancedVolcano", "httr", "dplyr", "ggplot2", "pheatmap")) %dopar% {
-#}
-#stopCluster(cl)
 ```

@@ -8,19 +8,19 @@ rule bowtie2_index:
     input:  
         get_references
     output:
-        one     = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1] + "/index.1.bt2l",
-        two     = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1] + "/index.2.bt2l",
-        three   = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1] + "/index.3.bt2l",
-        four    = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1] + "/index.4.bt2l",
-        rev_one = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1] + "/index.rev.1.bt2l",
-        rev_two = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1] + "/index.rev.2.bt2l"
+        one     = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "/index.1.bt2l"),
+        two     = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "/index.2.bt2l"),
+        three   = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "/index.3.bt2l"),
+        four    = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "/index.4.bt2l"),
+        rev_one = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "/index.rev.1.bt2l"),
+        rev_two = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "/index.rev.2.bt2l")
     params:
-        index_dir   = CACHEDIR + "/bowtie2/" + REFERENCE.split("/")[-1],
+        index_dir   = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1]),
         ref_dir     = REFERENCE
     log:
-        "log/bowtie2/bowtie2_index.log"
+        os.path.join("log", "bowtie2", "bowtie2_index.log")
     conda:
-        WD + "envs/bowtie2.yaml"
+        os.path.join("..", "envs", "bowtie2.yaml")
     threads:
         16
     message:
@@ -70,5 +70,5 @@ rule bowtie2_map:
         time=lambda _, attempt: 480 + ((attempt - 1) * 480)
     shell:
         """
-        bowtie2 --quiet {params.file_format} -x {params.ref_dir}/index -U {input.reads} --un-gz {output.unmapped} 2> {log}
+        bowtie2 --quiet {params.file_format} -x {params.ref_dir}/index -U {input.reads} --un-gz {output.unmapped} 2> {log} > /dev/null
         """

@@ -53,8 +53,8 @@ print(f"{bcolors.OKBLUE}INFO: Found sample files:", SAMPLE)
 
 def rule_all_input(wildcards):
 
-    humann  = [    os.path.join(config["work_dir"], "dga_humann.done")     ]
-    megan   = [    os.path.join(config["work_dir"], "dga_megan.done")     ]
+    humann  = [    os.path.join(TEMPDIR, "dga_humann.done")     ]
+    megan   = [    os.path.join(TEMPDIR, "dga_megan.done")     ]
     
     if "humann" in CORETOOLS and "megan" in CORETOOLS:
         print(f"{bcolors.OKBLUE}INFO: Running pipeline with core tools MEGAN6 and HUMAnN 3.0 to classify input reads.{bcolors.ENDC}")
@@ -76,7 +76,7 @@ def rule_all_input(wildcards):
 rule all:
     input:
         rule_all_input,
-        RESULTDIR + "/Summary/multiqc.html"
+        os.path.join(RESULTDIR , "Summary", "multiqc.html")
     message:
         "rule all"
     shell:
@@ -112,6 +112,7 @@ include: "rules/trimmomatic.smk"
 include: "rules/fastqc.smk"
 include: "rules/multiqc.smk"
 include: "rules/bbmerge.smk"
+include: "rules/analysis.smk"
 
 
 

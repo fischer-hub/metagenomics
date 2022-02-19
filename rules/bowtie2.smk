@@ -8,12 +8,12 @@ rule bowtie2_index:
     input:  
         get_references
     output:
-        one     = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "/index.1.bt2l"),
-        two     = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "/index.2.bt2l"),
-        three   = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "/index.3.bt2l"),
-        four    = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "/index.4.bt2l"),
-        rev_one = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "/index.rev.1.bt2l"),
-        rev_two = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "/index.rev.2.bt2l")
+        one     = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "index.1.bt2l"),
+        two     = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "index.2.bt2l"),
+        three   = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "index.3.bt2l"),
+        four    = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "index.4.bt2l"),
+        rev_one = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "index.rev.1.bt2l"),
+        rev_two = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "index.rev.2.bt2l")
     params:
         index_dir   = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1]),
         ref_dir     = REFERENCE

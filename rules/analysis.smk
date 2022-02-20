@@ -1,7 +1,7 @@
 def dga_counts(wildcards):
 
-    humann  = os.path.join(RESULTDIR, "humann", "genefamilies_" + UNITS  + "_combined.tsv")
-    megan   = os.path.join(RESULTDIR, "megan", "megan_combined.csv")
+    humann  = [ os.path.join(RESULTDIR, "humann", "genefamilies_" + UNITS  + "_combined.tsv")   ]
+    megan   = [ os.path.join(RESULTDIR, "megan", "megan_combined.csv")    ]
 
     if "humann" in CORETOOLS and not "megan" in CORETOOLS: return humann
     elif "megan" in CORETOOLS and not "humann" in CORETOOLS: return megan
@@ -15,7 +15,7 @@ rule differential_gene_analysis:
     output:
         flag        = os.path.join(TEMPDIR, "dga_{sample}.done")
     log:
-        os.path.join("log", "humann", "normalize", "{sample}_humann.log")
+        os.path.join(RESULTDIR, "log", "humann", "normalize", "dga_{sample}.log")
     conda:
         os.path.join("..", "envs", "analysis.yaml")
     threads:
@@ -32,10 +32,10 @@ rule differential_gene_analysis:
         pr_th       = PR_TH,
         sig_th      = SIG_TH
     message:
-        "differential_gene_analysis()"
+        "differential_gene_analysis({wildcards.sample})"
     shell:
         """
-        Rscript -e "rmarkdown::render('differential_abundance_humann.Rmd', params=list(\
+        Rscript -e "rmarkdown::render('differential_abundance_{wildcards.sample}.Rmd', params=list(\
                                                         counts = '{input.counts}',\
                                                         metadata = '{input.metadata}', \
                                                         show_code = FALSE, \
@@ -49,9 +49,4 @@ rule differential_gene_analysis:
                                                         work_dir = '{params.tmp_dir}', \
                                                         plot_height = {params.height}, \
                                                         plot_width = {params.width})) 2> {log}"
-        """ 
-
-#rule dga_megan:
-#    input: 
-#    output: 
-#    run: 
+        """

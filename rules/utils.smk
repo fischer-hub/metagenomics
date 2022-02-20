@@ -23,7 +23,7 @@ rule concat_paired_reads:
     output: 
         os.path.join(RESULTDIR, "concat_reads", "{sample}_concat.fq.gz")
     log:
-        os.path.join("log", "concat_paired_reads", "{sample}_concat.log")
+        os.path.join(RESULTDIR, "log", "concat_paired_reads", "{sample}_concat.log")
     conda:
         os.path.join("..", "envs", "utils.yaml")
     threads:

@@ -8,8 +8,8 @@ rule megan_get_db:
     message:
         "megan_get_db"
     log:
-        wget = os.path.join("log", "megan", "wget.log"),
-        gunzip = os.path.join("log", "megan", "gunzip.log")
+        wget = os.path.join(RESULTDIR, "log", "megan", "wget.log"),
+        gunzip = os.path.join(RESULTDIR, "log", "megan", "gunzip.log")
     shell:
         """
         wget --directory-prefix={output} https://software-ab.informatik.uni-tuebingen.de/download/megan6/megan-map-Jan2021.db.zip 2> {log.wget} > /dev/null
@@ -26,7 +26,7 @@ rule daa_meganize:
     params:
         megan_db_dir    = os.path.join(CACHEDIR, "databases", "megan")
     log:
-        os.path.join("log", "megan", "{sample}_daa_meganizer.log")
+        os.path.join(RESULTDIR, "log", "megan", "{sample}_daa_meganizer.log")
     conda:
         os.path.join("..", "envs", "megan.yaml")
     threads:
@@ -56,7 +56,7 @@ rule daa_to_info:
     output:
         counts          = os.path.join(RESULTDIR, "megan", "counts", "{sample}.tsv")
     log:
-        os.path.join("log", "megan", "{sample}_daa2info.log")
+        os.path.join(RESULTDIR, "log", "megan", "{sample}_daa2info.log")
     conda:
         os.path.join("..", "envs", "megan.yaml")
     params:

@@ -17,7 +17,7 @@ rule pear:
     params:
         resultDir = RESULTDIR
     log:
-        os.path.join("log", "pear", "{sample}_pear.log")
+        os.path.join(RESULTDIR, "log", "pear", "{sample}_pear.log")
     conda:
         os.path.join("..", "envs", "pear.yaml")
     threads:

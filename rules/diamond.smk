@@ -22,8 +22,8 @@ rule diamond_makedb:
     message:
         "diamond_makedb"
     log:
-        wget    = os.path.join("log", "diamond", "wget.log"),
-        makedb  = os.path.join("log", "diamond", "makedb.log")
+        wget    = os.path.join(RESULTDIR, "log", "diamond", "wget.log"),
+        makedb  = os.path.join(RESULTDIR, "log", "diamond", "makedb.log")
     shell:
         """
         wget --directory-prefix={params.prot_ref_db_dir} {params.prot_ref_db_src}  2> {log.wget}
@@ -50,7 +50,7 @@ rule diamond_blastx:
     message:
         "diamond_blastx({wildcards.sample})"
     log:
-        os.path.join("log", "diamond", "{sample}_blastx.log"),
+        os.path.join(RESULTDIR, "log", "diamond", "{sample}_blastx.log"),
     shell:
         """
         diamond blastx -p {threads} -q {input.reads} -d {input.db} -o {output} -f 100 -b {params.block_size} -c {params.num_index_chunks} 2> {log}

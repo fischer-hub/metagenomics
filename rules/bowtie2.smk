@@ -18,7 +18,7 @@ rule bowtie2_index:
         index_dir   = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1]),
         ref_dir     = REFERENCE
     log:
-        os.path.join("log", "bowtie2", "bowtie2_index.log")
+        os.path.join(RESULTDIR, "log", "bowtie2", "bowtie2_index.log")
     conda:
         os.path.join("..", "envs", "bowtie2.yaml")
     threads:
@@ -59,7 +59,7 @@ rule bowtie2_map:
         ref_dir     = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1]),
         file_format = FORMAT
     log:
-        os.path.join("log", "bowtie2", "bowtie2_map_{sample}.log")
+        os.path.join(RESULTDIR, "log", "bowtie2", "bowtie2_map_{sample}.log")
     conda:
         os.path.join("..", "envs", "bowtie2.yaml")
     threads:

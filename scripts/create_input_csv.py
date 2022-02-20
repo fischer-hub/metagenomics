@@ -30,10 +30,10 @@ def main(args=None):
         print("Sample,R1,R2", file=f)
         for SRR in dict(dictionary):
             if len(dictionary[SRR]) < 2:
-                print(f"{SRR.strip()},{WD + '/' + dict(dictionary)[SRR][0].strip()},", file=f)
+                print(f"{SRR.strip()},{dict(dictionary)[SRR][0].strip()},", file=f)
 
             else:
-                print(f"{SRR.strip()},{WD + '/' + dict(dictionary)[SRR][0].strip()},{WD + '/' + dict(dictionary)[SRR][1].strip()}", file=f)
+                print(f"{SRR.strip()},{dict(dictionary)[SRR][0].strip()},{dict(dictionary)[SRR][1].strip()}", file=f)
 
 
 

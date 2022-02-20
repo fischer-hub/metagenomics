@@ -10,10 +10,10 @@ rule pear:
     input:
         unpack(merge_input)
     output:
-        assembled_pairs = os.path.join(RESULTDIR, "pear", "{sample}.assembled.fastq"),
-        unassembled_fwd = os.path.join(RESULTDIR, "pear", "{sample}.unassembled.forward.fastq"),
-        unassembled_rev = os.path.join(RESULTDIR, "pear", "{sample}.unassembled.reverse.fastq"),
-        discarded_reads = os.path.join(RESULTDIR, "pear", "{sample}.discarded.fastq")
+        assembled_pairs = os.path.join(RESULTDIR, "01-QualityControl", "merged", "{sample}.assembled.fastq"),
+        unassembled_fwd = os.path.join(RESULTDIR, "01-QualityControl", "merged", "{sample}.unassembled.forward.fastq"),
+        unassembled_rev = os.path.join(RESULTDIR, "01-QualityControl", "merged", "{sample}.unassembled.reverse.fastq"),
+        discarded_reads = os.path.join(RESULTDIR, "01-QualityControl", "merged", "{sample}.discarded.fastq")
     params:
         resultDir = RESULTDIR
     log:

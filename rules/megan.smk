@@ -20,9 +20,9 @@ rule megan_get_db:
 rule daa_meganize:
     input: 
         megan_db_dir    = os.path.join(CACHEDIR, "databases", "megan"),
-        daa             = os.path.join(RESULTDIR, "diamond", "{sample}.daa")
+        daa             = os.path.join(TEMPDIR, "diamond", "{sample}.daa")
     output:
-        meganized_daa   = os.path.join(RESULTDIR, "megan", "meganized_daa", "{sample}_meganized.daa")
+        meganized_daa   = os.path.join(TEMPDIR, "megan", "meganized_daa", "{sample}_meganized.daa")
     params:
         megan_db_dir    = os.path.join(CACHEDIR, "databases", "megan")
     log:
@@ -52,15 +52,15 @@ rule daa_meganize:
 
 rule daa_to_info:
     input: 
-        meganized_daa   = os.path.join(RESULTDIR, "megan", "meganized_daa", "{sample}_meganized.daa")
+        meganized_daa   = os.path.join(TEMPDIR, "megan", "meganized_daa", "{sample}_meganized.daa")
     output:
-        counts          = os.path.join(RESULTDIR, "megan", "counts", "{sample}.tsv")
+        counts          = os.path.join(TEMPDIR, "megan", "counts", "{sample}.tsv")
     log:
         os.path.join(RESULTDIR, "log", "megan", "{sample}_daa2info.log")
     conda:
         os.path.join("..", "envs", "megan.yaml")
     params:
-        outdir = os.path.join(RESULTDIR, "megan", "counts")
+        outdir = os.path.join(TEMPDIR, "megan", "counts")
     threads:
         1
     message:
@@ -75,9 +75,9 @@ rule daa_to_info:
 
 rule join_megan_tsv:
     input:
-        expand(os.path.join(RESULTDIR, "megan", "counts", "{sample}.tsv"), sample = SAMPLE)
+        expand(os.path.join(TEMPDIR, "megan", "counts", "{sample}.tsv"), sample = SAMPLE)
     output:
-        combined = os.path.join(RESULTDIR, "megan", "megan_combined.csv")
+        combined = os.path.join(RESULTDIR, "03-CountData", "megan", "megan_combined.csv")
     message:
         "join_megan_tsv"
     run:

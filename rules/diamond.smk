@@ -35,7 +35,7 @@ rule diamond_blastx:
         db      = os.path.join(CACHEDIR, "databases", "diamond", "nr.dmnd"),
         reads   = get_diamond_reads
     output: 
-        os.path.join(RESULTDIR, "diamond", "{sample}.daa")
+        os.path.join(TEMPDIR, "diamond", "{sample}.daa")
     params:
         num_index_chunks = IDX_CHUNKS,
         block_size = BLOCK_SIZE

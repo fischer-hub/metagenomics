@@ -1,0 +1,5 @@
+Sample,R1,R2
+hiseq-010000040104-24021999-rep1,/home/mi/fisched99/simdata/hiseq-010000040104-24021999-rep1_1.fastq.gz,/home/mi/fisched99/simdata/hiseq-010000040104-24021999-rep1_2.fastq.gz
+hiseq-010000040104-06062002-rep2,/home/mi/fisched99/simdata/hiseq-010000040104-06062002-rep2_1.fastq.gz,/home/mi/fisched99/simdata/hiseq-010000040104-06062002-rep2_2.fastq.gz
+hiseq-020101010104-06062002-rep1,/home/mi/fisched99/simdata/hiseq-020101010104-06062002-rep1_1.fastq.gz,/home/mi/fisched99/simdata/hiseq-020101010104-06062002-rep1_2.fastq.gz
+hiseq-020101010104-24041999-rep2,/home/mi/fisched99/simdata/hiseq-020101010104-24041999-rep2_1.fastq.gz,/home/mi/fisched99/simdata/hiseq-020101010104-24041999-rep2_2.fastq.gz

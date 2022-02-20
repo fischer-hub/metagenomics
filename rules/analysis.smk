@@ -1,7 +1,7 @@
 def dga_counts(wildcards):
 
-    humann  = [ os.path.join(RESULTDIR, "humann", "genefamilies_" + UNITS  + "_combined.tsv")   ]
-    megan   = [ os.path.join(RESULTDIR, "megan", "megan_combined.csv")    ]
+    humann  = [ os.path.join(RESULTDIR, "03-CountData", "humann", "genefamilies_" + UNITS  + "_combined.tsv")   ]
+    megan   = [ os.path.join(RESULTDIR, "03-CountData", "megan", "megan_combined.csv")    ]
 
     if "humann" in CORETOOLS and not "megan" in CORETOOLS: return humann
     elif "megan" in CORETOOLS and not "humann" in CORETOOLS: return megan

@@ -38,7 +38,7 @@ rule bowtie2_index:
 
 def get_bowtie_reads(wildcards):
     if MODE == "paired":
-        return os.path.join(RESULTDIR, "concat_reads", "{wildcards.sample}_concat.fq.gz".format(wildcards=wildcards))
+        return os.path.join(TEMPDIR, "concat_reads", "{wildcards.sample}_concat.fq.gz".format(wildcards=wildcards))
     elif TRIM == "true":
         return os.path.join(RESULTDIR, "01-QualityControl", "trimmed_se", "{wildcards.sample}.fastq.gz".format(wildcards=wildcards))
     else:

@@ -75,14 +75,14 @@ rule humann_join:
     resources:
         time=240
     params:
-        tabledir    = os.path.join(RESULTDIR, "humann", "raw", "{sample}_genefamilies.tsv").rsplit('/',1)[0]
+        tabledir    = os.path.join(TEMPDIR, "humann", "raw", "{sample}_genefamilies.tsv").rsplit('/',1)[0]
     message:
         "humann_join"
     shell:
         """
-        humann_join_tables --input {params.tabledir} --output {output.genefamilies} --file_name genefamilies 2> {log}
-        humann_join_tables --input {params.tabledir} --output {output.pathCov} --file_name pathcoverage 2>> {log}
-        humann_join_tables --input {params.tabledir} --output {output.pathways} --file_name pathabundance 2>> {log}
+        humann_join_tables --input {params.tabledir} --output {output.genefamilies} --file_name genefamilies 2> {log} > /dev/null
+        humann_join_tables --input {params.tabledir} --output {output.pathCov} --file_name pathcoverage 2>> {log} > /dev/null
+        humann_join_tables --input {params.tabledir} --output {output.pathways} --file_name pathabundance 2>> {log} > /dev/null
         """
 
 
@@ -104,7 +104,7 @@ rule humann_normalize:
     resources:
         time=240
     params:
-        outdir = os.path.join(RESULTDIR, "humann"),
+        outdir = os.path.join(RESULTDIR, "03-CountData", "humann"),
         units = UNITS
     message:
         "humann_norm"
@@ -112,5 +112,5 @@ rule humann_normalize:
         """
         humann_renorm_table --input {input.genefamilies} --output {output.genefamilies} --units {params.units} 2> {log}
         humann_renorm_table --input {input.pathabundance} --output {output.pathabundance} --units {params.units} 2>> {log}
-        mv {input.pathCov} {params.outdir}/ 2>> {log}
+        mv {input.pathCov} {output.pathCov} 2>> {log}
         """

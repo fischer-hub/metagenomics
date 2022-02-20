@@ -27,7 +27,7 @@ rule concat_paired_reads:
     conda:
         os.path.join("..", "envs", "utils.yaml")
     threads:
-        1
+        RES["concat_paired_reads"]["cpu"]
     message:
         "concat_paired_reads({wildcards.sample})"
     shell: 

@@ -13,6 +13,7 @@ humann_join:          {cpu: 1, mem: 1, time: 1}
 humann_database:      {cpu: 1, mem: 1, time: 1}
 humann_normalize:     {cpu: 1, mem: 1, time: 1}
 join_megan_tsv:       {cpu: 1, mem: 1, time: 1}
+mega_get_db:          {cpu: 1, mem: 1, time: 1}
 multiqc:              {cpu: 1, mem: 1, time: 1}
 trimmomatic:          {cpu: 1, mem: 1, time: 1}
 dga_analysis:         {cpu: 1, mem: 1, time: 1}

@@ -18,12 +18,12 @@ rule bbmerge:
     conda:
         os.path.join("..", "envs", "bbmerge.yaml")
     threads:
-        16
+        RES["bbmerge"]["cpu"]
     message:
         "bbmerge({wildcards.sample})"
     resources:
-        time=480,
-        mem_mb=10240
+        time = RES["bbmerge"]["time"],
+        mem_mb = RES["bbmerge"]["mem"]
     shell:
         """
         bbmerge.sh t={threads} ziplevel=5 default -Xmx10240m in1={input.R1} in2={input.R2} out={output.merged} outu={output.unmerged} ihist={output.inserthist} 2> {log}

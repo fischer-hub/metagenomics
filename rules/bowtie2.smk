@@ -22,11 +22,11 @@ rule bowtie2_index:
     conda:
         os.path.join("..", "envs", "bowtie2.yaml")
     threads:
-        16
+        RES["bowtie2-index"]["cpu"]
     message:
         "bowtie2_index"
     resources:
-        time=240
+        time = RES["bowtie2-index"]["time"]
     shell:
         """
         cat {input} > {params.ref_dir}_concat.fa 2> {log}
@@ -63,11 +63,11 @@ rule bowtie2_map:
     conda:
         os.path.join("..", "envs", "bowtie2.yaml")
     threads:
-        28
+        RES["bowtie2-map"]["cpu"]
     message:
         "bowtie2_map({wildcards.sample})"
     resources:
-        time=lambda _, attempt: 480 + ((attempt - 1) * 480)
+        time=lambda _, attempt: RES["bowtie2-map"]["time"] + ((attempt - 1) * RES["bowtie2-map"]["time"])
     shell:
         """
         bowtie2 --quiet {params.file_format} -x {params.ref_dir}/index -U {input.reads} --un-gz {output.unmapped} 2> {log} > /dev/null

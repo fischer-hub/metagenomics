@@ -18,9 +18,9 @@ rule humann_databases:
     conda:
         os.path.join("..", "envs", "humann.yaml")
     resources:
-        time=240
+        time = RES["humann_database"]["time"]
     threads:
-        2
+        RES["humann_database"]["cpu"]
     message:
         "humann_database"
     shell:
@@ -44,9 +44,9 @@ rule humann_compute:
     conda:
         os.path.join("..", "envs", "humann.yaml")
     threads:
-        24
+        RES["humann_compute"]["cpu"]
     resources:
-        time=1200,
+        time = RES["humann_compute"]["time"],
         partition="big"
     params:
         outdir      = os.path.join(RESULTDIR, "humann", "raw", "{sample}_genefamilies.tsv").rsplit('/',1)[0],
@@ -71,9 +71,9 @@ rule humann_join:
     conda:
         os.path.join("..", "envs", "humann.yaml")
     threads:
-        8
+        RES["humann_join"]["cpu"]
     resources:
-        time=240
+        time = RES["humann_join"]["time"]
     params:
         tabledir    = os.path.join(RESULTDIR, "humann", "raw", "{sample}_genefamilies.tsv").rsplit('/',1)[0]
     message:
@@ -100,9 +100,9 @@ rule humann_normalize:
     conda:
         os.path.join("..", "envs", "humann.yaml")
     threads:
-        8
+        RES["humann_normalize"]["cpu"]
     resources:
-        time=240
+        time = RES["humann_normalize"]["time"]
     params:
         outdir = os.path.join(RESULTDIR, "humann"),
         units = UNITS

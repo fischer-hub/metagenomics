@@ -21,11 +21,11 @@ rule pear:
     conda:
         os.path.join("..", "envs", "pear.yaml")
     threads:
-        8
+        RES["pear"]["cpu"]
     message:
         "pear({wildcards.sample})"
     resources:
-        time=240
+        time = RES["pear"]["time"]
     shell:
         """
         mkdir -p {params.resultDir}/pear/

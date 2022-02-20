@@ -1,5 +1,5 @@
 def get_blast_mem(wildcards, attempt):
-    return ((BLOCK_SIZE * 7 + BLOCK_SIZE * attempt) * 1024)
+    return ((BLOCK_SIZE * 7 + BLOCK_SIZE * attempt) * RES["diamond_blastx"]["mem"])
 
 def get_diamond_reads(wildcards):
     if REFERENCE != "":
@@ -14,11 +14,11 @@ rule diamond_makedb:
         prot_ref_db_src = "https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz",
         prot_ref_db_dir = os.path.join(CACHEDIR, "databases", "protein_reference")
     threads:
-        16
+        RES["diamond_makedb"]["cpu"]
     conda:
         os.path.join("..", "envs", "diamond.yaml")
     resources:
-        time=1200
+        time = RES["diamond_makedb"]["time"]
     message:
         "diamond_makedb"
     log:
@@ -42,11 +42,11 @@ rule diamond_blastx:
     conda:
         os.path.join("..", "envs", "diamond.yaml")
     resources:
-        time=2880,
+        time = RES["diamond_blastx"]["time"],
         mem_mb=get_blast_mem,
         partition="big"
     threads:
-        24
+        RES["diamond_blastx"]["cpu"]
     message:
         "diamond_blastx({wildcards.sample})"
     log:

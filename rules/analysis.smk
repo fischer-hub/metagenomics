@@ -1,7 +1,7 @@
 def dga_counts(wildcards):
 
-    humann  = os.path.join(RESULTDIR, "humann", "genefamilies_" + UNITS  + "_combined.tsv")
-    megan   = os.path.join(RESULTDIR, "megan", "megan_combined.csv")
+    humann  = [ os.path.join(RESULTDIR, "humann", "genefamilies_" + UNITS  + "_combined.tsv")    ]
+    megan   = [ os.path.join(RESULTDIR, "megan", "megan_combined.csv")  ]
 
     if "humann" in CORETOOLS and not "megan" in CORETOOLS: return humann
     elif "megan" in CORETOOLS and not "humann" in CORETOOLS: return megan
@@ -11,17 +11,17 @@ rule differential_gene_analysis:
     input: 
         counts      = dga_counts,
         metadata    = config["metadata_csv"],
-        comparisons = config["comparisons_csv"]
+        comparisons = config["contrast_csv"]
     output:
-        flag        = os.path.join(TEMP, "dga_humann.done")
+        flag        = os.path.join(TEMPDIR, "dga_{sample}.done")
     log:
-        os.path.join("log", "humann", "normalize", "{sample}_humann.log")
+        os.path.join("log", "dga", "dga_{sample}.log")
     conda:
         os.path.join("..", "envs", "analysis.yaml")
     threads:
-        8
+        RES["dga_analysis"]["cpu"]
     resources:
-        time=240
+        time = RES["dga_analysis"]["time"]
     params:
         tmp_dir     = TEMPDIR,
         formula     = FORMULA,

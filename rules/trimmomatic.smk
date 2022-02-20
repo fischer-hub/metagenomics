@@ -21,9 +21,9 @@ rule trimmomatic_pe:
         extra="",
         compression_level="-9"
     threads:
-        32
+        RES["trimmomatic"]["cpu"]
     resources:
-        mem_mb=1024
+        mem_mb = RES["trimmomatic"]["mem"]
     message:
         "trimmomatic_pe({wildcards.sample})"
     wrapper:
@@ -46,9 +46,9 @@ rule trimmomatic_se:
         # optional compression levels from -0 to -9 and -11
         compression_level="-9"
     threads:
-        32
+        RES["trimmomatic"]["cpu"]
     resources:
-        mem_mb=1024
+        mem_mb = RES["trimmomatic"]["mem"]
     message:
         "trimmomatic_se({wildcards.sample})"
     wrapper:

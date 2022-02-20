@@ -4,7 +4,9 @@ rule megan_get_db:
     conda:
        os.path.join("..", "envs", "utils.yaml")
     resources:
-        time=120
+        time = RES["megan_get_db"]["time"]
+    threads:
+        RES["megan_get_db"]["cpu"]
     message:
         "megan_get_db"
     log:
@@ -30,11 +32,11 @@ rule daa_meganize:
     conda:
         os.path.join("..", "envs", "megan.yaml")
     threads:
-        16
+        RES["daa_meganize"]["cpu"]
     message:
         "daa_meganize({wildcards.sample})"
     resources:
-        time=1200,
+        time = RES["daa_meganize"]["time"],
         partition="big"
     shell:
         """
@@ -62,7 +64,7 @@ rule daa_to_info:
     params:
         outdir = os.path.join(RESULTDIR, "megan", "counts")
     threads:
-        1
+        RES["daa_to_info"]["cpu"]
     message:
         "daa_to_info({wildcards.sample})"
     shell:
@@ -80,6 +82,8 @@ rule join_megan_tsv:
         combined = os.path.join(RESULTDIR, "megan", "megan_combined.csv")
     message:
         "join_megan_tsv"
+    threads:
+        RES["join_megan_tsv"]["cpu"]
     run:
         frames = [ pd.read_csv(f, sep='\t', index_col=0, names=["gene_id", f]) for f in input ]
         result = frames[0].join(frames[1:])

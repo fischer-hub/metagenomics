@@ -26,5 +26,7 @@ rule multiqc:
         os.path.join("log", "multiqc.log")
     message:
         "multiqc"
+    threads:
+        RES["multiqc"]["cpu"]
     wrapper:
         "v0.86.0/bio/multiqc"

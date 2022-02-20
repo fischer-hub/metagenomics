@@ -8,7 +8,7 @@ rule fastqc_pe:
     log:
         os.path.join("log", "fastqc", "{sample}_{mate}.log")
     threads: 
-        1
+        RES["fastqc"]["cpu"]
     message:
         "fastqc_pre({wildcards.sample}_{wildcards.mate})"
     wrapper:
@@ -25,7 +25,7 @@ rule fastqc_se:
     log:
         os.path.join("log", "fastqc", "{sample}.log")
     threads: 
-        1
+        RES["fastqc"]["cpu"]
     message:
         "fastqc_se({wildcards.sample})"
     wrapper:

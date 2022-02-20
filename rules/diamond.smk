@@ -3,7 +3,7 @@ def get_blast_mem(wildcards, attempt):
 
 def get_diamond_reads(wildcards):
     if REFERENCE != "":
-        return os.path.join(RESULTDIR, "bowtie2", "{wildcards.sample}_unmapped.fastq.gz".format(wildcards=wildcards))
+        return os.path.join(RESULTDIR, "02-Decontamination", "{wildcards.sample}_unmapped.fastq.gz".format(wildcards=wildcards))
     else:
         return os.path.join(RESULTDIR, "concat_reads", "{wildcards.sample}_concat.fq.gz".format(wildcards=wildcards))
 

@@ -54,7 +54,7 @@ rule bowtie2_map:
         rev_two = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "index.rev.2.bt2l"),
         reads   = get_bowtie_reads
     output:
-        unmapped = os.path.join(RESULTDIR, "bowtie2", "{sample}_unmapped.fastq.gz")
+        unmapped = os.path.join(RESULTDIR, "02-Decontamination", "{sample}_unmapped.fastq.gz")
     params:
         ref_dir     = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1]),
         file_format = FORMAT

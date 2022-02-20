@@ -11,9 +11,9 @@ rule differential_gene_analysis:
     input: 
         counts      = dga_counts,
         metadata    = config["metadata_csv"],
-        comparisons = config["comparisons_csv"]
+        comparisons = config["contrast_csv"]
     output:
-        flag        = os.path.join(TEMP, "dga_humann.done")
+        flag        = os.path.join(TEMPDIR, "dga_{sample}.done")
     log:
         os.path.join("log", "humann", "normalize", "{sample}_humann.log")
     conda:

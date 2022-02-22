@@ -13,9 +13,9 @@ rule differential_gene_analysis:
         metadata    = config["metadata_csv"],
         comparisons = config["contrast_csv"]
     output:
-        flag        = os.path.join(TEMPDIR, "dga_{sample}.done")
+        flag        = os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}","dga_{tool}.done")
     log:
-        os.path.join(RESULTDIR, "log", "humann", "normalize", "dga_{sample}.log")
+        os.path.join(RESULTDIR, "log", "dga", "dga_{tool}.log")
     conda:
         os.path.join("..", "envs", "analysis.yaml")
     threads:
@@ -23,30 +23,34 @@ rule differential_gene_analysis:
     resources:
         time=240
     params:
-        tmp_dir     = TEMPDIR,
+        work_dir    = WORK_DIR,
         formula     = FORMULA,
         height      = HEIGHT,
         width       = WIDTH,
         fc_th       = FC_TH,
         ab_th       = AB_TH,
         pr_th       = PR_TH,
-        sig_th      = SIG_TH
+        sig_th      = SIG_TH,
+        result_dir  = RESULTDIR
     message:
-        "differential_gene_analysis({wildcards.sample})"
+        "differential_gene_analysis({wildcards.tool})"
     shell:
         """
-        Rscript -e "rmarkdown::render('differential_abundance_{wildcards.sample}.Rmd', params=list(\
+        [ ! -d {params.work_dir} ] && mkdir  -p {params.work_dir}
+        Rscript -e "rmarkdown::render('scripts/differential_abundance_{wildcards.tool}.Rmd', params=list(\
                                                         counts = '{input.counts}',\
                                                         metadata = '{input.metadata}', \
-                                                        show_code = FALSE, \
-                                                        comparisons = '{input.comparisons}, \
+                                                        show_code = 'FALSE', \
+                                                        comparisons = '{input.comparisons}', \
                                                         formula = '{params.formula}', \
                                                         cpus = {threads},\
                                                         abundance_threshold = {params.ab_th}, \
                                                         prevalence_threshold = {params.pr_th}, \
                                                         alpha = {params.sig_th}, \
                                                         fc_threshold = {params.fc_th}, \
-                                                        work_dir = '{params.tmp_dir}', \
+                                                        work_dir = '{params.work_dir}', \
                                                         plot_height = {params.height}, \
-                                                        plot_width = {params.width})) 2> {log}"
+                                                        plot_width = {params.width},
+                                                        tool = '{wildcards.tool}',
+                                                        result_dir = '{params.result_dir}'))" >& {log}
         """

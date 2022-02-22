@@ -52,8 +52,8 @@ print(f"{bcolors.OKBLUE}INFO: Found sample files:", SAMPLE)
 
 def rule_all_input(wildcards):
 
-    humann  = [    os.path.join(TEMPDIR, "dga_humann.done")     ]
-    megan   = [    os.path.join(TEMPDIR, "dga_megan.done")     ]
+    humann  = [    os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "humann", "dga_humann.done")     ]
+    megan   = [    os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "megan", "dga_megan.done")     ]
     
     if "humann" in CORETOOLS and "megan" in CORETOOLS:
         print(f"{bcolors.OKBLUE}INFO: Running pipeline with core tools MEGAN6 and HUMAnN 3.0 to classify input reads.{bcolors.ENDC}")
@@ -79,7 +79,9 @@ rule all:
     message:
         "rule all"
     shell:
-        "echo 'clean up'"
+        """
+        
+        """
 
 
 onsuccess:

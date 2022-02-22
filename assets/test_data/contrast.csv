@@ -1,5 +1,5 @@
 Condition,Group1,Group2
-diet_type,Omnivore,Low Carbohydrate
-diet_type,Low Carbohydrate,Pescaterian
-diet_type,Low Carbohydrate,Mediterranean
-diet_type,Pescaterian,Mediterranean
+cond,treatment,control
+cond,control,treatment
+seed,06062002,24041999
+seed,24041999,06062002

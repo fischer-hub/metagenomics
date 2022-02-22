@@ -3,7 +3,7 @@ def get_blast_mem(wildcards, attempt):
 
 def get_diamond_reads(wildcards):
     if REFERENCE != "":
-        return os.path.join(RESULTDIR, "bowtie2", "{wildcards.sample}_unmapped.fastq.gz".format(wildcards=wildcards))
+        return os.path.join(RESULTDIR, "02-Decontamination", "{wildcards.sample}_unmapped.fastq.gz".format(wildcards=wildcards))
     else:
         return os.path.join(RESULTDIR, "concat_reads", "{wildcards.sample}_concat.fq.gz".format(wildcards=wildcards))
 
@@ -22,8 +22,8 @@ rule diamond_makedb:
     message:
         "diamond_makedb"
     log:
-        wget    = os.path.join("log", "diamond", "wget.log"),
-        makedb  = os.path.join("log", "diamond", "makedb.log")
+        wget    = os.path.join(RESULTDIR, "log", "diamond", "wget.log"),
+        makedb  = os.path.join(RESULTDIR, "log", "diamond", "makedb.log")
     shell:
         """
         wget --directory-prefix={params.prot_ref_db_dir} {params.prot_ref_db_src}  2> {log.wget}
@@ -35,7 +35,7 @@ rule diamond_blastx:
         db      = os.path.join(CACHEDIR, "databases", "diamond", "nr.dmnd"),
         reads   = get_diamond_reads
     output: 
-        os.path.join(RESULTDIR, "diamond", "{sample}.daa")
+        os.path.join(TEMPDIR, "diamond", "{sample}.daa")
     params:
         num_index_chunks = IDX_CHUNKS,
         block_size = BLOCK_SIZE
@@ -50,7 +50,7 @@ rule diamond_blastx:
     message:
         "diamond_blastx({wildcards.sample})"
     log:
-        os.path.join("log", "diamond", "{sample}_blastx.log"),
+        os.path.join(RESULTDIR, "log", "diamond", "{sample}_blastx.log"),
     shell:
         """
         diamond blastx -p {threads} -q {input.reads} -d {input.db} -o {output} -f 100 -b {params.block_size} -c {params.num_index_chunks} 2> {log}

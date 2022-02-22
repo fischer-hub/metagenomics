@@ -18,7 +18,7 @@ rule bowtie2_index:
         index_dir   = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1]),
         ref_dir     = REFERENCE
     log:
-        os.path.join("log", "bowtie2", "bowtie2_index.log")
+        os.path.join(RESULTDIR, "log", "bowtie2", "bowtie2_index.log")
     conda:
         os.path.join("..", "envs", "bowtie2.yaml")
     threads:
@@ -38,7 +38,7 @@ rule bowtie2_index:
 
 def get_bowtie_reads(wildcards):
     if MODE == "paired":
-        return os.path.join(RESULTDIR, "concat_reads", "{wildcards.sample}_concat.fq.gz".format(wildcards=wildcards))
+        return os.path.join(TEMPDIR, "concat_reads", "{wildcards.sample}_concat.fq.gz".format(wildcards=wildcards))
     elif TRIM == "true":
         return os.path.join(RESULTDIR, "01-QualityControl", "trimmed_se", "{wildcards.sample}.fastq.gz".format(wildcards=wildcards))
     else:
@@ -54,12 +54,12 @@ rule bowtie2_map:
         rev_two = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "index.rev.2.bt2l"),
         reads   = get_bowtie_reads
     output:
-        unmapped = os.path.join(RESULTDIR, "bowtie2", "{sample}_unmapped.fastq.gz")
+        unmapped = os.path.join(RESULTDIR, "02-Decontamination", "{sample}_unmapped.fastq.gz")
     params:
         ref_dir     = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1]),
         file_format = FORMAT
     log:
-        os.path.join("log", "bowtie2", "bowtie2_map_{sample}.log")
+        os.path.join(RESULTDIR, "log", "bowtie2", "bowtie2_map_{sample}.log")
     conda:
         os.path.join("..", "envs", "bowtie2.yaml")
     threads:

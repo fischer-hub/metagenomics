@@ -3,6 +3,7 @@ reads: ""
 mode: "paired"
 ext: ""
 help: "dummy value"
+cleanup: true
 
 # directory structure
 results: "results"
@@ -38,12 +39,12 @@ adapters_se: "assets/adapters/TruSeq3-SE.fa"
 max_mismatch: "2"
 pThreshold: "30"
 sThreshold: "10" 
-min_adpt_len: 8
+min_adpt_len: "8"
 
 #dga
-metadata_csv: "assets/test-data/contrasts.csv"
-contrast_csv: "assets/test-data/metadata.csv"
-formula: ""
+metadata_csv: "assets/test_data/metadata.csv"
+contrast_csv: "assets/test_data/contrast.csv"
+formula: "cond+seed"
 plot_height: 11
 plot_width: 11
 fc_th: 1

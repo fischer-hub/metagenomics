@@ -435,7 +435,11 @@ worker_array <- foreach(i = 1:nrow(comparisons_df), .errorhandling='pass', .verb
 
 stopCluster(cl)
 
-for(i in 1:length(worker_array)){ logFC_by_cond <- merge(logFC_by_cond, worker_array[i], by = "feature") }
+for(i in 1:length(worker_array)){ 
+  if(is.data.frame(worker_array[i])){
+    logFC_by_cond <- merge(logFC_by_cond, worker_array[i], by = "feature")
+  }
+}
 rownames(logFC_by_cond) <- logFC_by_cond$feature
 logFC_by_cond <- logFC_by_cond[-1]
 

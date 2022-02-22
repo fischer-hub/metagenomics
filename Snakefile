@@ -77,8 +77,8 @@ rule all:
         rule_all_input,
         os.path.join(RESULTDIR , "Summary", "multiqc.html")
     params:
-        results = RESULTDIR
-        clean   = CLEAN
+        results = RESULTDIR,
+        clean   = CLEAN,
         tmp     = TEMPDIR
     message:
         "rule all"

@@ -290,24 +290,60 @@ ggsave(filename = "volcano_plot_general.png", plot = volcano_plot_gen, device = 
 
 ### run comparisons
 ```{r echo=params$show_code}
+# set reference level for each condition assuming first occurence is reference for now
+ref_levels <- c()
+conditions <- strsplit(params$formula, "\\+")[[1]]
+for(i in 1:length(conditions)){
+  ref_levels <- rbind(ref_levels, paste(conditions[i], metadata_df[1, conditions[i]], sep = ","))
+}
+
+# run model once for given formula, assume first entry in metadata is the reference level
+sink("/dev/null") # make maaslin2 shut up for once
+fit <- Maaslin2(
+    input_data = counts_clean_anno_df, 
+    input_metadata = metadata_df,
+    output = paste(out_dir_gen_data, "maaslin2_model_output", sep = "/"),
+    analysis_method = "CPLM",
+    normalization = "NONE",
+    transform = "NONE",
+    fixed_effects = strsplit(params$formula, "\\+")[[1]],
+    reference = paste(ref_levels, collapse = ";"),
+    cores = params$cpus,
+    min_abundance = params$abundance_threshold,
+    min_prevalence = params$prevalence_threshold,
+    plot_scatter = FALSE)
+sink() 
+
+results_df <- fit$results
+results_df <- na.omit(results_df)
+results_df <- merge(results_df, counts_clean_anno_df, all.x = TRUE, by = "feature")
+results_df <- mutate(results_df, count_mean = rowMeans(results_df[ , 12:(length(results_df)-3)]))
+results_df <- mutate(results_df, logFC = log2(exp(results_df$coef))) 
+
+ma_plot_gen <- plot.ma(results_df, "all groups")
+ggsave(filename = "ma_plot_general.png", plot = ma_plot_gen, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
+
+volcano_plot_gen <- plot.volcano(results_df, "Total differential abundant features", results_df$display_name, "all groups")
+ggsave(filename = "volcano_plot_general.png", plot = volcano_plot_gen, device = png, path = out_dir_gen_plots, width = 15, height = 10)
+```
+
+### run comparisons
+```{r echo=params$show_code}
 logFC_by_cond <- as.data.frame(rownames(counts_clean_anno_df))
 colnames(logFC_by_cond)[1] <- "feature"
 
-cl <- makeCluster(min(params$cpus, nrow(comparisons_df))) #, outfile=""
+cl <- makeCluster(min(params$cpus, nrow(comparisons_df)))
 registerDoParallel(cl)
 
-worker_array <- foreach(i = 1:nrow(comparisons_df), .errorhandling='pass', .combine = 'rbind', .packages = c("Maaslin2", "EnhancedVolcano", "pheatmap", "tidyverse"), outfile="") %dopar% {
+worker_array <- foreach(i = 1:nrow(comparisons_df), .errorhandling='pass', .verbose=TRUE, .packages = c("Maaslin2", "EnhancedVolcano", "pheatmap", "tidyverse", "doParallel")) %dopar% {
   
   cond <- comparisons_df$Condition[i]
   ref <- comparisons_df$Group1[i]
   alt <- comparisons_df$Group2[i]
   
-  # CONTRAST BASED MAASLIN2 CALL HERE
-  catch_empty_df(results_df)
-
   # create directory structure for current contrast 
   contrast <- paste(ref, "vs", alt, sep = "_")
-  out_dir_con <- paste(out_dir, "Contrasts", contrast, sep = "/")
+  out_dir_con <- paste(params$work_dir, "Contrasts", contrast, sep = "/")
   dir.create(out_dir_con, showWarnings = FALSE)
   
   out_dir_con_plots <- paste(out_dir_con, "Plots", sep = "/")
@@ -334,7 +370,7 @@ worker_array <- foreach(i = 1:nrow(comparisons_df), .errorhandling='pass', .comb
   sink() 
   
   # select rows with current condition
-  results_cond_df <- fit$results #results_df[results_df$metadata %in% cond, ]
+  results_cond_df <- fit$results
   
   # get display names, logFC and mean of normalized counts
   results_cond_df <- merge(results_cond_df, counts_clean_anno_df, all.x = TRUE)
@@ -346,67 +382,75 @@ worker_array <- foreach(i = 1:nrow(comparisons_df), .errorhandling='pass', .comb
   temp$feature <- results_cond_df[results_cond_df$value %in% alt  , "feature"]
   temp$qval <- results_cond_df[results_cond_df$value %in% alt  , "qval"]
   colnames(temp)[c(1,2,3)] <- c(contrast, "feature", paste("qval", contrast, sep = "_"))
+  export <- merge(logFC_by_cond, temp, by = "feature", all = TRUE)
 
   # filter for significance
   res_sig_df <- results_cond_df[ results_cond_df$qval < params$alpha, ]
   if(nrow(res_sig_df) < 2){stop()}
-
+  
   # order by ascending adjusted pval and descending logFC
   res_sig_ordered_df <- res_sig_df[order(res_sig_df$qval, -abs(res_sig_df$logFC)), ]
 
   # get top 100 significant features ordered by logFC
   top_100_df <- res_sig_ordered_df[1:min(nrow(res_sig_ordered_df), 100), ]
-  write.csv(top_100_df, file = paste(out_dir_con_data, paste(contrast, "top_100_features.csv", sep = "_"), sep = "/"))
+  bin <- write.csv(top_100_df, file = paste(out_dir_con_data, paste(contrast, "top_100_features.csv", sep = "_"), sep = "/"))
 
   # plot pca colored by current condition
   pca_con <- plot.pca(counts_clean_df[, 1:(length(colnames(counts_clean_df)) - 2)], metadata_df, cond, cond)
-  ggsave(filename = paste(contrast, "pca.png"), plot = pca_con, device = png, path = out_dir_con_plots, height = params$plot_height, width = params$plot_width)
+  bin <- ggsave(filename = paste(contrast, "pca.png"), plot = pca_con, device = png, path = out_dir_con_plots, height = params$plot_height, width = params$plot_width)
   pca_con_log <- plot.pca(log2(counts_clean_df[, 1:(length(colnames(counts_clean_df)) - 2)]), metadata_df, cond, cond)
-  ggsave(filename = paste(contrast, "pca_log.png"), plot = pca_con_log, device = png, path = out_dir_con_plots, height = params$plot_height, width = params$plot_width)
+  bin <- ggsave(filename = paste(contrast, "pca_log.png"), plot = pca_con_log, device = png, path = out_dir_con_plots, height = params$plot_height, width = params$plot_width)
   
   # heatmap of top 50
   top_100_anno_df <- merge(top_100_df, counts_clean_anno_df, all.x = TRUE)
   top_100_num_df <- top_100_anno_df[ , 3:(ncol(top_100_anno_df)-14)]
   
+  try({
   groups <- data.frame(metadata_df[[cond]])
   colnames(groups)[1] <- cond
   rownames(groups) <- rownames(metadata_df)
   heat_con <- plot.heatmap(top_100_num_df, min(nrow(top_100_num_df), 50), top_100_anno_df$display_name, paste("Heatmap of top 50 significant feature counts by logFC colored by", cond, sep = " "), group = groups)
-  ggsave(filename = paste(contrast, "heatmap_top_50_count_by_FC.png", sep = "_"), plot = heat_con, device = png, path = out_dir_con_plots, height = params$plot_height, width = params$plot_width)
+  bin <- ggsave(filename = paste(contrast, "heatmap_top_50_count_by_FC.png", sep = "_"), plot = heat_con, device = png, path = out_dir_con_plots, height = params$plot_height, width = params$plot_width)
   heat_con_log <- plot.heatmap(log2(counts_clean_num_df), min(nrow(top_100_num_df), 50), top_100_anno_df$display_name, paste("Heatmap of top 50 significant feature counts by logFC colored by", cond, "(log)", sep = " "), group = groups)
-  ggsave(filename = paste(contrast, "heatmap_top_50_log_count_by_FC.png", sep = "_"), plot = heat_con_log, device = png, path = out_dir_con_plots, height = params$plot_height, width = params$plot_width)
+  bin <- ggsave(filename = paste(contrast, "heatmap_top_50_log_count_by_FC.png", sep = "_"), plot = heat_con_log, device = png, path = out_dir_con_plots, height = params$plot_height, width = params$plot_width)
   
   # sample to sample distance
   sample_dist_con <- plot.dist(t(top_100_num_df), paste("Sample to sample count distance colored by ", cond, "(euclidean)", sep = " "), group = groups, TRUE, TRUE)
-  ggsave(filename = paste(contrast, "sample_to_sample_dist_count.png", sep = "_"), plot = sample_dist_con, device = png, path = out_dir_con_plots, height = params$plot_height, width = params$plot_width)
+  bin <- ggsave(filename = paste(contrast, "sample_to_sample_dist_count.png", sep = "_"), plot = sample_dist_con, device = png, path = out_dir_con_plots, height = params$plot_height, width = params$plot_width)
   sample_dist_log <- plot.dist(t(log2(counts_clean_num_df)), paste("Sample to sample log count distance colored by ", cond, "(euclidean)", sep = " "), group = groups, TRUE, TRUE)
-  ggsave(filename = paste(contrast, "sample_to_sample_dist_log_count.png", sep = "_"), plot = sample_dist_log, device = png, path = out_dir_con_plots, height = params$plot_height, width = params$plot_width)
+  bin <- ggsave(filename = paste(contrast, "sample_to_sample_dist_log_count.png", sep = "_"), plot = sample_dist_log, device = png, path = out_dir_con_plots, height = params$plot_height, width = params$plot_width)
   
   # volcano plot for current contrast
   volcano_plot_con <- plot.volcano(results_cond_df[results_cond_df$value %in% alt , ], "Differential abundant features by contrast", results_cond_df[results_cond_df$value %in% alt  , "display_name"], contrast)
-  ggsave(filename = paste(contrast, "volcano_plot.png", sep = "_"), plot = volcano_plot_gen, device = png, path = out_dir_con_plots, width = 15, height = 10)
+  bin <- ggsave(filename = paste(contrast, "volcano_plot.png", sep = "_"), plot = volcano_plot_gen, device = png, path = out_dir_con_plots, width = 15, height = 10)
+  }
+  , silent=TRUE)
   
-  # ma-plot for curretn contrast
+  # ma-plot for current contrast
   ma_plot_con <- plot.ma(results_cond_df, contrast)
-  ggsave(filename = paste(contrast, "ma_plot.png", sep = "_"), plot = ma_plot_con, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
+  bin <- ggsave(filename = paste(contrast, "ma_plot.png", sep = "_"), plot = ma_plot_con, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
   
-  return(merge(logFC_by_cond, temp, by = "feature", all = TRUE))
-
+  export
 }
 
 stopCluster(cl)
 
+for(i in 1:length(worker_array)){ logFC_by_cond <- merge(logFC_by_cond, worker_array[i], by = "feature") }
 rownames(logFC_by_cond) <- logFC_by_cond$feature
 logFC_by_cond <- logFC_by_cond[-1]
 
 # remove rows with only NA
 logFC_by_cond <- logFC_by_cond[rowSums(is.na(logFC_by_cond)) != ncol(logFC_by_cond), ]
 catch_empty_df(logFC_by_cond)
+logFC_by_cond[is.na(logFC_by_cond)] <- 1
 
 # sort by ascending qval and descending abs(logFC)
 logFC_by_cond <- logFC_by_cond[order(-rowSums(abs(logFC_by_cond[ , seq(1, ncol(logFC_by_cond), 2)])),
                                      rowSums(logFC_by_cond[ , seq(2, ncol(logFC_by_cond), 2)])), ]
 logFC_by_cond_num <- logFC_by_cond[ , seq(1, ncol(logFC_by_cond), 2)]
+logFC_by_cond_num[logFC_by_cond_num == 1] <- 0
+
+
 # get display names
 logFC_by_cond <- merge(logFC_by_cond, counts_clean_anno_df, by.x = 0, by.y = 0, all.x = TRUE)
 
@@ -419,4 +463,7 @@ temp <- as.data.frame(colnames(logFC_by_cond_num))
 colnames(temp)[1] <- "contrast"
 pca_FC <- plot.pca(logFC_by_cond_num, temp, "contrast", "contrast")
   ggsave(filename = "contrasts_pca.png", plot = pca_FC, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
+
+# create finish flag
+file.create("dga_humann.done")
 ```

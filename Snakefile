@@ -75,7 +75,7 @@ def rule_all_input(wildcards):
 rule all:
     input:
         rule_all_input,
-        os.path.join(RESULTDIR , "Summary", "multiqc.html")
+        os.path.join(RESULTDIR , "05-Summary", "multiqc.html")
     params:
         results = RESULTDIR,
         clean   = CLEAN,

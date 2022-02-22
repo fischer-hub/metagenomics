@@ -6,8 +6,8 @@ def get_humann_reads(wildcards):
 
 rule humann_databases:
     log:
-        c = os.path.join(RESULTDIR, "log", "humann", "humann_databases_ChocoPhlAn.log"),
-        u = os.path.join(RESULTDIR, "log", "humann", "humann_databases_UniRef.log")
+        c = os.path.join(RESULTDIR, "00-Log", "humann", "humann_databases_ChocoPhlAn.log"),
+        u = os.path.join(RESULTDIR, "00-Log", "humann", "humann_databases_UniRef.log")
     output:
         nucDB   = directory(os.path.join(CACHEDIR, "databases", "humann", "nuc")),
         protDB  = directory(os.path.join(CACHEDIR, "databases", "humann", "prot"))
@@ -40,7 +40,7 @@ rule humann_compute:
         pathways        = os.path.join(TEMPDIR, "humann", "raw", "{sample}_pathabundance.tsv"),
         pathCov         = os.path.join(TEMPDIR, "humann", "raw", "{sample}_pathcoverage.tsv")
     log:
-        os.path.join(RESULTDIR, "log", "humann", "compute", "{sample}_humann.log")
+        os.path.join(RESULTDIR, "00-Log", "humann", "compute", "{sample}_humann.log")
     conda:
         os.path.join("..", "envs", "humann.yaml")
     threads:
@@ -67,7 +67,7 @@ rule humann_join:
         pathways        = os.path.join(TEMPDIR, "humann", "pathabundance_combined.tsv"),
         pathCov         = os.path.join(TEMPDIR, "humann", "pathcoverage_combined.tsv")
     log:
-        os.path.join(RESULTDIR, "log", "humann", "join", "humann.log")
+        os.path.join(RESULTDIR, "00-Log", "humann", "join", "humann.log")
     conda:
         os.path.join("..", "envs", "humann.yaml")
     threads:
@@ -96,7 +96,7 @@ rule humann_normalize:
         pathabundance   = os.path.join(RESULTDIR, "03-CountData", "humann", f"pathabundance_{UNITS}_combined.tsv"),
         pathCov         = os.path.join(RESULTDIR, "03-CountData", "humann", "pathcoverage_normalized_combined.tsv")
     log:
-        os.path.join(RESULTDIR, "log", "humann", "humann_norm.log")
+        os.path.join(RESULTDIR, "00-Log", "humann", "humann_norm.log")
     conda:
         os.path.join("..", "envs", "humann.yaml")
     threads:

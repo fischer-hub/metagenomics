@@ -14,7 +14,7 @@ rule bbmerge:
         unmerged    = os.path.join(RESULTDIR, "01-QualityControl", "merged", "{sample}_unmerged_fastq.gz"),
         inserthist  = os.path.join(TEMPDIR,   "bbmerge", "{sample}_ihist.txt")
     log:
-        os.path.join(RESULTDIR, "log", "bbmerge", "{sample}_merge.log")
+        os.path.join(RESULTDIR, "00-Log", "bbmerge", "{sample}_merge.log")
     conda:
         os.path.join("..", "envs", "bbmerge.yaml")
     threads:

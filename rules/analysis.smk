@@ -15,7 +15,7 @@ rule differential_gene_analysis:
     output:
         flag        = os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}","dga_{tool}.done")
     log:
-        os.path.join(RESULTDIR, "log", "dga", "dga_{tool}.log")
+        os.path.join(RESULTDIR, "00-Log", "dga", "dga_{tool}.log")
     conda:
         os.path.join("..", "envs", "analysis.yaml")
     threads:

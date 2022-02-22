@@ -1,6 +1,6 @@
 # WGS-Metagenomics
 This is a `Snakemake` based pipeline for functional profiling of (WGS) metagenomic read data.
-When finished, it is supposed to provide multiple modes to analyse the (relative) gene abundance and genetic profile of your samples and do some statistical analysis and visualisation on it as well.
+When finished, it is supposed to provide multiple modes to analyse the gene abundance and genetic profile of your samples and do some statistical analysis and visualisation on it as well.
 As of right now the pipeline provides analysis via the tools:
 - [`HUMAnN 3.0`](https://github.com/biobakery/humann)
 - [`MEGAN6`](https://uni-tuebingen.de/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/algorithms-in-bioinformatics/software/megan6/)

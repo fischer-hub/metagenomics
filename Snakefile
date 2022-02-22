@@ -76,11 +76,19 @@ rule all:
     input:
         rule_all_input,
         os.path.join(RESULTDIR , "Summary", "multiqc.html")
+    params:
+        results = RESULTDIR
+        clean   = CLEAN
+        tmp     = TEMPDIR
     message:
         "rule all"
     shell:
         """
-        
+        [ -e {params.results}/04-DifferentialGeneAbundance/humann/dga_humann.done ] && rm {params.results}/04-DifferentialGeneAbundance/humann/dga_humann.done
+        [ -e {params.results}/04-DifferentialGeneAbundance/humann/dga_humann.done ] && rm {params.results}/04-DifferentialGeneAbundance/humann/dga_humann.done
+        if({params.clean}=="true"); then
+            rm -rf {params.tmp}
+        fi
         """
 
 
@@ -90,7 +98,7 @@ onsuccess:
         shell(f"if [ ! -d results ]; then ln -s {RESULTDIR} results; fi")
     if CACHEDIR != "cache":
         shell(f"if [ ! -d cache ]; then ln -s {CACHEDIR} cache; fi")
-    if TEMPDIR != "temp":
+    if TEMPDIR != "temp" and CLEAN != "true":
         shell(f"if [ ! -d temp ]; then ln -s {TEMPDIR} temp; fi")
 
 onerror:

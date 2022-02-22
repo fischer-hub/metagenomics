@@ -180,6 +180,26 @@ In said `results` directory you will find at most 5 sub directories:
 05-Summary/
 - this directory contains summary data like reports for the pipeline run
 ```
+### Differential gene abundance analysis
+The differential gene abundance analysis run in this pipeline consists of two main steps:
+- First a model including all of your condition variables provided via the `formula=` flag is calculated. You can find the results of this step in the `Overview` directory  contained in `04-DifferentialGeneAbundance/$coretool/`, parted into `Plots/` and `Data`. This can be helpful to get an overview of your data and the general quality/distribution of said etc. Note that this first model assumes the reference level for each condition to be whatever value happens to be in the first line of the `metadata.csv` for that condition.
+- In the second step a new model is calculated for each contrast provided in the `contrasts.csv`. The reference level is set to the value contained in column `Group1`. If your condition of interest is a multi level variable (meaning it has more than two levels), make sure to pass the right value as the reference level in the `contrast.csv` as the coefficients used to calculate the log fold change etc. is dependant on the reference level. The results of this step are stored in the `Contrasts/` directory in `04-DifferentialGeneAbundance/$coretool/`. There you will find a seperate directory for each contrast provided in the `contrast.csv`.
+
+The pipeline will try to create the following plots (depending on wether there is enough data after filtering for given quality thresholds):
+- heatmap of top 50 features log fold change over all contrasts sorted by descending log fold change and ascending adjusted p-value 
+- general heatmap of top 50 counting features sorted by basemean
+- general heatmap of sample to sample distance (euclidean)
+- general PCA-Plot colored by sample
+- general Volcano-Plot colored by significance and fold change threshold
+- general MA-Plot
+- per contrast heatmap of top 50 counting features sorted by descending log fold change and ascending adjusted p-value
+- per contrast heatmap of sample to sample distance (euclidean) colored by contrast 
+- per contrast PCA-Plot colored by contrast
+- per contrast Volcano-Plot of top 100 features sorted by descending log fold change and ascending adjusted p-value
+- per contrast MA-Plot sorted by descending log fold change and ascending adjusted p-value
+
+There will also be a html report created for the whole analysis containing some of the results (data and plots) that you can find PLACEHOLDER.
+
 
 ## LICENSE
 

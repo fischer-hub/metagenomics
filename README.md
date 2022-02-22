@@ -57,24 +57,75 @@ The following parameters are required to run the pipeline:
 reads=                  comma seperated file that with information about the reads or dir that contains the reads [section Requirements](#requirements)
 ```
 ### Optional parameters
+
+#### general
 ```
-cacheDir=               define the directory where the pipeline can store big files like databases and reference genomes [default: ./cacheDir]
-resultDir=              define the directory where the pipeline can store result files [default: ./resultDir]
-ext=                    define the file extension of your read data [default: try to retrieve automatically]
-protDB_build=           define the protein database build used for humann runs [default: uniref50_ec_filtered_diamond]
-nucDB_build=            define the nucleotide translation database build used for humann runs [default: full]
-humann_count_units=     define units for gene counts [cpm (counts per million), relab (relative abundance), default: cpm]
-dmnd_block_size=        block size to run DIAMOND, mem. usage is approximately 6 times this value, increases performance for increased values
-dmnd_num_index_chunks=  number of index chunks to run DIAMOND on, lower values increase the performance
-merge_reads=            if true, merge overlapping paired-end reads with PEAR instead of just concatenating them [default: true]
-bowtie2_reference=      directory containing the host genome file(s) used for removing host sequences from the reads [default: empty]
-adapters=               file with illumina adapter sequences to used by TRIMMOMATIC for adapter removal
-max_mismatch=           maximum mismatch count which will still allow a full adapter match
-pThreshold=             specifies how accurate the match between the two 'adapter ligated' reads must be
-sThreshold=             specifies how accurate the match between any adapter etc. sequence must be
+mode=               mode of the reads, only required if no samplesheet is provided [default: paired]
+ext=                file extension of the read files, if not provided may be retrieved automatically [default: NULL]
+help=               help flag, if set to true the help message is printed on start [default: false]
+cleanup=            if set to true, temporary and intermediate files will be removed after a successful run [default: false]
 ```
-These can be useful when running in environments where the project directory has limited storage and one might want to have large files in other directories without storage limits (this could be the case on shared machines like HPC's where you would want big temporary files on lets say /scratch or similar).\
-Providing a genome reference via the `bowtie2_reference=` will activate the host sequence removal sub workflow (reference files have to be uncompressed).\
+#### directory structure
+```
+results= directory to store the results in [default: "./results"]
+temp=               directory to store temporary and intermediate files in [default: "./temp"]
+cache=              directory to store database and reference files in to use in multiple runs [default: "./cache"]
+```
+#### snakemake args
+```
+cores=              amount of cores the piepline is allowed to occupie, this also impacts how many jobs will run in parallel [default: 1]
+use-conda=          if set to true, the pipeline will use the conda environment files to create environments for every rule to run in [default: true]
+latency-wait=       amount of seconds the pipeline will wait for expected in- and output files to be present 
+```
+#### tools
+```
+fastqc=             if set to true, fastqc will be run during quality control steps, this should be false if input data is not in fastq format [default: true]
+merger=             paired-end read merger to use [default: "bbmerge", "pear"]
+coretools=          core tools to run [default: "humann,megan"]
+trim=               if set to true, reads will be trimmed for adapter sequences before merging [default: true]
+```
+#### humann args
+```
+protDB_build=       protein database to use with HUMANN3.0 [default: "uniref50_ec_filtered_diamond"]
+nucDB_build=        nucleotide database to use with HUMANN3.0 [default: "full"]
+count_units=        unit to normalize HUMANN3.0 raw reads to [default: "cpm", "relab"]
+```
+NOTE: For alternative DBs please refer to the [HUMANN3.0 manual](https://github.com/biobakery/humann#databases) .
+
+#### diamond args
+```
+block_size=         block size to use with diamond calls, higher block size increases memory usage and performance [default: 12]
+num_index_chunks=   number of index chunks to use with diamond calls, lower number of index chunks increases memory usage and performance [default: 1]
+```
+
+#### bowtie2 args
+```
+reference=          reference genome file(s) to map against during decontamination of the reads, if no reference is provided decontamination is skipped [default: "none"]
+```
+
+#### trimmomatic args
+```
+adapters_pe=        file containing the adapters to trim for in paired-end runs [default: "assets/adapters/TruSeq3-PE.fa"]
+adapters_se=        file containing the adapters to trim for in single-end runs [default: "assets/adapters/TruSeq3-SE.fa"]
+max_mismatch=       max mismatch count to still allow for a full match to be performed [default: "2"]
+pThreshold=         specifies how accurate the match between the two 'adapter ligated' reads must be for PE palindrome read alignment [default: "30"]
+sThreshold:         specifies how accurate the match between any adapter etc. sequence must be against a read [default: "10"] 
+min_adpt_len:       minimum adapter length in palindrome mode [default: "8"]
+```
+
+### differential gene abundance analysis args
+```
+metadata_csv=       CSV file containing metadata of the samples to analyse [default: "assets/test_data/metadata.csv"]
+contrast_csv=       CSV file containing the contrasts to be taken into account [default: "assets/test_data/contrast.csv"]
+formula=            R formatted model formula with variables to be taken into account [default: "cond+seed"]
+plot_height=        height for plots to be generated [default: 11]
+plot_width=         widht for plots to be generated [default: 11]
+fc_th=              fold change threshold, drop all features with a fold change below this threshold [default: 1]
+ab_th=              abundance threshold, drop all features with lower abundance than this threshold [default: 10]
+pr_th=              prevalence threshold, drop all features with a prevalence below this threshold [default: 0.1]
+sig_th=             significance threshold, drop all features with an adjusted p-value below this threshold [default: 1]
+```
+
 NOTE: All of these parameters can be set permanently in the configuration file (profiles/config.yaml).
 
 ## Usage on high performance clusters (HPC)
@@ -87,13 +138,22 @@ You can define your own HPC (or local) profiles and put them in the profiles dir
 
 ## Output
 ### Results
-All results can be found in the `/resultDir` directory in their respective tool directories. 
-As of right now the pipeline will outputs combined gene abundance tables in `resultDir/humann/`. Here you can aso find the individual gene abundance tables for every sample, normalized for gene length and amount of reads per sample (relative abundances) and raw (absoulte abundance).
-Meganized `.daa` files can be found in `resultDir/megan/$sample_meganized.daa`.
-
-### Logs
-All log files are saved to `log/$toolname` and contain the standard output of the tool.\
-NOTE: On HPCs the job manager might catch the stdout before going to the log files resulting in empty logs. You can find the stdout of each job in its job-log file. For `SLURM` these will be redirected to the `slurm/` directory of the project dir.
+All important output files will be stored in the `results` directory, which you can find in the project directory of the pipeline if not defined otherwise in the pipeline call.
+In said `results` directory you will find at most 5 sub directories:
+```
+00-Log
+- this directory contains all the log files that have been created during the pipeline run
+01-QualityControl
+- this directory contains the fastqc reports, trimmed reads and merged paired-end reads
+02-Decontamination
+- this directory contains all the reads that didn't map to the reference genome (decontaminated reads)
+03-CountData
+- this directory contains the raw count data created by the core tools that were run (HUMANN3.0 and/or MEGAN6)
+04-DifferentialGeneAbundance
+- this directory contains results of the statistical analysis e.g. calculated log fold change and adjusted p-values per feature as well as plots for general- and per contrast data visualisation
+05-Summary
+- this directory contains summary data like reports for the pipeline run
+```
 
 ## LICENSE
 

@@ -1,13 +1,10 @@
 # WGS-Metagenomics
 This is a `Snakemake` based pipeline for functional profiling of (WGS) metagenomic read data.
-When finished, it is supposed to provide multiple modes to analyse the gene abundance and genetic profile of your samples and do some statistical analysis and visualisation on it as well.
+It provides an easy to use interface for standard analysis methods while still being customizable at a very low level.
+The pipeline contains optional preprocessing of your reads such as quality control, adapter trimming, merging of paired-end reads and host sequence removal, different core tools for functional analysis and calculation of gene / feature counts and analysis steps for visualization and further processing of said count data.\
 As of right now the pipeline provides analysis via the tools:
 - [`HUMAnN 3.0`](https://github.com/biobakery/humann)
 - [`MEGAN6`](https://uni-tuebingen.de/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/algorithms-in-bioinformatics/software/megan6/)
-- [`carnelian`](https://github.com/snz20/carnelian) (under construction)
-
-A manual mode, mapping your reads against a reference to retrieve the gene counts is planned in the future.
-Additionally optional automatic preprocessing of your read data (filtering and cleaning) is planned as well.
 
 ## Requirements
 To run the pipeline you will need a working [`Snakemake`](https://snakemake.readthedocs.io/en/stable/) installation as well as the [`Conda`](https://github.com/conda-forge/miniforge) package manager on your machine. A miniforge `Conda` installation is sufficient for this project:
@@ -84,33 +81,33 @@ reads=                  comma seperated file that with information about the rea
 ```
 ### Optional parameters
 
-#### general
+#### General
 ```
 mode=               mode of the reads, only required if no samplesheet is provided [default: paired]
 ext=                file extension of the read files, if not provided may be retrieved automatically [default: NULL]
 help=               help flag, if set to true the help message is printed on start [default: false]
 cleanup=            if set to true, temporary and intermediate files will be removed after a successful run [default: false]
 ```
-#### directory structure
+#### Directory structure
 ```
 results= directory to store the results in [default: "./results"]
 temp=               directory to store temporary and intermediate files in [default: "./temp"]
 cache=              directory to store database and reference files in to use in multiple runs [default: "./cache"]
 ```
-#### snakemake args
+#### Snakemake arguments
 ```
 cores=              amount of cores the piepline is allowed to occupie, this also impacts how many jobs will run in parallel [default: 1]
 use-conda=          if set to true, the pipeline will use the conda environment files to create environments for every rule to run in [default: true]
 latency-wait=       amount of seconds the pipeline will wait for expected in- and output files to be present 
 ```
-#### tools
+#### Tools
 ```
 fastqc=             if set to true, fastqc will be run during quality control steps, this should be false if input data is not in fastq format [default: true]
 merger=             paired-end read merger to use [default: "bbmerge", "pear"]
 coretools=          core tools to run [default: "humann,megan"]
 trim=               if set to true, reads will be trimmed for adapter sequences before merging [default: true]
 ```
-#### humann args
+#### HUMANN3.0 arguments
 ```
 protDB_build=       protein database to use with HUMANN3.0 [default: "uniref50_ec_filtered_diamond"]
 nucDB_build=        nucleotide database to use with HUMANN3.0 [default: "full"]
@@ -118,18 +115,18 @@ count_units=        unit to normalize HUMANN3.0 raw reads to [default: "cpm", "r
 ```
 NOTE: For alternative DBs please refer to the [HUMANN3.0 manual](https://github.com/biobakery/humann#databases) .
 
-#### diamond args
+#### DIAMOND arguments
 ```
 block_size=         block size to use with diamond calls, higher block size increases memory usage and performance [default: 12]
 num_index_chunks=   number of index chunks to use with diamond calls, lower number of index chunks increases memory usage and performance [default: 1]
 ```
 
-#### bowtie2 args
+#### Bowtie2 arguments
 ```
 reference=          reference genome file(s) to map against during decontamination of the reads, if no reference is provided decontamination is skipped [default: "none"]
 ```
 
-#### trimmomatic args
+#### TRIMMOMATIC arguments
 ```
 adapters_pe=        file containing the adapters to trim for in paired-end runs [default: "assets/adapters/TruSeq3-PE.fa"]
 adapters_se=        file containing the adapters to trim for in single-end runs [default: "assets/adapters/TruSeq3-SE.fa"]
@@ -139,7 +136,7 @@ sThreshold:         specifies how accurate the match between any adapter etc. se
 min_adpt_len:       minimum adapter length in palindrome mode [default: "8"]
 ```
 
-### differential gene abundance analysis args
+### Statistical analysis arguments
 ```
 metadata_csv=       CSV file containing metadata of the samples to analyse [default: "assets/test_data/metadata.csv"]
 contrast_csv=       CSV file containing the contrasts to be taken into account [default: "assets/test_data/contrast.csv"]

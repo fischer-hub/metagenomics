@@ -19,7 +19,7 @@ rule multiqc:
     input:
         get_reports
     output:
-        os.path.join(RESULTDIR, "Summary", "multiqc.html")
+        os.path.join(RESULTDIR, "05-Summary", "multiqc.html")
     params:
         ""  # Optional: extra parameters for multiqc.
     log:

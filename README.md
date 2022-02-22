@@ -24,8 +24,8 @@ conda activate base
 mamba create -c conda-forge -c bioconda -n snakemake snakemake
 conda activate snakemake
 ```
-To access your sample files the pipeline expects a csv file of the following format:
-
+### Input files
+To access your sample files, the pipeline expects a csv file of the following format:
 ```
 Sample,R1,R2
 samplename,/path/to/sample/file/samplename_forward.ext,/path/to/sample/file/samplename_reverse.ext
@@ -37,6 +37,31 @@ If your input files are all in the same directory you can use the `create_input_
 ```
 python3 scripts/create_input_csv.py <FASTQ_DIR>
 ```
+For running the differential gene abundance analysis the pipeline expects a csv file containing metadata:
+```
+Sample,cond1,cond2,...
+sample_name1_rep2,control,male,...
+sample_name1_rep1,control,male,...
+sample_name2_rep2,treatment,female,...
+sample_name2_rep1,treatment,female,...
+```
+Where the sample name must match the sample name provided in the input.csv file.
+Additionally a csv file containing the contrasts to take into account is expected:
+```
+Condition,Group1,Group2
+cond1,treatment,control
+cond1,control,treatment
+cond2,male,female
+cond2,female,male
+.
+.
+```
+Where the condition level in group 1 is taken as the reference level for the model to be calculated on this contrast.
+These input files then need to be included in the pipeline call via: 
+`reads=your_input.csv`
+`metadata_csv=your_metadata.csv`
+`contrast_csv=your_contrast.csv` 
+
 ## Installation
 With `Snakemake` and `Conda` set up you can just clone and cd into this project via:
 ```
@@ -51,6 +76,7 @@ After that the pipeline is independant of any network connection.
 
 ## Pipeline parameters
 Additionally to the standard `Snakemake` parameters the pipeline comes with some custom ones that can be used after the `--config` flag.
+Please note that you might need to specify `Snakemake` parameters like `cores` if you dont run the pipeline with one of the available profiles (`local,allegro`).
 ### Required parameters
 The following parameters are required to run the pipeline:
 ```
@@ -141,17 +167,17 @@ You can define your own HPC (or local) profiles and put them in the profiles dir
 All important output files will be stored in the `results` directory, which you can find in the project directory of the pipeline if not defined otherwise in the pipeline call.
 In said `results` directory you will find at most 5 sub directories:
 ```
-00-Log
+00-Log/
 - this directory contains all the log files that have been created during the pipeline run
-01-QualityControl
+01-QualityControl/
 - this directory contains the fastqc reports, trimmed reads and merged paired-end reads
-02-Decontamination
+02-Decontamination/
 - this directory contains all the reads that didn't map to the reference genome (decontaminated reads)
-03-CountData
+03-CountData/
 - this directory contains the raw count data created by the core tools that were run (HUMANN3.0 and/or MEGAN6)
-04-DifferentialGeneAbundance
+04-DifferentialGeneAbundance/
 - this directory contains results of the statistical analysis e.g. calculated log fold change and adjusted p-values per feature as well as plots for general- and per contrast data visualisation
-05-Summary
+05-Summary/
 - this directory contains summary data like reports for the pipeline run
 ```
 

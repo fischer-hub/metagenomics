@@ -6,7 +6,7 @@ rule fastqc_pe:
         zip     = os.path.join(TEMPDIR, "qc", "fastqc_pre", "{sample}_{mate}_fastqc.zip")
     params: "--quiet"
     log:
-        os.path.join("log", "fastqc", "{sample}_{mate}.log")
+        os.path.join(RESULTDIR, "log", "fastqc", "{sample}_{mate}.log")
     threads: 
         1
     message:
@@ -23,7 +23,7 @@ rule fastqc_se:
         zip     = os.path.join(TEMPDIR, "qc", "fastqc_se", "{sample}_fastqc.zip")
     params: "--quiet"
     log:
-        os.path.join("log", "fastqc", "{sample}.log")
+        os.path.join(RESULTDIR, "log", "fastqc", "{sample}.log")
     threads: 
         1
     message:

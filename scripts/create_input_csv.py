@@ -6,6 +6,10 @@ import glob
 import argparse
 from collections import defaultdict
 
+def absoluteFilePaths(directory):
+    for dirpath,_,filenames in os.walk(directory):
+        for f in filenames:
+            yield os.path.abspath(os.path.join(dirpath, f))
 
 def main(args=None):
 
@@ -18,6 +22,8 @@ def main(args=None):
     mode        = args.READ_MODE
     dictionary = defaultdict(list)
     WD = os.getcwd()
+    
+    print(absoluteFilePaths(fastq_dir))
 
     files = sorted(glob.glob(os.path.join(fastq_dir, f"*.gz"), recursive=False))
     files = set(map(lambda x: (x.split("/")[-1].rsplit(".")[0].rsplit("_")[0], x), files)) if mode != "single" else set(map(lambda x: (x.split("/")[-1].rsplit(".")[0], x), files))

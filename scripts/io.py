@@ -75,3 +75,4 @@ PR_TH           = config["pr_th"]
 SIG_TH          = config["sig_th"]
 META            = path_check(config["metadata_csv"], True)
 CONTRAST        = path_check(config["contrast_csv"], True)
+CLEAN           = config["cleanup"]

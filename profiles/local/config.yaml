@@ -3,4 +3,4 @@ cores: 50
 use-conda: true
 latency-wait: 20
 rerun-incomplete: true
-restart-times: 5
+restart-times: 0

@@ -52,8 +52,8 @@ print(f"{bcolors.OKBLUE}INFO: Found sample files:", SAMPLE)
 
 def rule_all_input(wildcards):
 
-    humann  = [    os.path.join(TEMPDIR, "dga_humann.done")     ]
-    megan   = [    os.path.join(TEMPDIR, "dga_megan.done")     ]
+    humann  = [    os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "humann", "dga_humann.done")     ]
+    megan   = [    os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "megan", "dga_megan.done")     ]
     
     if "humann" in CORETOOLS and "megan" in CORETOOLS:
         print(f"{bcolors.OKBLUE}INFO: Running pipeline with core tools MEGAN6 and HUMAnN 3.0 to classify input reads.{bcolors.ENDC}")
@@ -76,10 +76,20 @@ rule all:
     input:
         rule_all_input,
         os.path.join(RESULTDIR , "Summary", "multiqc.html")
+    params:
+        results = RESULTDIR,
+        clean   = CLEAN,
+        tmp     = TEMPDIR
     message:
         "rule all"
     shell:
-        "echo 'clean up'"
+        """
+        [ -e {params.results}/04-DifferentialGeneAbundance/humann/dga_humann.done ] && rm {params.results}/04-DifferentialGeneAbundance/humann/dga_humann.done
+        [ -e {params.results}/04-DifferentialGeneAbundance/humann/dga_humann.done ] && rm {params.results}/04-DifferentialGeneAbundance/humann/dga_humann.done
+        if({params.clean}=="true"); then
+            rm -rf {params.tmp}
+        fi
+        """
 
 
 onsuccess:
@@ -88,7 +98,7 @@ onsuccess:
         shell(f"if [ ! -d results ]; then ln -s {RESULTDIR} results; fi")
     if CACHEDIR != "cache":
         shell(f"if [ ! -d cache ]; then ln -s {CACHEDIR} cache; fi")
-    if TEMPDIR != "temp":
+    if TEMPDIR != "temp" and CLEAN != "true":
         shell(f"if [ ! -d temp ]; then ln -s {TEMPDIR} temp; fi")
 
 onerror:

@@ -38,6 +38,7 @@ rule daa_meganize:
         partition="big"
     shell:
         """
+        # this will not work if --conda-prefix is set to something else then ./.snakemake !!!
         # set memory limit to 32 GB for MEGAN if not set already
         if ( $(tail -f -n 1 /Users/shubhamsinha/Desktop/new_test.log | grep '-Xmx32000M') ); then
             head -n -1 $(find  .snakemake/conda/ -name 'MEGAN.vmoptions') > temp.txt
@@ -59,18 +60,16 @@ rule daa_to_info:
         os.path.join(RESULTDIR, "00-Log", "megan", "{sample}_daa2info.log")
     conda:
         os.path.join("..", "envs", "megan.yaml")
-    params:
-        outdir = os.path.join(TEMPDIR, "megan", "counts")
     threads:
         1
     message:
         "daa_to_info({wildcards.sample})"
     shell:
         """
-        mkdir -p {params.outdir} 2> {log}
-        daa2info --in {input} -es {output} 2>> {log} #-es -> report all classifications: /DBNAME/DBID (no prefix)/COUNTS/, -c2c DB -> report one DB, --names replace ID with full ID and NAME
-        awk '!/@/ && !/END/ && !/daa/{{printf ("%1s%2s\\t%3s\\n", $1, $2, $3)}}' {output} > temp.tsv 2>> {log} # merge db and id 
-        mv temp.tsv {output} 2>> {log}
+        daa2info --in {input} --names -c2c EGGNOG >> {output} 2>> {log} 
+        #for DB in EC EGGNOG INTERPRO2GO SEED; do
+        #    daa2info --in {input} --names -c2c $DB >> {output} 2>> {log} 
+        #done
         """
 
 rule join_megan_tsv:

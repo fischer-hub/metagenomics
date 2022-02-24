@@ -3,9 +3,8 @@ def dga_counts(wildcards):
     humann  = [ os.path.join(RESULTDIR, "03-CountData", "humann", "genefamilies_" + UNITS  + "_combined.tsv")   ]
     megan   = [ os.path.join(RESULTDIR, "03-CountData", "megan", "megan_combined.csv")    ]
 
-    if "humann" in CORETOOLS and not "megan" in CORETOOLS: return humann
-    elif "megan" in CORETOOLS and not "humann" in CORETOOLS: return megan
-    else: return humann + megan
+    if wildcards.tool == "humann": return humann
+    else: return megan
 
 rule differential_gene_analysis:
     input: 
@@ -37,7 +36,8 @@ rule differential_gene_analysis:
     shell:
         """
         [ ! -d {params.work_dir} ] && mkdir  -p {params.work_dir}
-        Rscript -e "rmarkdown::render('scripts/differential_abundance_{wildcards.tool}.Rmd', params=list(\
+        Rscript -e "rmarkdown::render('scripts/differential_abundance_{wildcards.tool}.Rmd', output_file = 'dga_{wildcards.tool}.html',\
+                                                        params=list(\
                                                         counts = '{input.counts}',\
                                                         metadata = '{input.metadata}', \
                                                         show_code = 'FALSE', \

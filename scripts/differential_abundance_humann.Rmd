@@ -154,14 +154,6 @@ catch_empty_df <- function(df){
 catch_empty_df(counts_df)
 colnames(counts_df) <- gsub(".RPKs", "", colnames(counts_df), fixed = TRUE)
 colnames(counts_df) <- gsub("_Abundance", "", colnames(counts_df), fixed = TRUE)
-
-# clean metadata rownames (sample names)
-catch_empty_df(metadata_df)
-rownames(metadata_df) <- gsub("_", ".", rownames(metadata_df), fixed = TRUE)
-rownames(metadata_df) <- gsub(":", ".", rownames(metadata_df), fixed = TRUE)
-rownames(metadata_df) <- gsub(" ", ".", rownames(metadata_df), fixed = TRUE)
-rownames(metadata_df) <- gsub("-", ".", rownames(metadata_df), fixed = TRUE)
-
 ```
 
 ### remove stratified duplicate hits, low abundant hits and NAs
@@ -174,6 +166,11 @@ counts_clean_df <- na.omit(counts_unstratified_df + 1)
 
 # remove unmapped counts
 counts_clean_df <- counts_clean_df[!(row.names(counts_clean_df) %in% "UNMAPPED"), ]
+
+# clean metadata rownames (sample names)
+catch_empty_df(metadata_df)
+row.names(counts_clean_df) <- gsub("[[:punct:]]", ".", row.names(counts_clean_df))
+row.names(counts_clean_df) <- gsub(" ", ".", row.names(counts_clean_df))
 
 # gene abundance distribution over all samples
 hist_plot <- hist(rowSums(counts_clean_df[-1, ]), br = 100, main = "Cleaned gene count distribution over all samples", xlab = "Genes counts")
@@ -214,9 +211,11 @@ counts_clean_anno_df$display_name <- ifelse(!is.na(counts_clean_anno_df$synonym)
                                             ifelse(!is.na(counts_clean_anno_df$gene_name),
                                                    counts_clean_anno_df$gene_name,
                                                    counts_clean_anno_df$id))
-counts_clean_anno_df$feature <- gsub(":", ".", counts_clean_anno_df$feature, fixed = TRUE)
-counts_clean_anno_df$feature <- gsub(" ", ".", counts_clean_anno_df$feature, fixed = TRUE)
-counts_clean_anno_df$feature <- gsub("-", ".", counts_clean_anno_df$feature, fixed = TRUE)
+
+counts_clean_anno_df$feature <- gsub("[[:punct:]]", ".", counts_clean_anno_df$feature)
+counts_clean_anno_df$feature <- gsub(" ", ".", counts_clean_anno_df$feature)
+counts_clean_anno_df$feature <- stringr::str_trunc(counts_clean_anno_df$feature, 50)
+
 counts_clean_anno_df <- counts_clean_anno_df[!duplicated(counts_clean_anno_df$feature), ]
 rownames(counts_clean_anno_df) <- counts_clean_anno_df$feature
 ```
@@ -276,7 +275,7 @@ sink()
 results_df <- fit$results
 results_df <- na.omit(results_df)
 catch_empty_df(results_df)
-results_df <- merge(results_df, counts_clean_anno_df, all.x = TRUE)
+results_df <- merge(results_df, counts_clean_anno_df, all.x = TRUE, by = "feature")
 results_df <- mutate(results_df, count_mean = rowMeans(results_df[ , 12:(length(results_df)-3)]))
 results_df <- mutate(results_df, logFC = log2(exp(results_df$coef))) 
 
@@ -312,17 +311,20 @@ worker_array <- foreach(i = 1:nrow(comparisons_df), .errorhandling='pass', .verb
   out_dir_curr_data <- paste(out_dir_curr, "Data", sep = "/")
   dir.create(out_dir_curr_data, showWarnings = FALSE)
   
+  # set reference level with this 'hack' because the reference option will not work for binary conditions -.-
+  metadata_con_df <- metadata_df
+  metadata_con_df[[cond]] <- ifelse(grepl(ref, metadata_con_df[[cond]]), paste0("aa", metadata_con_df[[cond]]),  metadata_con_df[[cond]])
+
   # run model once for each contrast, assume Group1 from contrast sheet is the reference level
   sink("/dev/null") # make maaslin2 shut up for once
   fit <- Maaslin2(
       input_data = counts_clean_anno_df, 
-      input_metadata = metadata_df, 
+      input_metadata = metadata_con_df, 
       output = paste(out_dir_curr_data, paste(contrast, "maaslin2_model_output", sep = "_"), sep = "/"),
       analysis_method = "CPLM",
       normalization = "NONE",
       transform = "NONE",
       fixed_effects = cond,
-      reference = paste(cond, ref, sep = ","),
       cores = 1,
       min_abundance = params$abundance_threshold,
       min_prevalence = params$prevalence_threshold,
@@ -333,7 +335,7 @@ worker_array <- foreach(i = 1:nrow(comparisons_df), .errorhandling='pass', .verb
   results_cond_df <- fit$results
   
   # get display names, logFC and mean of normalized counts
-  results_cond_df <- merge(results_cond_df, counts_clean_anno_df, all.x = TRUE)
+  results_cond_df <- merge(results_cond_df, counts_clean_anno_df, all.x = TRUE, by = "feature")
   results_cond_df <- mutate(results_cond_df, count_mean = rowMeans(results_cond_df[ , 12:(length(results_cond_df)-3)]))
   results_cond_df <- mutate(results_cond_df, logFC = log2(exp(results_cond_df$coef)))
   
@@ -364,7 +366,7 @@ worker_array <- foreach(i = 1:nrow(comparisons_df), .errorhandling='pass', .verb
   }, silent=FALSE)
 
   # heatmap of top 50
-  top_100_anno_df <- merge(top_100_df, counts_clean_anno_df, all.x = TRUE)
+  top_100_anno_df <- merge(top_100_df, counts_clean_anno_df, all.x = TRUE, by = "row.names")
   top_100_num_df <- top_100_anno_df[ , 3:(ncol(top_100_anno_df)-14)]
   
   try({
@@ -403,8 +405,8 @@ worker_array <- foreach(i = 1:nrow(comparisons_df), .errorhandling='pass', .verb
 stopCluster(cl)
 
 for(i in 1:length(worker_array)){ 
-  if(is.data.frame(worker_array[i])){
-    logFC_by_cond <- merge(logFC_by_cond, worker_array[i], by = "feature")
+  if(is.data.frame(worker_array[[i]])){
+    logFC_by_cond <- merge(logFC_by_cond, worker_array[[i]], by = "feature")
   }
 }
 rownames(logFC_by_cond) <- logFC_by_cond$feature
@@ -434,7 +436,4 @@ temp <- as.data.frame(colnames(logFC_by_cond_num))
 colnames(temp)[1] <- "contrast"
 pca_FC <- plot.pca(logFC_by_cond_num, temp, "contrast", "contrast")
   ggsave(filename = "contrasts_pca.png", plot = pca_FC, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
-
-# create finish flag
-file.create("dga_humann.done")
 ```

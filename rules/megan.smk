@@ -23,8 +23,6 @@ rule daa_meganize:
         daa             = os.path.join(TEMPDIR, "diamond", "{sample}.daa")
     output:
         meganized_daa   = os.path.join(TEMPDIR, "megan", "meganized_daa", "{sample}_meganized.daa")
-    params:
-        megan_db_dir    = os.path.join(CACHEDIR, "databases", "megan")
     log:
         os.path.join(RESULTDIR, "00-Log", "megan", "{sample}_daa_meganizer.log")
     conda:
@@ -79,6 +77,8 @@ rule join_megan_tsv:
         combined = os.path.join(RESULTDIR, "03-CountData", "megan", "megan_combined.csv")
     message:
         "join_megan_tsv"
+    log:
+        os.path.join(RESULTDIR, "00-Log", "megan", "join_megan_tsv.log")
     run:
         frames = [ pd.read_csv(f, sep='\t', index_col=0, names=["gene_id", f]) for f in input ]
         result = frames[0].join(frames[1:])

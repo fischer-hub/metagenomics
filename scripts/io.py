@@ -33,20 +33,20 @@ help is on the way
 """
 
 def path_check(path, is_file):
-    if path[-1] == "/":
+    if path and path[-1] == "/":
         path = path[0:-1]
     if exists(path):
         return path
     else:
         if is_file:
-            print(f"{bcolors.FAIL}CRITICAL: File {path} does not exist, exiting..")
-            exit()
+            print(f"{bcolors.FAIL}CRITICAL: File {path} does not exist, exiting if this is an essential file..")
+            return ""
         else:
             print(f"{bcolors.OKBLUE}INFO: Directory {path} does not exist, creating and hoping for the best now..")
             return path
 
 # set static vars from config file here
-READS           = path_check(config["reads"], True)
+READS           = config["reads"] if path_check(config["reads"], True) else quit()
 MODE            = config["mode"]
 MERGER          = config["merger"] if MODE == "paired" else "none"
 FASTQC          = config["fastqc"] 

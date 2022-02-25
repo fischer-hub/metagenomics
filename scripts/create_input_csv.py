@@ -26,7 +26,7 @@ def main(args=None):
     print(absoluteFilePaths(fastq_dir))
 
     files = sorted(glob.glob(os.path.join(fastq_dir, f"*.gz"), recursive=False))
-    files = set(map(lambda x: (x.split("/")[-1].rsplit(".")[0].rsplit("_")[0], x), files)) if mode != "single" else set(map(lambda x: (x.split("/")[-1].rsplit(".")[0], x), files))
+    files = set(map(lambda x: (x.split(os.path.sep)[-1].rsplit(".")[0].rsplit("_")[0], x), files)) if mode != "single" else set(map(lambda x: (x.split(os.path.sep)[-1].rsplit(".")[0], x), files))
 
     for SRR, path in files:
         dictionary[SRR].append(path)

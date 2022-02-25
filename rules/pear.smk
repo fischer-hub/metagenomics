@@ -15,7 +15,7 @@ rule pear:
         unassembled_rev = os.path.join(RESULTDIR, "01-QualityControl", "merged", "{sample}.unassembled.reverse.fastq"),
         discarded_reads = os.path.join(RESULTDIR, "01-QualityControl", "merged", "{sample}.discarded.fastq")
     params:
-        resultDir = RESULTDIR
+        resultDir = lambda w, output: output[0].split("01-QualityControl")[0]
     log:
         os.path.join(RESULTDIR, "00-Log", "pear", "{sample}_pear.log")
     conda:

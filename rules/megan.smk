@@ -36,12 +36,11 @@ rule daa_meganize:
         partition="big"
     shell:
         """
-        # this will not work if --conda-prefix is set to something else then ./.snakemake !!!
         # set memory limit to 32 GB for MEGAN if not set already
-        if ( $(tail -f -n 1 /Users/shubhamsinha/Desktop/new_test.log | grep '-Xmx32000M') ); then
-            head -n -1 $(find  .snakemake/conda/ -name 'MEGAN.vmoptions') > temp.txt
-            mv temp.txt $(find  .snakemake/conda/ -name 'MEGAN.vmoptions')
-            echo "-Xmx32000M" >> $(find  .snakemake/conda/ -name 'MEGAN.vmoptions')
+        if ! tail -n 1 ${CONDA_PREFIX}/opt/megan-6.21.7/MEGAN.vmoptions | grep -q Xmx32000M; then
+            head -n -1 ${CONDA_PREFIX}/opt/megan-6.21.7/MEGAN.vmoptions > temp.txt
+            mv temp.txt ${CONDA_PREFIX}/opt/megan-6.21.7/MEGAN.vmoptions
+            echo "-Xmx32000M" >> ${CONDA_PREFIX}/opt/megan-6.21.7/MEGAN.vmoptions
         fi
 
         # meganize .daa file

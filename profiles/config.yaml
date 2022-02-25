@@ -1,5 +1,5 @@
 # general
-reads: ""
+reads: "assets/test_data/input.csv"
 mode: "paired"
 ext: ""
 help: "dummy value"

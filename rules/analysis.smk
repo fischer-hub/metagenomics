@@ -36,7 +36,7 @@ rule differential_gene_analysis:
     shell:
         """
         [ ! -d {params.work_dir} ] && mkdir  -p {params.work_dir}
-        Rscript -e "rmarkdown::render('scripts/differential_abundance_{wildcards.tool}.Rmd', output_file = 'dga_{wildcards.tool}.html',\
+        Rscript -e "rmarkdown::render('scripts/differential_abundance_{wildcards.tool}.Rmd', output_file = '{params.result_dir}/04-DifferentialGeneAbundance/{tool}/dga_{wildcards.tool}.html',\
                                                         params=list(\
                                                         counts = '{input.counts}',\
                                                         metadata = '{input.metadata}', \

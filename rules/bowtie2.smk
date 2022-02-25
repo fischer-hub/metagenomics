@@ -15,7 +15,7 @@ rule bowtie2_index:
         rev_one = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "index.rev.1.bt2l"),
         rev_two = os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1], "index.rev.2.bt2l")
     params:
-        index_dir   = lambda w, input: input[0].split(os.path.sep)[-2], #os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1]),
+        index_dir   = lambda w, input: input[0].rsplit(os.path.sep, 1)[0], #os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1]),
         ref_dir     = REFERENCE
     log:
         os.path.join(RESULTDIR, "00-Log", "bowtie2", "bowtie2_index.log")
@@ -56,7 +56,7 @@ rule bowtie2_map:
     output:
         unmapped = os.path.join(RESULTDIR, "02-Decontamination", "{sample}_unmapped.fastq.gz")
     params:
-        ref_dir     = lambda w, input: input[0].split(os.path.sep)[-2], #os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1]),
+        ref_dir     = lambda w, input: input[0].rsplit(os.path.sep, 1)[0], #os.path.join(CACHEDIR, "bowtie2", REFERENCE.split("/")[-1]),
         file_format = FORMAT
     log:
         os.path.join(RESULTDIR, "00-Log", "bowtie2", "bowtie2_map_{sample}.log")

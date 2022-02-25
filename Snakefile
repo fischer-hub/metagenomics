@@ -5,6 +5,7 @@ import os
 configfile: "profiles/config.yaml"
 include: "scripts/create_input_csv.py"
 include: "scripts/io.py"
+include: "rules/common.smk"
 
 if config["help"] != "dummy value": print(f"{HELPMSG}")
 
@@ -23,15 +24,12 @@ else:
     os.system(f"python3 scripts/create_input_csv.py {READS} {MODE}")
     SAMPLESHEET = pd.read_csv("input.csv")
 
-# set working directory
-WD = {workflow.snakefile}.pop().rsplit('/', 1)[0] + '/'
-
 # get samplenames
 SAMPLE = list(SAMPLESHEET["Sample"])
 
 # get file extensions
-EXT  = '.' + SAMPLESHEET.loc[0, "R1"].rsplit(".", 2)[1]
-EXT += '.' + SAMPLESHEET.loc[0, "R1"].rsplit(".", 2)[2] if SAMPLESHEET.loc[0, "R1"].rsplit(".", 1)[1] == "gz" else + ""
+EXT  = f".{SAMPLESHEET.loc[0, 'R1'].rsplit('.', 2)[1]}"
+EXT  = f"{EXT}.{SAMPLESHEET.loc[0, 'R1'].rsplit('.', 2)[2]}" if SAMPLESHEET.loc[0, "R1"].rsplit(".", 1)[1] == "gz" else EXT
 
 # check if input is fasta format -> omit fastqc checks
 if "fasta" in EXT or "fna" in EXT or "fa." in EXT:
@@ -50,26 +48,6 @@ SINGLE = True if pd.isna(SAMPLESHEET.loc[0, "R2"]) == 0 else False
 print(f"{bcolors.OKBLUE}INFO: Found sample files:", SAMPLE)
 
 
-def rule_all_input(wildcards):
-
-    humann  = [    os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "humann", "dga_humann.done")     ]
-    megan   = [    os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "megan", "dga_megan.done")     ]
-    
-    if "humann" in CORETOOLS and "megan" in CORETOOLS:
-        print(f"{bcolors.OKBLUE}INFO: Running pipeline with core tools MEGAN6 and HUMAnN 3.0 to classify input reads.{bcolors.ENDC}")
-        return humann + megan
-
-    elif "humann" in CORETOOLS:
-        print(f"{bcolors.OKBLUE}INFO: Running pipeline with core tool HUMAnN 3.0.")
-        return humann
-
-    elif "megan" in CORETOOLS:
-        print(f"{bcolors.OKBLUE}INFO: Running pipeline with core tool MEGAN6 to classify input reads.{bcolors.ENDC}")
-        return megan
-
-    else:
-        print(f"{bcolors.FAIL}WARNING: No core tool was chosen to classify the reads. Running all core tools now..{bcolors.ENDC}")
-        return humann + megan
 
 
 rule all:
@@ -77,11 +55,15 @@ rule all:
         rule_all_input,
         os.path.join(RESULTDIR , "05-Summary", "multiqc.html")
     params:
-        results = RESULTDIR,
+        results = lambda w, input: input[0].split("05-Summary")[0],
         clean   = CLEAN,
         tmp     = TEMPDIR
     message:
         "rule all"
+    log:
+        os.path.join(RESULTDIR, "00-Log", "rule_all.log")
+    conda:
+        os.path.join("envs", "utils.yaml")
     shell:
         """
         [ -e {params.results}/04-DifferentialGeneAbundance/humann/dga_humann.done ] && rm {params.results}/04-DifferentialGeneAbundance/humann/dga_humann.done

@@ -1,4 +1,3 @@
-
 rule trimmomatic_pe:
     input:
         r1 = os.path.join(READDIR, f"{{sample}}_1{EXT}"),

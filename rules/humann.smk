@@ -1,9 +1,3 @@
-def get_humann_reads(wildcards):
-    if REFERENCE != "":
-        return os.path.join(RESULTDIR, "02-Decontamination", "{wildcards.sample}_unmapped.fastq.gz".format(wildcards=wildcards))
-    else:
-        return os.path.join(TEMPDIR, "concat_reads", "{wildcards.sample}_concat.fq.gz".format(wildcards=wildcards))
-
 rule humann_databases:
     log:
         c = os.path.join(RESULTDIR, "00-Log", "humann", "humann_databases_ChocoPhlAn.log"),
@@ -14,7 +8,7 @@ rule humann_databases:
     params:
         u_build     = config["protDB_build"],
         c_build     = config["nucDB_build"],
-        installDir  = os.path.join(CACHEDIR, "databases", "humann")
+        installDir  = lambda w, output: os.path.split(output[0]), #os.path.join(CACHEDIR, "databases", "humann")
     conda:
         os.path.join("..", "envs", "humann.yaml")
     resources:
@@ -29,6 +23,7 @@ rule humann_databases:
         humann_databases --download chocophlan {params.c_build} {params.installDir}/nuc 2> {log.c} > /dev/null
         humann_databases --download uniref {params.u_build} {params.installDir}/prot 2> {log.u} > /dev/null     
         """
+        
 
 rule humann_compute:
     input: 
@@ -49,7 +44,7 @@ rule humann_compute:
         time=1200,
         partition="big"
     params:
-        outdir      = os.path.join(TEMPDIR, "humann", "raw", "{sample}_genefamilies.tsv").rsplit('/',1)[0],
+        outdir      = lambda w, output: os.path.split(output[0])[0], #os.path.join(TEMPDIR, "humann", "raw", "{sample}_genefamilies.tsv").rsplit('/',1)[0],
         read_len    = 45
     message:
         "humann_compute({wildcards.sample})"
@@ -104,7 +99,7 @@ rule humann_normalize:
     resources:
         time=240
     params:
-        outdir = os.path.join(RESULTDIR, "03-CountData", "humann"),
+        outdir = lambda w, output: os.path.split(output[0])[0], #os.path.join(RESULTDIR, "03-CountData", "humann"),
         units = UNITS
     message:
         "humann_norm"

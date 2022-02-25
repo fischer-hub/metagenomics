@@ -1,11 +1,3 @@
-def dga_counts(wildcards):
-
-    humann  = [ os.path.join(RESULTDIR, "03-CountData", "humann", "genefamilies_" + UNITS  + "_combined.tsv")   ]
-    megan   = [ os.path.join(RESULTDIR, "03-CountData", "megan", "megan_combined.csv")    ]
-
-    if wildcards.tool == "humann": return humann
-    else: return megan
-
 rule differential_gene_analysis:
     input: 
         counts      = dga_counts,

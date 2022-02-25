@@ -1,11 +1,3 @@
-def merge_input(wildcards):
-    if config["qc"] == "true":
-        return  {   "R1" : os.path.join(RESULTDIR, "01-QualityControl", "trimmed_pe", "{wildcards.sample}_1.fastq.gz".format(wildcards=wildcards)),
-                    "R2" : os.path.join(RESULTDIR, "01-QualityControl", "trimmed_pe", "{wildcards.sample}_2.fastq.gz".format(wildcards=wildcards))    }
-    else:
-        return  {   "R1" : os.path.join(READDIR, "{wildcards.sample}_1".format(wildcards=wildcards), EXT),
-                    "R2" : os.path.join(READDIR, "{wildcards.sample}_2".format(wildcards=wildcards), EXT)   }
-
 rule pear:
     input:
         unpack(merge_input)

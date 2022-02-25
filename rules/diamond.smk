@@ -1,12 +1,3 @@
-def get_blast_mem(wildcards, attempt):
-    return ((BLOCK_SIZE * 7 + BLOCK_SIZE * attempt) * 1024)
-
-def get_diamond_reads(wildcards):
-    if REFERENCE != "":
-        return os.path.join(RESULTDIR, "02-Decontamination", "{wildcards.sample}_unmapped.fastq.gz".format(wildcards=wildcards))
-    else:
-        return os.path.join(RESULTDIR, "concat_reads", "{wildcards.sample}_concat.fq.gz".format(wildcards=wildcards))
-
 rule diamond_makedb:
     output:
         os.path.join(CACHEDIR, "databases", "diamond", "nr.dmnd")
@@ -43,7 +34,7 @@ rule diamond_blastx:
         os.path.join("..", "envs", "diamond.yaml")
     resources:
         time=2880,
-        mem_mb=get_blast_mem,
+        mem_mb=lambda wildcards,attempt: ((BLOCK_SIZE * 7 + BLOCK_SIZE * attempt) * 1024),#get_blast_mem,
         partition="big"
     threads:
         24

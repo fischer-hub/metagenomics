@@ -30,13 +30,14 @@ rule differential_gene_analysis:
         ab_th       = AB_TH,
         pr_th       = PR_TH,
         sig_th      = SIG_TH,
-        result_dir  = RESULTDIR
+        result_dir  = lambda w, output: output[0].split("04-DifferentialGeneAbundance")[0],
+        tool        = lambda w, output: os.path.splitext(os.path.split(output[0])[1])[0].split("_")[1]
     message:
         "differential_gene_analysis({wildcards.tool})"
     shell:
         """
         [ ! -d {params.work_dir} ] && mkdir  -p {params.work_dir}
-        Rscript -e "rmarkdown::render('scripts/differential_abundance_{wildcards.tool}.Rmd', output_file = '{params.result_dir}/04-DifferentialGeneAbundance/{tool}/dga_{wildcards.tool}.html',\
+        Rscript -e "rmarkdown::render('scripts/differential_abundance_{params.tool}.Rmd', output_file = '../{params.result_dir}04-DifferentialGeneAbundance/{params.tool}/dga_{params.tool}.html',\
                                                         params=list(\
                                                         counts = '{input.counts}',\
                                                         metadata = '{input.metadata}', \
@@ -51,6 +52,6 @@ rule differential_gene_analysis:
                                                         work_dir = '{params.work_dir}', \
                                                         plot_height = {params.height}, \
                                                         plot_width = {params.width},
-                                                        tool = '{wildcards.tool}',
+                                                        tool = '{params.tool}',
                                                         result_dir = '{params.result_dir}'))" >& {log}
         """

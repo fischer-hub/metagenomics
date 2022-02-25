@@ -37,10 +37,10 @@ rule daa_meganize:
     shell:
         """
         # set memory limit to 32 GB for MEGAN if not set already
-        if ! tail -n 1 ${CONDA_PREFIX}/opt/megan-6.21.7/MEGAN.vmoptions | grep -q Xmx32000M; then
-            head -n -1 ${CONDA_PREFIX}/opt/megan-6.21.7/MEGAN.vmoptions > temp.txt
-            mv temp.txt ${CONDA_PREFIX}/opt/megan-6.21.7/MEGAN.vmoptions
-            echo "-Xmx32000M" >> ${CONDA_PREFIX}/opt/megan-6.21.7/MEGAN.vmoptions
+        if ! tail -n 1 ${{CONDA_PREFIX}}/opt/megan-6.21.7/MEGAN.vmoptions | grep -q Xmx32000M; then
+            head -n -1 ${{CONDA_PREFIX}}/opt/megan-6.21.7/MEGAN.vmoptions > temp.txt
+            mv temp.txt ${{CONDA_PREFIX}}/opt/megan-6.21.7/MEGAN.vmoptions
+            echo "-Xmx32000M" >> ${{CONDA_PREFIX}}/opt/megan-6.21.7/MEGAN.vmoptions
         fi
 
         # meganize .daa file

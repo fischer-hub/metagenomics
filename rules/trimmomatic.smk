@@ -19,12 +19,14 @@ rule trimmomatic_pe:
         # optional parameters
         extra="",
         compression_level="-9"
-    threads:
-        32
     resources:
-        mem_mb=1024
+        time        = RES["trimmomatic"]["time"],
+        mem_mb      = RES["trimmomatic"]["mem"] * 1024,
+        partition   = RES["trimmomatic"]["partition"]
+    threads:
+        RES["trimmomatic"]["cpu"]
     message:
-        "trimmomatic_pe({wildcards.sample})"
+        "trimmomatic_pe({wildcards.sample})\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
     wrapper:
         "v0.86.0/bio/trimmomatic/pe"
 
@@ -44,11 +46,13 @@ rule trimmomatic_se:
         extra="",
         # optional compression levels from -0 to -9 and -11
         compression_level="-9"
-    threads:
-        32
     resources:
-        mem_mb=1024
+        time        = RES["trimmomatic"]["time"],
+        mem_mb      = RES["trimmomatic"]["mem"] * 1024,
+        partition   = RES["trimmomatic"]["partition"]
+    threads:
+        RES["trimmomatic"]["cpu"]
     message:
-        "trimmomatic_se({wildcards.sample})"
+        "trimmomatic_se({wildcards.sample})\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
     wrapper:
         "v0.86.0/bio/trimmomatic/se"

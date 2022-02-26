@@ -4,9 +4,13 @@ rule megan_get_db:
     conda:
        os.path.join("..", "envs", "utils.yaml")
     resources:
-        time=120
+        time        = RES["megan_get_db"]["time"],
+        mem_mb      = RES["megan_get_db"]["mem"] * 1024,
+        partition   = RES["megan_get_db"]["partition"]
+    threads:
+        RES["megan_get_db"]["cpu"]
     message:
-        "megan_get_db"
+        "megan_get_db\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
     log:
         wget = os.path.join(RESULTDIR, "00-Log", "megan", "wget.log"),
         gunzip = os.path.join(RESULTDIR, "00-Log", "megan", "gunzip.log")
@@ -27,13 +31,14 @@ rule daa_meganize:
         os.path.join(RESULTDIR, "00-Log", "megan", "{sample}_daa_meganizer.log")
     conda:
         os.path.join("..", "envs", "megan.yaml")
-    threads:
-        16
     message:
-        "daa_meganize({wildcards.sample})"
+        "daa_meganize({wildcards.sample})\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
     resources:
-        time=1200,
-        partition="big"
+        time        = RES["daa_meganize"]["time"],
+        mem_mb      = RES["daa_meganize"]["mem"] * 1024,
+        partition   = RES["daa_meganize"]["partition"]
+    threads:
+        RES["daa_meganize"]["cpu"]
     shell:
         """
         # set memory limit to 32 GB for MEGAN if not set already
@@ -57,10 +62,14 @@ rule daa_to_info:
         os.path.join(RESULTDIR, "00-Log", "megan", "{sample}_daa2info.log")
     conda:
         os.path.join("..", "envs", "megan.yaml")
+    resources:
+        time        = RES["daa_to_info"]["time"],
+        mem_mb      = RES["daa_to_info"]["mem"] * 1024,
+        partition   = RES["daa_to_info"]["partition"]
     threads:
-        1
+        RES["daa_to_info"]["cpu"]
     message:
-        "daa_to_info({wildcards.sample})"
+        "daa_to_info({wildcards.sample})\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
     shell:
         """
         daa2info --in {input} --names -c2c EGGNOG >> {output} 2>> {log} 
@@ -75,9 +84,15 @@ rule join_megan_tsv:
     output:
         combined = os.path.join(RESULTDIR, "03-CountData", "megan", "megan_combined.csv")
     message:
-        "join_megan_tsv"
+        "join_megan_tsv\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
     log:
         os.path.join(RESULTDIR, "00-Log", "megan", "join_megan_tsv.log")
+    resources:
+        time        = RES["join_megan_tsv"]["time"],
+        mem_mb      = RES["join_megan_tsv"]["mem"] * 1024,
+        partition   = RES["join_megan_tsv"]["partition"]
+    threads:
+        RES["join_megan_tsv"]["cpu"]
     run:
         frames = [ pd.read_csv(f, sep='\t', index_col=0, names=["gene_id", f]) for f in input ]
         result = frames[0].join(frames[1:])

@@ -12,12 +12,14 @@ rule pear:
         os.path.join(RESULTDIR, "00-Log", "pear", "{sample}_pear.log")
     conda:
         os.path.join("..", "envs", "pear.yaml")
-    threads:
-        8
     message:
-        "pear({wildcards.sample})"
+        "pear({wildcards.sample})\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
     resources:
-        time=240
+        time        = RES["pear"]["time"],
+        mem_mb      = RES["pear"]["mem"] * 1024,
+        partition   = RES["pear"]["partition"]
+    threads:
+        RES["pear"]["cpu"]
     shell:
         """
         mkdir -p {params.resultDir}/pear/

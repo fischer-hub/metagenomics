@@ -7,10 +7,14 @@ rule fastqc_pe:
     params: "--quiet"
     log:
         os.path.join(RESULTDIR, "00-Log", "fastqc", "{sample}_{mate}.log")
-    threads: 
-        1
+    resources:
+        time        = RES["fastqc"]["time"],
+        mem_mb      = RES["fastqc"]["mem"] * 1024,
+        partition   = RES["fastqc"]["partition"]
+    threads:
+        RES["fastqc"]["cpu"]
     message:
-        "fastqc_pre({wildcards.sample}_{wildcards.mate})"
+        "fastqc_pre({wildcards.sample}_{wildcards.mate})\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
     wrapper:
         "v0.86.0/bio/fastqc"
 
@@ -24,9 +28,13 @@ rule fastqc_se:
     params: "--quiet"
     log:
         os.path.join(RESULTDIR, "00-Log", "fastqc", "{sample}.log")
-    threads: 
-        1
+    resources:
+        time        = RES["fastqc"]["time"],
+        mem_mb      = RES["fastqc"]["mem"] * 1024,
+        partition   = RES["fastqc"]["partition"]
+    threads:
+        RES["fastqc"]["cpu"]
     message:
-        "fastqc_se({wildcards.sample})"
+        "fastqc_se({wildcards.sample})\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
     wrapper:
         "v0.86.0/bio/fastqc"

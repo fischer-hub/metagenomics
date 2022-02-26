@@ -9,13 +9,14 @@ rule bbmerge:
         os.path.join(RESULTDIR, "00-Log", "bbmerge", "{sample}_merge.log")
     conda:
         os.path.join("..", "envs", "bbmerge.yaml")
-    threads:
-        16
     message:
-        "bbmerge({wildcards.sample})"
+        "bbmerge({wildcards.sample})\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
     resources:
-        time=480,
-        mem_mb=10240
+        time        = RES["bbmerge"]["time"],
+        mem_mb      = RES["bbmerge"]["mem"] * 1024,
+        partition   = RES["bbmerge"]["partition"]
+    threads:
+        RES["bbmerge"]["cpu"]
     shell:
         """
         bbmerge.sh t={threads} ziplevel=5 default -Xmx10240m in1={input.R1} in2={input.R2} out={output.merged} outu={output.unmerged} ihist={output.inserthist} 2> {log}

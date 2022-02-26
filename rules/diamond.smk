@@ -4,21 +4,23 @@ rule diamond_makedb:
     params:
         prot_ref_db_src = "https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz",
         prot_ref_db_dir = os.path.join(CACHEDIR, "databases", "protein_reference")
-    threads:
-        16
     conda:
         os.path.join("..", "envs", "diamond.yaml")
     resources:
-        time=1200
+        time        = RES["diamond_makedb"]["time"],
+        mem_mb      = RES["diamond_makedb"]["mem"] * 1024,
+        partition   = RES["diamond_makedb"]["partition"]
+    threads:
+        RES["diamond_makedb"]["cpu"]
     message:
-        "diamond_makedb"
+        "diamond_makedb\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
     log:
         wget    = os.path.join(RESULTDIR, "00-Log", "diamond", "wget.log"),
         makedb  = os.path.join(RESULTDIR, "00-Log", "diamond", "makedb.log")
     shell:
         """
         wget --directory-prefix={params.prot_ref_db_dir} {params.prot_ref_db_src}  2> {log.wget}
-        diamond makedb -p {threads} --in {params.prot_ref_db_dir}nr.gz --db {output}  2> {log.makedb}
+        diamond makedb -p {threads} --in {params.prot_ref_db_dir}/nr.gz --db {output}  2> {log.makedb}
         """
 
 rule diamond_blastx:
@@ -33,13 +35,13 @@ rule diamond_blastx:
     conda:
         os.path.join("..", "envs", "diamond.yaml")
     resources:
-        time=2880,
-        mem_mb=lambda wildcards,attempt: ((BLOCK_SIZE * 7 + BLOCK_SIZE * attempt) * 1024),#get_blast_mem,
-        partition="big"
+        time        = RES["diamond_makedb"]["time"],
+        mem_mb      = lambda wildcards,attempt: ((BLOCK_SIZE * 7 + BLOCK_SIZE * attempt) * RES["diamond_makedb"]["mem"]),
+        partition   = RES["diamond_makedb"]["partition"]
     threads:
-        24
+        RES["diamond_makedb"]["cpu"]
     message:
-        "diamond_blastx({wildcards.sample})"
+        "diamond_blastx({wildcards.sample})\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
     log:
         os.path.join(RESULTDIR, "00-Log", "diamond", "{sample}_blastx.log"),
     shell:

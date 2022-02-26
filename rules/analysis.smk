@@ -9,10 +9,12 @@ rule differential_gene_analysis:
         os.path.join(RESULTDIR, "00-Log", "dga", "dga_{tool}.log")
     conda:
         os.path.join("..", "envs", "analysis.yaml")
-    threads:
-        8
     resources:
-        time=240
+        time        = RES["dga_analysis"]["time"],
+        mem_mb      = RES["dga_analysis"]["mem"] * 1024,
+        partition   = RES["dga_analysis"]["partition"]
+    threads:
+        RES["dga_analysis"]["cpu"]
     params:
         work_dir    = WORK_DIR,
         formula     = FORMULA,
@@ -25,7 +27,7 @@ rule differential_gene_analysis:
         result_dir  = lambda w, output: output[0].split("04-DifferentialGeneAbundance")[0],
         tool        = lambda w, output: os.path.splitext(os.path.split(output[0])[1])[0].split("_")[1]
     message:
-        "differential_gene_analysis({wildcards.tool})"
+        "differential_gene_analysis({wildcards.tool})\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
     shell:
         """
         [ ! -d {params.work_dir} ] && mkdir  -p {params.work_dir}

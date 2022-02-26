@@ -64,7 +64,7 @@ MIN_ADPT_LEN    = config["min_adpt_len"]
 P_TH            = config["pThreshold"]
 S_TH            = config["sThreshold"]
 TRIM            = config["trim"]
-REFERENCE       = path_check(config["reference"], True)
+REFERENCE       = path_check(config["reference"], False)
 WORK_DIR        = os.getcwd()
 FORMULA         = config["formula"]
 HEIGHT          = config["plot_height"]
@@ -76,3 +76,6 @@ SIG_TH          = config["sig_th"]
 META            = path_check(config["metadata_csv"], True)
 CONTRAST        = path_check(config["contrast_csv"], True)
 CLEAN           = config["cleanup"]
+
+with open('profiles/resource.yaml', 'r') as f:
+    RES = yaml.load(f, Loader=yaml.FullLoader)

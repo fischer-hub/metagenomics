@@ -1,6 +1,6 @@
 import pandas as pd
 import glob
-import os
+import os, shutil
 import yaml
 
 configfile: "profiles/config.yaml"
@@ -49,8 +49,6 @@ SINGLE = True if pd.isna(SAMPLESHEET.loc[0, "R2"]) == 0 else False
 print(f"{bcolors.OKBLUE}INFO: Found sample files:", SAMPLE)
 
 
-
-
 rule all:
     input:
         rule_all_input,
@@ -63,16 +61,20 @@ rule all:
         "rule all"
     log:
         os.path.join(RESULTDIR, "00-Log", "rule_all.log")
-    conda:
-        os.path.join("envs", "utils.yaml")
-    shell:
+    run:
+        try:
+            os.remove("Rplots.pdf")
+            os.remove(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "humann", "dga_humann.done"))
+            os.remove(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "megan", "dga_megan.done"))
+            shutil.move("metagenomics_report.html", os.path.join(RESULTDIR, "05-Summary", "metagenomics_report.html"))
+        except OSError:
+            pass
         """
-        [ -e {params.results}/04-DifferentialGeneAbundance/humann/dga_humann.done ] && rm {params.results}/04-DifferentialGeneAbundance/humann/dga_humann.done
-        [ -e {params.results}/04-DifferentialGeneAbundance/humann/dga_humann.done ] && rm {params.results}/04-DifferentialGeneAbundance/humann/dga_humann.done
-        if({params.clean}=="true"); then
-            rm -rf {params.tmp}
-        fi
+        [ -e {params.results}04-DifferentialGeneAbundance/humann/dga_humann.done ] && rm {params.results}04-DifferentialGeneAbundance/humann/dga_humann.done > {log} 2>&1
+        [ -e {params.results}04-DifferentialGeneAbundance/megan/dga_megan.done ] && rm {params.results}04-DifferentialGeneAbundance/megan/dga_megan.done >> {log} 2>&1
+        [ -e Rplots.pdf ] && rm Rplots.pdf >> {log} 2>&1
         """
+        #[ -e metagenomics_report.html ] && mv metagenomics_report.html {params.results}05-Summary/ >> {log} 2>&1
 
 
 onsuccess:
@@ -83,6 +85,11 @@ onsuccess:
         shell(f"if [ ! -d cache ]; then ln -s {CACHEDIR} cache; fi")
     if TEMPDIR != "temp" and CLEAN != "true":
         shell(f"if [ ! -d temp ]; then ln -s {TEMPDIR} temp; fi")
+    if CLEAN == "true":
+        try:
+            os.remove(TEMPDIR)
+        except OSError:
+            pass
 
 onerror:
     print(f"{bcolors.FAIL}An error occurred, looking for temporary files to clean up..{bcolors.ENDC}")

@@ -42,7 +42,7 @@ dir.create(out_dir_con, showWarnings = FALSE)
 ```
 
 ### load librarys
-```{r load_librarys, echo=params$show_code}
+```{r load_librarys, echo=params$show_code, results='hide',fig.keep='all'}
 library(tidyverse)
 library(broom)
 library(Maaslin2)
@@ -58,7 +58,7 @@ library(pheatmap)
 ```
 
 ### load necessary files
-```{r load_files, echo=params$show_code}
+```{r load_files, echo=params$show_code, results='hide',fig.keep='all'}
 counts_df <- read.csv(file = params$counts, row.names = 1, header = TRUE, sep = ',', strip.white=TRUE) 
 counts_df <- counts_df[ , order(names(counts_df))]
 
@@ -69,7 +69,7 @@ comparisons_df <- read.csv(file = params$comparisons, header = TRUE, sep = ',', 
 ```
 
 ### functions
-```{r function_defs, echo=params$show_code}
+```{r function_defs, echo=params$show_code, results='hide',fig.keep='all'}
 # create flag in case the script exits early
 file.create(paste(out_dir, "dga_megan.done", sep = "/"))
 
@@ -149,7 +149,7 @@ catch_empty_df <- function(df){
 ```
 
 ## clean row and col names
-```{r clean_names, echo=params$show_code}
+```{r clean_names, echo=params$show_code, results='hide',fig.keep='all'}
 # clean count_df colnames (sample names)
 catch_empty_df(counts_df)
 colnames(counts_df) <- gsub(".*megan.counts.", "", colnames(counts_df), fixed = FALSE)
@@ -165,7 +165,7 @@ rownames(metadata_df) <- gsub("-", ".", rownames(metadata_df), fixed = TRUE)
 ```
 
 ### clean and normalize data
-```{r clean_data, echo=params$show_code}
+```{r clean_data, echo=params$show_code, results='hide',fig.keep='all'}
 # drop rows containing NAs and add pseudo count to prevent MaAslin2 model fit from crashing
 counts_clean_df <- na.omit(counts_df + 1)
 
@@ -173,12 +173,23 @@ counts_clean_df <- na.omit(counts_df + 1)
 counts_clean_df <- apply(counts_clean_df, 2, function(x) x*1e6/sum(x))
 
 # gene abundance distribution over all samples
-hist_plot <- hist(rowSums(counts_clean_df[-1, ]), br = 100, main = "Cleaned gene count distribution over all samples", xlab = "Genes counts")
-hist_log_plot <- hist(log2(rowSums(counts_clean_df[-1, ])), br = 100, main = "Log2 transformed, cleaned gene count distribution over all samples", xlab = "Log2 transformed genes counts")
+png(filename = paste(out_dir_gen_plots, "count_distribution.png", sep = "/"), width = params$plot_width, height = params$plot_height, units = "in", res = 72)
+hist_plot <- hist(rowSums(counts_clean_df), br = 100, main = "Cleaned gene count distribution over all samples", xlab = "Genes counts")
+dev.off()
+png(filename = paste(out_dir_gen_plots, "count_distribution_log.png", sep = "/"), width = params$plot_width, height = params$plot_height, units = "in", res = 72)
+hist_log_plot <- hist(log2(rowSums(counts_clean_df)), br = 100, main = "Log2 transformed, cleaned gene count distribution over all samples", xlab = "Log2 transformed genes counts")
+dev.off()
+```
+
+### clean counts table row names
+```{r, clean row names, results='hide',fig.keep='all'}
+row.names(counts_clean_df) <- gsub("[[:punct:]]", ".", row.names(counts_clean_df))
+row.names(counts_clean_df) <- gsub(" ", ".", row.names(counts_clean_df))
+row.names(counts_clean_df) <- stringr::str_trunc(row.names(counts_clean_df), 80)
 ```
 
 ### plots on count data
-```{r count_plots, echo=params$show_code, message=FALSE}
+```{r count_plots, echo=params$show_code, message=FALSE, results='hide',fig.keep='all'}
 # sort data by most counts per row
 counts_clean_df <- counts_clean_df[order(-rowSums(counts_clean_df)), ]
 
@@ -202,16 +213,9 @@ sample_dist_log <- plot.dist(t(log2(counts_clean_df)), "Sample to sample log cou
 ggsave(filename = "sample_to_sample_dist_log_count.png", plot = sample_dist_log, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
 ```
 
-### clean counts table row names
-```{r, clean row names}
-row.names(counts_clean_df) <- gsub("[[:punct:]]", ".", row.names(counts_clean_df))
-row.names(counts_clean_df) <- gsub(" ", ".", row.names(counts_clean_df))
-row.names(counts_clean_df) <- stringr::str_trunc(row.names(counts_clean_df), 50)
-
-```
 
 ### run MaAslin2 model for given formula
-```{r general_model, echo=TRUE,  message=TRUE}
+```{r general_model, echo=TRUE, results='hide',fig.keep='all'}
 # set reference level for each condition assuming first occurence is reference for now
 ref_levels <- c()
 conditions <- strsplit(params$formula, "\\+")[[1]]
@@ -251,7 +255,7 @@ ggsave(filename = "volcano_plot_general.png", plot = volcano_plot_gen, device = 
 ```
 
 ### run comparisons
-```{r contrast_models, echo=params$show_code}
+```{r contrast_models, echo=params$show_code, results='hide',fig.keep='all'}
 logFC_by_cond <- as.data.frame(rownames(counts_clean_df))
 colnames(logFC_by_cond)[1] <- "feature"
 

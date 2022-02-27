@@ -42,7 +42,7 @@ dir.create(out_dir_con, showWarnings = FALSE)
 ```
 
 ### load librarys
-```{r load_librarys, echo=params$show_code}
+```{r load_librarys, echo=params$show_code, results='hide',fig.keep='all'}
 library(tidyverse)
 library(broom)
 library(Maaslin2)
@@ -58,7 +58,7 @@ library(pheatmap)
 ```
 
 ### load necessary files
-```{r load_files, echo=params$show_code}
+```{r load_files, echo=params$show_code, results='hide',fig.keep='all'}
 counts_df <- read.csv(file = params$counts, row.names = 1, header = TRUE, sep = '\t') 
 counts_df <- counts_df[ , order(names(counts_df))]
 
@@ -69,7 +69,7 @@ comparisons_df <- read.csv(file = params$comparisons, header = TRUE, sep = ',')
 ```
 
 ### functions
-```{r function_defs, echo=params$show_code}
+```{r function_defs, echo=params$show_code, results='hide',fig.keep='all'}
 # create flag in case the script exits early
 file.create(paste(out_dir, "dga_humann.done", sep = "/"))
 
@@ -128,7 +128,10 @@ plot.dist <- function(df, title_txt, group = NA, cluster_cols = FALSE, cluster_r
 
 uniprot.map <- function(ids1, ids2, from_str, to_str, mapping_df){
 
+  show_col_types = FALSE
+
   post <- function(f, t, ids){
+    show_col_types = FALSE
     response <- POST(url = "https://www.uniprot.org/uploadlists/", body = list(from = f, to = t, format = 'tab', query = paste(ids, collapse = ' ')))
     httr::content(response, type = 'text/tab-separated-values', encoding = "UTF-8")
   }
@@ -149,7 +152,7 @@ catch_empty_df <- function(df){
 ```
 
 ## clean row and col names
-```{r clean_names, echo=params$show_code}
+```{r clean_names, echo=params$show_code, results='hide',fig.keep='all'}
 # clean count_df colnames (sample names)
 catch_empty_df(counts_df)
 colnames(counts_df) <- gsub(".RPKs", "", colnames(counts_df), fixed = TRUE)
@@ -157,7 +160,7 @@ colnames(counts_df) <- gsub("_Abundance", "", colnames(counts_df), fixed = TRUE)
 ```
 
 ### remove stratified duplicate hits, low abundant hits and NAs
-```{r clean_data, echo=params$show_code}
+```{r clean_data, echo=params$show_code, results='hide',fig.keep='all'}
 # drop stratified duplicate rows
 counts_unstratified_df <- counts_df[!grepl("\\|",rownames(counts_df)),]
 
@@ -168,12 +171,16 @@ counts_clean_df <- na.omit(counts_unstratified_df + 1)
 counts_clean_df <- counts_clean_df[!(row.names(counts_clean_df) %in% "UNMAPPED"), ]
 
 # gene abundance distribution over all samples
+png(filename = paste(out_dir_gen_plots, "count_distribution.png", sep = "/"), width = params$plot_width, height = params$plot_height, units = "in", res = 72)
 hist_plot <- hist(rowSums(counts_clean_df[-1, ]), br = 100, main = "Cleaned gene count distribution over all samples", xlab = "Genes counts")
+dev.off()
+png(filename = paste(out_dir_gen_plots, "count_distribution_log.png", sep = "/"), width = params$plot_width, height = params$plot_height, units = "in", res = 72)
 hist_log_plot <- hist(log2(rowSums(counts_clean_df[-1, ])), br = 100, main = "Log2 transformed, cleaned gene count distribution over all samples", xlab = "Log2 transformed genes counts")
+dev.off()
 ```
 
 ### set feature display names
-```{r id_mapping, echo=params$show_code}
+```{r id_mapping, echo=params$show_code, results='hide',fig.keep='all'}
 # tell tidy to stop spamming my console with col info <3
 show_col_types = FALSE
 
@@ -218,7 +225,7 @@ rownames(counts_clean_anno_df) <- counts_clean_anno_df$feature
 ```
 
 ### plots on count data
-```{r count_plots, echo=params$show_code, message=FALSE}
+```{r count_plots, echo=params$show_code, message=FALSE, results='hide',fig.keep='all'}
 # sort data by most counts per row
 counts_clean_anno_df <- counts_clean_anno_df[order(-rowSums(counts_clean_anno_df[ , 2:(length(counts_clean_anno_df)-4)])), ]
 counts_clean_num_df <- counts_clean_anno_df[ , 2:(length(counts_clean_anno_df)-4)]
@@ -244,7 +251,7 @@ ggsave(filename = "sample_to_sample_dist_log_count.png", plot = sample_dist_log,
 ```
 
 ### run MaAslin2 model for given formula
-```{r general_model, echo=params$show_code,  message=FALSE}
+```{r general_model, echo=params$show_code,  message=FALSE, results='hide',fig.keep='all'}
 # clean metadata rownames (sample names)
 catch_empty_df(metadata_df)
 row.names(counts_clean_df) <- gsub("[[:punct:]]", ".", row.names(counts_clean_df))
@@ -289,7 +296,7 @@ ggsave(filename = "volcano_plot_general.png", plot = volcano_plot_gen, device = 
 ```
 
 ### run comparisons
-```{r contrast_models, echo=params$show_code}
+```{r contrast_models, echo=params$show_code, results='hide',fig.keep='all'}
 logFC_by_cond <- as.data.frame(rownames(counts_clean_anno_df))
 colnames(logFC_by_cond)[1] <- "feature"
 

@@ -4,7 +4,18 @@ rule differential_gene_analysis:
         metadata    = config["metadata_csv"],
         comparisons = config["contrast_csv"]
     output:
-        flag        = os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}","dga_{tool}.done")
+        flag             = os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}","dga_{tool}.done"),
+        count_dist       = report(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Plots", "count_distribution.png"), caption="../assets/report/test.rst", category="DGA-General", subcategory = "Histograms"),
+        count_dist_log   = report(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Plots", "count_distribution_log.png"), caption="../assets/report/test.rst", category="DGA-General", subcategory = "Histograms"),
+        heat_gen         = report(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Plots", "heatmap_top_50_count_gen.png"), caption="../assets/report/test.rst", category="DGA-General", subcategory = "Heatmaps"),
+        heat_gen_log     = report(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Plots", "heatmap_top_50_count_log_gen.png"), caption="../assets/report/test.rst", category="DGA-General", subcategory = "Heatmaps"),
+        sample2sample    = report(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Plots", "sample_to_sample_dist_count.png"), caption="../assets/report/test.rst", category="DGA-General", subcategory = "Heatmaps"),
+        sample2sample_log= report(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Plots", "sample_to_sample_dist_log_count.png"), caption="../assets/report/test.rst", category="DGA-General", subcategory = "Heatmaps"),
+        pca_gen          = report(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Plots", "pca_general.png"), caption="../assets/report/test.rst", category="DGA-General", subcategory = "PCAs"),
+        pca_log_gen      = report(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Plots", "pca_log_general.png"), caption="../assets/report/test.rst", category="DGA-General", subcategory = "PCAs"),
+        volcano_gen      = report(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Plots", "volcano_plot_general.png"), caption="../assets/report/test.rst", category="DGA-General", subcategory = "Others"),
+        ma_gen           = report(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Plots", "ma_plot_general.png"), caption="../assets/report/test.rst", category="DGA-General", subcategory = "Others"),        
+        contrasts        = report(directory(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Contrasts")), patterns=["{contrast1}/Plots/{name}.png"], caption="../assets/report/test.rst", category="DGA-{contrast1}", subcategory = "{contrast1}")
     log:
         os.path.join(RESULTDIR, "00-Log", "dga", "dga_{tool}.log")
     conda:
@@ -35,7 +46,7 @@ rule differential_gene_analysis:
                                                         params=list(\
                                                         counts = '{input.counts}',\
                                                         metadata = '{input.metadata}', \
-                                                        show_code = 'FALSE', \
+                                                        show_code = 'TRUE', \
                                                         comparisons = '{input.comparisons}', \
                                                         formula = '{params.formula}', \
                                                         cpus = {threads},\

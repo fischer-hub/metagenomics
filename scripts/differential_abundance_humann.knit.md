@@ -21,29 +21,11 @@ params:
   result_dir: ""
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_knit$set(root.dir = params$work_dir)
-knitr::opts_chunk$set(fig.width=params$plot_width, fig.height=params$plot_height)
 
-
-# set directory variables
-out_dir <- paste(params$work_dir, params$result_dir, "04-DifferentialGeneAbundance", params$tool, sep = "/")
-out_dir_gen <- paste(out_dir, "Overview", sep = "/")
-out_dir_con <- paste(out_dir, "Contrasts", sep = "/")
-out_dir_gen_plots <- paste(out_dir_gen, "Plots", sep = "/")
-out_dir_gen_data <- paste(out_dir_gen, "Data", sep = "/")
-
-# create directories
-dir.create(out_dir, showWarnings =  FALSE)
-dir.create(out_dir_gen, showWarnings = FALSE)
-dir.create(out_dir_gen_plots, showWarnings = FALSE)
-dir.create(out_dir_gen_data, showWarnings = FALSE)
-dir.create(out_dir_con, showWarnings = FALSE)
-```
 
 ### load librarys
-```{r load_librarys, echo=params$show_code, results='hide',fig.keep='all', message=FALSE, warning=FALSE,}
+
+```r
 library(tidyverse)
 library(broom)
 library(Maaslin2)
@@ -59,7 +41,8 @@ library(pheatmap)
 ```
 
 ### load necessary files
-```{r load_files, echo=params$show_code, results='hide',fig.keep='all'}
+
+```r
 counts_df <- read.csv(file = params$counts, row.names = 1, header = TRUE, sep = '\t') 
 counts_df <- counts_df[ , order(names(counts_df))]
 
@@ -70,7 +53,8 @@ comparisons_df <- read.csv(file = params$comparisons, header = TRUE, sep = ',')
 ```
 
 ### functions
-```{r function_defs, echo=params$show_code, results='hide',fig.keep='all'}
+
+```r
 # create flag in case the script exits early
 file.create(paste(out_dir, "dga_humann.done", sep = "/"))
 
@@ -149,11 +133,11 @@ catch_empty_df <- function(df){
     quit(save = "no", status = 0)
   }
 }
-  
 ```
 
 ### clean row and col names
-```{r clean_names, echo=params$show_code, results='hide',fig.keep='all'}
+
+```r
 # clean count_df colnames (sample names)
 catch_empty_df(counts_df)
 colnames(counts_df) <- gsub(".RPKs", "", colnames(counts_df), fixed = TRUE)
@@ -161,7 +145,8 @@ colnames(counts_df) <- gsub("_Abundance", "", colnames(counts_df), fixed = TRUE)
 ```
 
 ### remove stratified duplicate hits, low abundant hits and NAs
-```{r clean_data, echo=params$show_code, results='hide',fig.keep='all'}
+
+```r
 # drop stratified duplicate rows
 counts_unstratified_df <- counts_df[!grepl("\\|",rownames(counts_df)),]
 
@@ -183,7 +168,8 @@ hist_log_plot
 ```
 
 ### set feature display names
-```{r id_mapping, echo=params$show_code, results='hide',fig.keep='all', warning=FALSE, message=FALSE}
+
+```r
 # tell tidy to stop spamming my console with col info <3
 show_col_types = FALSE
 
@@ -228,7 +214,8 @@ rownames(counts_clean_anno_df) <- counts_clean_anno_df$feature
 ```
 
 ### plots on count data
-```{r count_plots, echo=params$show_code, message=FALSE, results='hide',fig.keep='all'}
+
+```r
 # sort data by most counts per row
 counts_clean_anno_df <- counts_clean_anno_df[order(-rowSums(counts_clean_anno_df[ , 2:(length(counts_clean_anno_df)-4)])), ]
 counts_clean_num_df <- counts_clean_anno_df[ , 2:(length(counts_clean_anno_df)-4)]
@@ -238,29 +225,75 @@ metadata_df$sample <- row.names(metadata_df)
 pca_gen <- plot.pca(counts_clean_df[, 1:(length(colnames(counts_clean_df)) - 2)], metadata_df, "sample", "sample")
 ggsave(filename = "pca_general.png", plot = pca_gen, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
 pca_gen
+```
+
+<img src="../results/04-DifferentialGeneAbundance/humann/dga_humann_files/figure-html/count_plots-1.png" width="1056" />
+
+```r
 pca_gen_log <- plot.pca(log2(counts_clean_df[, 1:(length(colnames(counts_clean_df)) - 2)]), metadata_df, "sample", "sample")
 ggsave(filename = "pca_log_general.png", plot = pca_gen_log, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
 pca_gen_log
+```
 
+<img src="../results/04-DifferentialGeneAbundance/humann/dga_humann_files/figure-html/count_plots-2.png" width="1056" />
+
+```r
 # heatmap of top 50
 heat_gen <- plot.heatmap(counts_clean_num_df, 50, counts_clean_anno_df$display_name, "Heatmap top 50 counts")
+```
+
+<img src="../results/04-DifferentialGeneAbundance/humann/dga_humann_files/figure-html/count_plots-3.png" width="1056" />
+
+```r
 ggsave(filename = "heatmap_top_50_count_gen.png", plot = heat_gen, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
 heat_gen
+```
+
+<img src="../results/04-DifferentialGeneAbundance/humann/dga_humann_files/figure-html/count_plots-4.png" width="1056" />
+
+```r
 heat_gen_log <- plot.heatmap(log2(counts_clean_num_df), 50, counts_clean_anno_df$display_name, "Heatmap top 50 counts")
+```
+
+<img src="../results/04-DifferentialGeneAbundance/humann/dga_humann_files/figure-html/count_plots-5.png" width="1056" />
+
+```r
 ggsave(filename = "heatmap_top_50_count_log_gen.png", plot = heat_gen_log, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
 heat_gen_log
+```
 
+<img src="../results/04-DifferentialGeneAbundance/humann/dga_humann_files/figure-html/count_plots-6.png" width="1056" />
+
+```r
 # sample to sample distance
 sample_dist <- plot.dist(t(counts_clean_num_df), "Sample to sample count distance (euclidean)")
+```
+
+<img src="../results/04-DifferentialGeneAbundance/humann/dga_humann_files/figure-html/count_plots-7.png" width="1056" />
+
+```r
 ggsave(filename = "sample_to_sample_dist_count.png", plot = sample_dist, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
 sample_dist
+```
+
+<img src="../results/04-DifferentialGeneAbundance/humann/dga_humann_files/figure-html/count_plots-8.png" width="1056" />
+
+```r
 sample_dist_log <- plot.dist(t(log2(counts_clean_num_df)), "Sample to sample log count distance (euclidean)")
+```
+
+<img src="../results/04-DifferentialGeneAbundance/humann/dga_humann_files/figure-html/count_plots-9.png" width="1056" />
+
+```r
 ggsave(filename = "sample_to_sample_dist_log_count.png", plot = sample_dist_log, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
 sample_dist_log
 ```
 
+<img src="../results/04-DifferentialGeneAbundance/humann/dga_humann_files/figure-html/count_plots-10.png" width="1056" />
+
 ### run MaAslin2 model for given formula
-```{r general_model, echo=params$show_code,  message=FALSE, results='hide',fig.keep='all', warning=FALSE}
+
+```r
 # clean metadata rownames (sample names)
 catch_empty_df(metadata_df)
 row.names(counts_clean_df) <- gsub("[[:punct:]]", ".", row.names(counts_clean_df))
@@ -305,15 +338,54 @@ ggsave(filename = "volcano_plot_general.png", plot = volcano_plot_gen, device = 
 ```
 
 ### general analysis results
-```{r general_results, results='asis'}
+
+```r
 res_ordered <- results_df[order(-abs(results_df$logFC), results_df$qval), ]
 table_df <- res_ordered[ , c("display_name", "value", "logFC", "qval", "count_mean")]
 knitr::kable(table_df[1:min(nrow(table_df), 50), ], col.names = c('feature name', 'condition', 'log fold change', 'adj. p-value', 'norm. counts mean'))
+```
+
+
+
+|   |feature name                                                           |condition | log fold change| adj. p-value| norm. counts mean|
+|:--|:----------------------------------------------------------------------|:---------|---------------:|------------:|-----------------:|
+|16 |HMPREF0880_02691                                                       |treatment |     -11.0070148|    0.4397794|          956.4850|
+|1  |A6M23_06185                                                            |treatment |      -1.9736860|    1.0000000|          450.1605|
+|7  |HMPREF0880_00179                                                       |treatment |      -1.4995670|    1.0000000|         1319.8975|
+|10 |HMPREF0880_00552                                                       |treatment |      -1.4995670|    1.0000000|         1319.8975|
+|28 |grdA2 &#124;  Glycine/sarcosine/betaine reductase complex component A2 |treatment |      -0.9472144|    1.0000000|          929.4375|
+|5  |rpmH                                                                   |treatment |      -0.7928096|    1.0000000|          840.8587|
+|17 |HMPREF0880_02786                                                       |treatment |      -0.7560933|    1.0000000|         2310.9375|
+|25 |HMPREF0880_04766                                                       |treatment |      -0.7560933|    1.0000000|         2310.9375|
+|20 |HMPREF0880_03700                                                       |treatment |       0.6048578|    1.0000000|         1205.5675|
+|14 |HMPREF0880_02032                                                       |treatment |      -0.6011364|    1.0000000|          999.0620|
+|3  |crl_1                                                                  |treatment |      -0.5192934|    1.0000000|         2524.4625|
+|9  |HMPREF0880_00356                                                       |treatment |      -0.3941507|    1.0000000|          842.1550|
+|18 |HMPREF0880_02866                                                       |treatment |      -0.3941507|    1.0000000|          842.1550|
+|24 |HMPREF0880_04720                                                       |treatment |      -0.3941507|    1.0000000|          842.1550|
+|26 |UUU_05910                                                              |treatment |      -0.3941507|    1.0000000|          842.1550|
+|29 |EDP2_1152                                                              |treatment |      -0.3941507|    1.0000000|          842.1550|
+|21 |HMPREF0880_03934                                                       |treatment |      -0.3939921|    1.0000000|          631.8675|
+|8  |HMPREF0880_00295                                                       |treatment |      -0.3244819|    1.0000000|         1321.7640|
+|12 |HMPREF0880_01557                                                       |treatment |      -0.2473080|    1.0000000|         2674.3500|
+|22 |HMPREF0880_03949                                                       |treatment |      -0.2198835|    1.0000000|         1127.3865|
+|4  |A0A377T6U1                                                             |treatment |      -0.1801856|    1.0000000|         1833.1950|
+|6  |LTSESEN_5372                                                           |treatment |       0.1389680|    1.0000000|          739.3858|
+|23 |HMPREF0880_04537                                                       |treatment |      -0.0864226|    1.0000000|          954.5685|
+|27 |mntS &#124;  Small protein MntS                                        |treatment |       0.0000000|    1.0000000|         1983.0750|
+|2  |A0A2A7PRR7                                                             |treatment |       0.0000000|    1.0000000|          992.0400|
+|11 |HMPREF0880_01538                                                       |treatment |       0.0000000|    1.0000000|          992.0400|
+|13 |HMPREF0880_01844                                                       |treatment |       0.0000000|    1.0000000|          992.0400|
+|15 |HMPREF0880_02503                                                       |treatment |       0.0000000|    1.0000000|          567.3050|
+|19 |HMPREF0880_03629                                                       |treatment |       0.0000000|    1.0000000|          744.2800|
+
+```r
 write.csv(table_df[1:min(nrow(table_df), 50), ], file = paste(out_dir_gen_data, "top_50_significantly_expressed_features.csv", sep = "/"))
 ```
 
 ### run comparisons
-```{r contrast_models, echo=params$show_code, results='hide',fig.keep='all'}
+
+```r
 logFC_by_cond <- as.data.frame(rownames(counts_clean_anno_df))
 colnames(logFC_by_cond)[1] <- "feature"
 
@@ -432,7 +504,8 @@ stopCluster(cl)
 ```
 
 ### summarize per-contrast output
-```{r summary_output, results='asis'}
+
+```r
 for(i in 1:length(worker_array)){ 
   if(is.data.frame(worker_array[[i]])){
     logFC_by_cond <- merge(logFC_by_cond, worker_array[[i]], by = "feature")
@@ -454,7 +527,43 @@ logFC_by_cond_num[logFC_by_cond_num == 1] <- 0
 
 write.csv(logFC_by_cond, file = paste(out_dir_gen_data, "logFC_per_contrast.csv", sep = "/"))
 knitr::kable(logFC_by_cond[1:min(nrow(logFC_by_cond), 50), ])
+```
 
+
+
+|                                                   | treatment_vs_control| qval_treatment_vs_control| control_vs_treatment| qval_control_vs_treatment|
+|:--------------------------------------------------|--------------------:|-------------------------:|--------------------:|-------------------------:|
+|UniRef50.G9Z5A2                                    |           11.0070148|                 0.4397794|          -11.0070148|                 0.4397794|
+|UniRef50.A0A1C2IEP4                                |            1.9736860|                 1.0000000|           -1.9736860|                 1.0000000|
+|UniRef50.G9YY89                                    |            1.4995670|                 1.0000000|           -1.4995670|                 1.0000000|
+|UniRef50.G9YZA7                                    |            1.4995670|                 1.0000000|           -1.4995670|                 1.0000000|
+|UniRef50.Q6LH19..Glycine.sarcosine.betaine.redu... |            0.9472144|                 1.0000000|           -0.9472144|                 1.0000000|
+|UniRef50.C0ZVP8                                    |            0.7928096|                 1.0000000|           -0.7928096|                 1.0000000|
+|UniRef50.G9Z5U1                                    |            0.7560933|                 1.0000000|           -0.7560933|                 1.0000000|
+|UniRef50.G9ZB48                                    |            0.7560933|                 1.0000000|           -0.7560933|                 1.0000000|
+|UniRef50.G9Z856                                    |           -0.6048578|                 1.0000000|            0.6048578|                 1.0000000|
+|UniRef50.G9Z3N8                                    |            0.6011364|                 1.0000000|           -0.6011364|                 1.0000000|
+|UniRef50.A0A376U2I3                                |            0.5192934|                 1.0000000|           -0.5192934|                 1.0000000|
+|UniRef50.G9YYR9                                    |            0.3941507|                 1.0000000|           -0.3941507|                 1.0000000|
+|UniRef50.G9Z6B8                                    |            0.3941507|                 1.0000000|           -0.3941507|                 1.0000000|
+|UniRef50.G9ZB04                                    |            0.3941507|                 1.0000000|           -0.3941507|                 1.0000000|
+|UniRef50.J2XCU8                                    |            0.3941507|                 1.0000000|           -0.3941507|                 1.0000000|
+|UniRef50.V5B655                                    |            0.3941507|                 1.0000000|           -0.3941507|                 1.0000000|
+|UniRef50.G9Z8F3                                    |            0.3939921|                 1.0000000|           -0.3939921|                 1.0000000|
+|UniRef50.G9YYK8                                    |            0.3244819|                 1.0000000|           -0.3244819|                 1.0000000|
+|UniRef50.G9Z249                                    |            0.2473080|                 1.0000000|           -0.2473080|                 1.0000000|
+|UniRef50.G9Z8G6                                    |            0.2198835|                 1.0000000|           -0.2198835|                 1.0000000|
+|UniRef50.A0A377T6U1                                |            0.1801856|                 1.0000000|           -0.1801856|                 1.0000000|
+|UniRef50.G5R6P8                                    |           -0.1389680|                 1.0000000|            0.1389680|                 1.0000000|
+|UniRef50.G9ZAH6                                    |            0.0864226|                 1.0000000|           -0.0864226|                 1.0000000|
+|UniRef50.P0DKB3..Small.protein.MntS                |            0.0000000|                 1.0000000|            0.0000000|                 1.0000000|
+|UniRef50.G9Z7T7                                    |            0.0000000|                 1.0000000|            0.0000000|                 1.0000000|
+|UniRef50.G9Z4G0                                    |            0.0000000|                 1.0000000|            0.0000000|                 1.0000000|
+|UniRef50.A0A2A7PRR7                                |            0.0000000|                 1.0000000|            0.0000000|                 1.0000000|
+|UniRef50.G9Z230                                    |            0.0000000|                 1.0000000|            0.0000000|                 1.0000000|
+|UniRef50.G9Z348                                    |            0.0000000|                 1.0000000|            0.0000000|                 1.0000000|
+
+```r
 # get display names
 logFC_by_cond <- merge(logFC_by_cond, counts_clean_anno_df, by.x = 0, by.y = 0, all.x = TRUE)
 
@@ -462,7 +571,11 @@ logFC_by_cond <- merge(logFC_by_cond, counts_clean_anno_df, by.x = 0, by.y = 0, 
 heat_FC <- plot.heatmap(logFC_by_cond_num, min(nrow(logFC_by_cond_num), 50), logFC_by_cond$display_name, "Heatmap of top 50 significant, expressed features by contrasts")
 ggsave(filename = "heatmap_top_50_FC_by_contrast.png", plot = heat_FC, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
 heat_FC
+```
 
+<img src="../results/04-DifferentialGeneAbundance/humann/dga_humann_files/figure-html/summary_output-1.png" width="1056" />
+
+```r
 # pca of top significant and expressed features by contrasts
 temp <- as.data.frame(colnames(logFC_by_cond_num))
 colnames(temp)[1] <- "contrast"
@@ -470,3 +583,5 @@ pca_FC <- plot.pca(logFC_by_cond_num, temp, "contrast", "contrast")
 ggsave(filename = "contrasts_pca.png", plot = pca_FC, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
 pca_FC
 ```
+
+<img src="../results/04-DifferentialGeneAbundance/humann/dga_humann_files/figure-html/summary_output-2.png" width="1056" />

@@ -195,8 +195,12 @@ The pipeline will try to create the following plots (depending on wether there i
 - per contrast Volcano-Plot of top 100 features sorted by descending log fold change and ascending adjusted p-value
 - per contrast MA-Plot sorted by descending log fold change and ascending adjusted p-value
 
-There will also be a html report created for the whole analysis containing some of the results (data and plots) that you can find PLACEHOLDER.
+There will also be a html report created for the whole analysis containing some of the results (data and plots) that you can find under `$resultdir/04-DifferentialGeneAnalysis/$toolname/dga_$toolname.html`.\
+NOTE: Because of restrictions in RMarkdown some plots might be distorted or missing. It is advised to further inspect results and plots via the Snakemake report tool in the next section or by reviewing the figures in the result directory manually.
 
+
+## Reports
+Besides the automatically generated html report for the statistical analysis of the gene abundance mentioned in the section before, you can create a `Snakemake` report summing up the results and statistics of the pipeline run after the run is finished with `snakemake --report my_report.html`. The resulting report will be created in the project directory by default, where you can also find the Snakefile.
 
 ## LICENSE
 

@@ -196,7 +196,7 @@ The pipeline will try to create the following plots (depending on wether there i
 - per contrast MA-Plot sorted by descending log fold change and ascending adjusted p-value
 
 There will also be a html report created for the whole analysis containing some of the results (data and plots) that you can find under `$resultdir/04-DifferentialGeneAnalysis/$toolname/dga_$toolname.html`.\
-NOTE: Because of restrictions in RMarkdown some plots might be distorted or missing. It is advised to further inspect results and plots via the Snakemake report tool in the next section or by reviewing the figures in the result directory manually.
+NOTE: Because of restrictions in RMarkdown some plots might be distorted or missing, this is especially true for per-contrast figures. It is therefore advised to further inspect results and plots via the Snakemake report tool in the next section or by reviewing the figures in the result directory manually and use the RMarkdown reports to get an idea of what is happening during the analysis / general explorative data analysis.
 
 
 ## Reports

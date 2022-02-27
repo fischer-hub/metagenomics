@@ -24,6 +24,7 @@ params:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(root.dir = params$work_dir)
+knitr::opts_chunk$set(fig.width=params$plot_width, fig.height=params$plot_height)
 
 
 # set directory variables
@@ -42,7 +43,7 @@ dir.create(out_dir_con, showWarnings = FALSE)
 ```
 
 ### load librarys
-```{r load_librarys, echo=params$show_code, results='hide',fig.keep='all'}
+```{r load_librarys, echo=params$show_code, results='hide',fig.keep='all', message=FALSE, warning=FALSE}
 library(tidyverse)
 library(broom)
 library(Maaslin2)
@@ -148,7 +149,7 @@ catch_empty_df <- function(df){
 
 ```
 
-## clean row and col names
+### clean row and col names
 ```{r clean_names, echo=params$show_code, results='hide',fig.keep='all'}
 # clean count_df colnames (sample names)
 catch_empty_df(counts_df)
@@ -176,9 +177,11 @@ counts_clean_df <- apply(counts_clean_df, 2, function(x) x*1e6/sum(x))
 png(filename = paste(out_dir_gen_plots, "count_distribution.png", sep = "/"), width = params$plot_width, height = params$plot_height, units = "in", res = 72)
 hist_plot <- hist(rowSums(counts_clean_df), br = 100, main = "Cleaned gene count distribution over all samples", xlab = "Genes counts")
 dev.off()
+hist_plot
 png(filename = paste(out_dir_gen_plots, "count_distribution_log.png", sep = "/"), width = params$plot_width, height = params$plot_height, units = "in", res = 72)
 hist_log_plot <- hist(log2(rowSums(counts_clean_df)), br = 100, main = "Log2 transformed, cleaned gene count distribution over all samples", xlab = "Log2 transformed genes counts")
 dev.off()
+hist_log_plot
 ```
 
 ### clean counts table row names
@@ -197,25 +200,31 @@ counts_clean_df <- counts_clean_df[order(-rowSums(counts_clean_df)), ]
 metadata_df$sample <- row.names(metadata_df)
 pca_gen <- plot.pca(counts_clean_df, metadata_df, "sample", "sample")
 ggsave(filename = "pca_general.png", plot = pca_gen, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
+pca_gen
 pca_gen_log <- plot.pca(log2(counts_clean_df), metadata_df, "sample", "sample")
 ggsave(filename = "pca_log_general.png", plot = pca_gen_log, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
+pca_gen_log
 
 # heatmap of top 50
 heat_gen <- plot.heatmap(counts_clean_df, 50, row.names(counts_clean_df), "Heatmap top 50 counts")
 ggsave(filename = "heatmap_top_50_count_gen.png", plot = heat_gen, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
+heat_gen
 heat_gen_log <- plot.heatmap(log2(counts_clean_df), 50, row.names(counts_clean_df), "Heatmap top 50 counts")
 ggsave(filename = "heatmap_top_50_count_log_gen.png", plot = heat_gen_log, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
+heat_gen_log
 
 # sample to sample distance
 sample_dist <- plot.dist(t(counts_clean_df), "Sample to sample count distance (euclidean)")
 ggsave(filename = "sample_to_sample_dist_count.png", plot = sample_dist, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
+sample_dist
 sample_dist_log <- plot.dist(t(log2(counts_clean_df)), "Sample to sample log count distance (euclidean)")
 ggsave(filename = "sample_to_sample_dist_log_count.png", plot = sample_dist_log, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
+sample_dist_log
 ```
 
 
 ### run MaAslin2 model for given formula
-```{r general_model, echo=TRUE, results='hide',fig.keep='all'}
+```{r general_model, echo=TRUE, results='hide',fig.keep='all', warning=FALSE}
 # set reference level for each condition assuming first occurence is reference for now
 ref_levels <- c()
 conditions <- strsplit(params$formula, "\\+")[[1]]
@@ -249,9 +258,19 @@ results_df <- mutate(results_df, logFC = log2(exp(results_df$coef)))
 
 ma_plot_gen <- plot.ma(results_df, "all groups")
 ggsave(filename = "ma_plot_general.png", plot = ma_plot_gen, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
+ma_plot_gen
 
 volcano_plot_gen <- plot.volcano(results_df, "Total differential abundant features", row.names(results_df), "all groups")
 ggsave(filename = "volcano_plot_general.png", plot = volcano_plot_gen, device = png, path = out_dir_gen_plots, width = 15, height = 10)
+volcano_plot_gen
+```
+
+### general analysis results
+```{r general_results, results='asis'}
+res_ordered <- results_df[order(-abs(results_df$logFC), results_df$qval), ]
+table_df <- res_ordered[ , c("feature", "value", "logFC", "qval", "count_mean")]
+knitr::kable(table_df[1:min(nrow(table_df), 50), ], col.names = c('feature name', 'condition', 'log fold change', 'adj. p-value', 'norm. counts mean'))
+write.csv(table_df[1:min(nrow(table_df), 50), ], file = paste(out_dir_gen_data, "top_50_significantly_expressed_features.csv", sep = "/"))
 ```
 
 ### run comparisons
@@ -323,14 +342,14 @@ worker_array <- foreach(i = 1:nrow(comparisons_df), .errorhandling='pass', .verb
   
   # get top 100 significant features ordered by logFC
   top_100_df <- res_sig_ordered_df[1:min(nrow(res_sig_ordered_df), 100), ]
-  bin <- write.csv(top_100_df, file = paste(out_dir_curr_data, paste(contrast, "top_100_features.csv", sep = "_"), sep = "/"))
+  write.csv(top_100_df, file = paste(out_dir_curr_data, paste(contrast, "top_100_features.csv", sep = "_"), sep = "/"))
   
   try({
     # plot pca colored by current condition
     pca_con <- plot.pca(counts_clean_df, metadata_df, cond, cond)
-    bin <- ggsave(filename = paste(contrast, "pca.png"), plot = pca_con, device = png, path = out_dir_curr_plots, height = params$plot_height, width = params$plot_width)
+    bin <- ggsave(filename = paste(contrast, "pca.png", sep = "/"), plot = pca_con, device = png, path = out_dir_curr_plots, height = params$plot_height, width = params$plot_width)
     pca_con_log <- plot.pca(log2(counts_clean_df), metadata_df, cond, cond)
-    bin <- ggsave(filename = paste(contrast, "pca_log.png"), plot = pca_con_log, device = png, path = out_dir_curr_plots, height = params$plot_height, width = params$plot_width)
+    bin <- ggsave(filename = paste(contrast, "pca_log.png", sep = "/"), plot = pca_con_log, device = png, path = out_dir_curr_plots, height = params$plot_height, width = params$plot_width)
   }, silent=TRUE)
   
   # heatmap of top 50
@@ -370,7 +389,10 @@ worker_array <- foreach(i = 1:nrow(comparisons_df), .errorhandling='pass', .verb
 }
 
 stopCluster(cl)
+```
 
+### summarize per-contrast output
+```{r summary_output, results='asis'}
 for(i in 1:length(worker_array)){ 
   if(is.data.frame(worker_array[[i]])){
     logFC_by_cond <- merge(logFC_by_cond, worker_array[[i]], by = "feature")
@@ -388,13 +410,18 @@ logFC_by_cond <- logFC_by_cond[order(-rowSums(abs(logFC_by_cond[ , seq(2, ncol(l
 logFC_by_cond_num <- logFC_by_cond[ , seq(2, ncol(logFC_by_cond), 2)]
 logFC_by_cond_num[logFC_by_cond_num == 1] <- 0
 
+write.csv(logFC_by_cond, file = paste(out_dir_gen_data, "logFC_per_contrast.csv", sep = "/"))
+knitr::kable(logFC_by_cond[1:min(nrow(logFC_by_cond), 50), ])
+
 # heatmap of top significant and expressed features by contrasts
 heat_FC <- plot.heatmap(logFC_by_cond_num, min(nrow(logFC_by_cond_num), 50), logFC_by_cond$feature, "Heatmap of top 50 significant, expressed features by contrasts")
 ggsave(filename = "heatmap_top_50_FC_by_contrast.png", plot = heat_FC, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
+heat_FC
 
 # pca of top significant and expressed features by contrasts
 temp <- as.data.frame(colnames(logFC_by_cond_num))
 colnames(temp)[1] <- "contrast"
 pca_FC <- plot.pca(logFC_by_cond_num, temp, "contrast", "contrast")
 ggsave(filename = "contrasts_pca.png", plot = pca_FC, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
+pca_FC
 ```

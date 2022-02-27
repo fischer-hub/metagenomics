@@ -69,11 +69,6 @@ rule all:
             shutil.move("metagenomics_report.html", os.path.join(RESULTDIR, "05-Summary", "metagenomics_report.html"))
         except OSError:
             pass
-        """
-        [ -e {params.results}04-DifferentialGeneAbundance/humann/dga_humann.done ] && rm {params.results}04-DifferentialGeneAbundance/humann/dga_humann.done > {log} 2>&1
-        [ -e {params.results}04-DifferentialGeneAbundance/megan/dga_megan.done ] && rm {params.results}04-DifferentialGeneAbundance/megan/dga_megan.done >> {log} 2>&1
-        [ -e Rplots.pdf ] && rm Rplots.pdf >> {log} 2>&1
-        """
         #[ -e metagenomics_report.html ] && mv metagenomics_report.html {params.results}05-Summary/ >> {log} 2>&1
 
 

@@ -25,7 +25,7 @@ rule humann_databases:
         mkdir -p {params.installDir}
         humann_databases --download chocophlan {params.c_build} {params.installDir}/nuc 2> {log.c} > /dev/null
         humann_databases --download uniref {params.u_build} {params.installDir}/prot 2> {log.u} > /dev/null
-        humann_test --run-functional-tests-tools --run-functional-tests-end-to-end > {log.t}
+        humann_test --run-functional-tests-tools --run-functional-tests-end-to-end > {log.t} 2>&1
         """
         
 

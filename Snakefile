@@ -1,6 +1,6 @@
 import pandas as pd
 import glob
-import os, shutil
+import os
 import yaml
 
 configfile: "profiles/config.yaml"

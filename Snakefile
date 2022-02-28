@@ -48,7 +48,6 @@ SINGLE = True if pd.isna(SAMPLESHEET.loc[0, "R2"]) == 0 else False
 
 print(f"{bcolors.OKBLUE}INFO: Found sample files:", SAMPLE)
 
-
 rule all:
     input:
         rule_all_input,
@@ -66,10 +65,8 @@ rule all:
             os.remove("Rplots.pdf")
             os.remove(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "humann", "dga_humann.done"))
             os.remove(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "megan", "dga_megan.done"))
-            shutil.move("metagenomics_report.html", os.path.join(RESULTDIR, "05-Summary", "metagenomics_report.html"))
         except OSError:
             pass
-        #[ -e metagenomics_report.html ] && mv metagenomics_report.html {params.results}05-Summary/ >> {log} 2>&1
 
 
 onsuccess:

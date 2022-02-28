@@ -3,7 +3,7 @@ reads: "assets/test_data/input.csv"
 mode: "paired"
 ext: ""
 help: "dummy value"
-cleanup: true
+cleanup: "true"
 
 # directory structure
 results: "results"

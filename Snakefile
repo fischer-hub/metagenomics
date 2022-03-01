@@ -1,7 +1,5 @@
 import pandas as pd
-import glob
-import os
-import yaml
+import os, shutil, yaml, glob
 
 configfile: "profiles/config.yaml"
 include: "scripts/create_input_csv.py"
@@ -82,6 +80,8 @@ onsuccess:
     if CLEAN == "true":
         try:
             os.remove(TEMPDIR)
+            shutil.move(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "humann","dga_humann.html"), os.path.join(RESULTDIR, "05-Summary", "dga_report_humann.html"))
+            shutil.move(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "megan","dga_megan.html"), os.path.join(RESULTDIR, "05-Summary", "dga_report_megan.html"))
         except OSError:
             pass
 

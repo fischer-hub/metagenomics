@@ -122,12 +122,12 @@ rule humann_normalize:
 
 rule humann_regroup:
     input:
-        genefamilies        = os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "humann", "Overview", "Data", "logFC_per_contrast.tsv")
-        #genefamilies        = os.path.join(RESULTDIR, "03-CountData", "humann", f"genefamilies_{UNITS}_combined.tsv")
+        per_contrast        = os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "humann", "Overview", "Data", "logFC_per_contrast.tsv"),
+        genefamilies        = os.path.join(RESULTDIR, "03-CountData", "humann", f"genefamilies_{UNITS}_combined.tsv")
     output:
         installDir          = directory(os.path.join(CACHEDIR, "databases", "humann", "mapping_files")),
-        #genefamilies_eggNOG = os.path.join(RESULTDIR, "03-CountData", "humann", f"genefamilies_{UNITS}_combined_eggNOG.tsv")
-        genefamilies_eggNOG = os.path.join(RESULTDIR, "03-CountData", "humann", "logFC_per_contrast_eggNOG.tsv")
+        per_contrast_eggNOG = os.path.join(RESULTDIR, "03-CountData", "humann", "logFC_per_contrast_eggNOG.tsv"),
+        genefamilies_eggNOG = os.path.join(RESULTDIR, "03-CountData", "humann", f"genefamilies_{UNITS}_combined_eggNOG.tsv")
     log:
         os.path.join(RESULTDIR, "00-Log", "humann", "humann_regroup.log")
     conda:
@@ -145,5 +145,6 @@ rule humann_regroup:
     shell:
         """
         [ ! -e {output.installDir}/full_mapping_v201901b.tar.gz ] && humann_databases --download utility_mapping full {output.installDir} > {log} 2>&1
-        humann_regroup_table --input {input} --groups {params.prot_db}_eggnog --output {output.genefamilies_eggNOG} 2>> {log}
+        humann_regroup_table --input {input.per_contrast} --groups {params.prot_db}_eggnog --output {output.per_contrast_eggNOG} 2>> {log}
+        humann_regroup_table --input {input.genefamilies} --groups {params.prot_db}_eggnog --output {output.genefamilies_eggNOG} 2>> {log}
         """

@@ -8,7 +8,9 @@ include: "scripts/create_input_csv.py"
 include: "scripts/io.py"
 include: "rules/common.smk"
 
-if config["help"] != "dummy value": print(f"{HELPMSG}")
+if config["help"] != "dummy value" :
+    print(f"{HELPMSG}")
+    exit()
 
 # read in samplesheet
 if ".csv" in READS:

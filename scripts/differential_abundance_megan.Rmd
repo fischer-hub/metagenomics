@@ -56,6 +56,7 @@ library(EnhancedVolcano)
 library(UniProt.ws)
 library(ggplot2)
 library(pheatmap)
+library(UpSetR)
 ```
 
 ### load necessary files
@@ -410,8 +411,8 @@ logFC_by_cond <- logFC_by_cond[order(-rowSums(abs(logFC_by_cond[ , seq(2, ncol(l
 logFC_by_cond_num <- logFC_by_cond[ , seq(2, ncol(logFC_by_cond), 2)]
 logFC_by_cond_num[logFC_by_cond_num == 1] <- 0
 
-write.csv(logFC_by_cond, file = paste(out_dir_gen_data, "logFC_per_contrast.csv", sep = "/"))
-knitr::kable(logFC_by_cond[1:min(nrow(logFC_by_cond), 50), ])
+write.table(logFC_by_cond, file = paste(out_dir_gen_data, "logFC_per_contrast.tsv", sep = "/"), sep = '\t')
+knitr::kable(logFC_by_cond[1:min(nrow(logFC_by_cond), 50), ], row.names = NA)
 
 # heatmap of top significant and expressed features by contrasts
 heat_FC <- plot.heatmap(logFC_by_cond_num, min(nrow(logFC_by_cond_num), 50), logFC_by_cond$feature, "Heatmap of top 50 significant, expressed features by contrasts")
@@ -424,4 +425,19 @@ colnames(temp)[1] <- "contrast"
 pca_FC <- plot.pca(logFC_by_cond_num, temp, "contrast", "contrast")
 ggsave(filename = "contrasts_pca.png", plot = pca_FC, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
 pca_FC
+
+# upset plots
+upset_ids <- as.data.frame(logFC_by_cond_num)
+upset_ids[is.na(upset_ids)] <- 0
+upset_ids <- as.data.frame(apply(upset_ids, 2, function(x) ifelse(abs(x) > params$fc_threshold, 1, 0)))
+
+png(filename = paste(out_dir_gen_plots, "upset_plot_per_contrast.png", sep = "/"), width = params$plot_width, height = params$plot_height, units = "in", res = 72)
+upset(upset_ids, order.by = "freq",  nsets = ncol(upset_ids), nintersects = 40, mainbar.y.label = "number of common features between contrasts", sets.x.label = "number of signific features per contrast", keep.order = T, text.scale = 1.4, point.size = 2.6, line.size = 0.8, set_size.show = TRUE)
+dev.off()
+upset(upset_ids, order.by = "freq",  nsets = ncol(upset_ids), nintersects = 40, mainbar.y.label = "number of common features between contrasts", sets.x.label = "number of signific features per contrast", keep.order = T, text.scale = 1.4, point.size = 2.6, line.size = 0.8, set_size.show = TRUE)
+```
+
+# session info
+```{r}
+sessionInfo()
 ```

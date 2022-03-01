@@ -5,6 +5,7 @@ rule differential_gene_analysis:
         comparisons = config["contrast_csv"]
     output:
         flag             = os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}","dga_{tool}.done"),
+        logFC_con        = os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Data", "logFC_per_contrast.tsv"),
         count_dist       = report(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Plots", "count_distribution.png"), caption="../assets/report/test.rst", category="DGA-General", subcategory = "Histograms"),
         count_dist_log   = report(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Plots", "count_distribution_log.png"), caption="../assets/report/test.rst", category="DGA-General", subcategory = "Histograms"),
         heat_gen         = report(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Plots", "heatmap_top_50_count_gen.png"), caption="../assets/report/test.rst", category="DGA-General", subcategory = "Heatmaps"),
@@ -14,7 +15,8 @@ rule differential_gene_analysis:
         pca_gen          = report(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Plots", "pca_general.png"), caption="../assets/report/test.rst", category="DGA-General", subcategory = "PCAs"),
         pca_log_gen      = report(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Plots", "pca_log_general.png"), caption="../assets/report/test.rst", category="DGA-General", subcategory = "PCAs"),
         volcano_gen      = report(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Plots", "volcano_plot_general.png"), caption="../assets/report/test.rst", category="DGA-General", subcategory = "Others"),
-        ma_gen           = report(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Plots", "ma_plot_general.png"), caption="../assets/report/test.rst", category="DGA-General", subcategory = "Others"),        
+        ma_gen           = report(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Plots", "ma_plot_general.png"), caption="../assets/report/test.rst", category="DGA-General", subcategory = "Others"),
+        upset_con        = report(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Plots", "upset_plot_per_contrast.png"), caption="../assets/report/test.rst", category="DGA-General", subcategory = "Others"),
         contrasts        = report(directory(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Contrasts")), patterns=["{contrast1}/Plots/{name}.png"], caption="../assets/report/test.rst", category="DGA-{contrast1}", subcategory = "{contrast1}")
     log:
         os.path.join(RESULTDIR, "00-Log", "dga", "dga_{tool}.log")

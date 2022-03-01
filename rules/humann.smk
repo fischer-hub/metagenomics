@@ -9,7 +9,7 @@ rule humann_databases:
     params:
         u_build     = config["protDB_build"],
         c_build     = config["nucDB_build"],
-        installDir  = lambda w, output: os.path.split(output[0])[0], #os.path.join(CACHEDIR, "databases", "humann")
+        installDir  = lambda w, output: os.path.split(output[0])[0],
     conda:
         os.path.join("..", "envs", "humann.yaml")
     resources:
@@ -49,7 +49,7 @@ rule humann_compute:
     threads:
         RES["humann_compute"]["cpu"]
     params:
-        outdir      = lambda w, output: os.path.split(output[0])[0], #os.path.join(TEMPDIR, "humann", "raw", "{sample}_genefamilies.tsv").rsplit('/',1)[0],
+        outdir      = lambda w, output: os.path.split(output[0])[0],
         read_len    = 45
     message:
         "humann_compute({wildcards.sample})\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
@@ -108,7 +108,7 @@ rule humann_normalize:
     threads:
         RES["humann_normalize"]["cpu"]
     params:
-        outdir = lambda w, output: os.path.split(output[0])[0], #os.path.join(RESULTDIR, "03-CountData", "humann"),
+        outdir = lambda w, output: os.path.split(output[0])[0],
         units = UNITS
     message:
         "humann_norm\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
@@ -117,4 +117,33 @@ rule humann_normalize:
         humann_renorm_table --input {input.genefamilies} --output {output.genefamilies} --units {params.units} 2> {log}
         humann_renorm_table --input {input.pathabundance} --output {output.pathabundance} --units {params.units} 2>> {log}
         mv {input.pathCov} {output.pathCov} 2>> {log}
+        """
+
+
+rule humann_regroup:
+    input:
+        genefamilies        = os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "humann", "Overview", "Data", "logFC_per_contrast.tsv")
+        #genefamilies        = os.path.join(RESULTDIR, "03-CountData", "humann", f"genefamilies_{UNITS}_combined.tsv")
+    output:
+        installDir          = directory(os.path.join(CACHEDIR, "databases", "humann", "mapping_files")),
+        #genefamilies_eggNOG = os.path.join(RESULTDIR, "03-CountData", "humann", f"genefamilies_{UNITS}_combined_eggNOG.tsv")
+        genefamilies_eggNOG = os.path.join(RESULTDIR, "03-CountData", "humann", "logFC_per_contrast_eggNOG.tsv")
+    log:
+        os.path.join(RESULTDIR, "00-Log", "humann", "humann_regroup.log")
+    conda:
+        os.path.join("..", "envs", "humann.yaml")
+    params:
+        prot_db = config["protDB_build"].split("_")[0]
+    resources:
+        time        = RES["humann_regroup"]["time"],
+        mem_mb      = RES["humann_regroup"]["mem"],
+        partition   = RES["humann_regroup"]["partition"]
+    threads:
+        RES["humann_regroup"]["cpu"]
+    message:
+        "humann_regroup\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
+    shell:
+        """
+        [ ! -e {output.installDir}/full_mapping_v201901b.tar.gz ] && humann_databases --download utility_mapping full {output.installDir} > {log} 2>&1
+        humann_regroup_table --input {input} --groups {params.prot_db}_eggnog --output {output.genefamilies_eggNOG} 2>> {log}
         """

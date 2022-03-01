@@ -21,11 +21,8 @@ def main(args=None):
     fastq_dir   = args.FASTQ_DIR
     mode        = args.READ_MODE
     dictionary = defaultdict(list)
-    WD = os.getcwd()
     
-    print(absoluteFilePaths(fastq_dir))
-
-    files = sorted(glob.glob(os.path.join(fastq_dir, f"*.gz"), recursive=False))
+    files = sorted(list(absoluteFilePaths(fastq_dir)))
     files = set(map(lambda x: (x.split(os.path.sep)[-1].rsplit(".")[0].rsplit("_")[0], x), files)) if mode != "single" else set(map(lambda x: (x.split(os.path.sep)[-1].rsplit(".")[0], x), files))
 
     for SRR, path in files:

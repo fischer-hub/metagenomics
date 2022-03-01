@@ -2,10 +2,12 @@ def rule_all_input(wildcards):
 
     humann  = [    os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "humann", "dga_humann.done")     ]
     megan   = [    os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "megan", "dga_megan.done")     ]
-    
+    #compare = [    os.path.join(RESULTDIR, "03-CountData", "humann", f"genefamilies_{UNITS}_combined_eggNOG.tsv")   ]
+    compare = [    os.path.join(RESULTDIR, "03-CountData", "humann", "logFC_combined_eggNOG.tsv")   ]
+
     if "humann" in CORETOOLS and "megan" in CORETOOLS:
         print(f"{bcolors.OKBLUE}INFO: Running pipeline with core tools MEGAN6 and HUMAnN 3.0 to classify input reads.{bcolors.ENDC}")
-        return humann + megan
+        return humann + megan + compare
 
     elif "humann" in CORETOOLS:
         print(f"{bcolors.OKBLUE}INFO: Running pipeline with core tool HUMAnN 3.0.")
@@ -17,7 +19,7 @@ def rule_all_input(wildcards):
 
     else:
         print(f"{bcolors.FAIL}WARNING: No core tool was chosen to classify the reads. Running all core tools now..{bcolors.ENDC}")
-        return humann + megan
+        return humann + megan + compare
 
 
 def dga_counts(wildcards):

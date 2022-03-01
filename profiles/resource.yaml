@@ -15,6 +15,7 @@ humann_compute:       {cpu: 32, mem: 25, time: 1200, partition: "big"}
 humann_join:          {cpu: 8,  mem: 8,  time: 60,   partition: ""   }
 humann_database:      {cpu: 4,  mem: 8,  time: 60,   partition: ""   }
 humann_normalize:     {cpu: 4,  mem: 8,  time: 60,   partition: ""   }
+humann_regroup:       {cpu: 4,  mem: 8,  time: 60,   partition: ""   }
 join_megan_tsv:       {cpu: 1,  mem: 4,  time: 60,   partition: ""   }
 multiqc:              {cpu: 4,  mem: 8,  time: 60,   partition: ""   }
 trimmomatic:          {cpu: 16, mem: 16, time: 60,   partition: ""   }

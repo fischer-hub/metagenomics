@@ -1,11 +1,14 @@
 name: analysis
 channels:
   - conda-forge
+  - bioconda
+  - defaults
 dependencies:
-  - r-tidyverse
   - bioconductor-maaslin2
-  - ca-certificates
-  - openssl
-  - r-doparallel
   - bioconductor-enhancedvolcano
   - bioconductor-uniprot.ws
+  - r-tidyverse
+  - r-upsetr
+  - r-doparallel
+  - ca-certificates
+  - openssl

@@ -1,0 +1,1 @@
+Minus average plot showing log2 transformed fold change over the mean of normalized counts.

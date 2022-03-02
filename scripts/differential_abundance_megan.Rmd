@@ -40,9 +40,6 @@ dir.create(out_dir_gen, showWarnings = FALSE)
 dir.create(out_dir_gen_plots, showWarnings = FALSE)
 dir.create(out_dir_gen_data, showWarnings = FALSE)
 dir.create(out_dir_con, showWarnings = FALSE)
-
-# no idea where Rplots.pdf is coming from but this should prevent R from generating it
-pdf(NULL)
 ```
 
 ### load librarys

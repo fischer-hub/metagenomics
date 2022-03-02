@@ -62,23 +62,17 @@ upset(fromList(ids), order.by = "freq",  nsets = length(ids), nintersects = 40, 
 dev.off()
 ```
 
-### common features in raw gene counts
+### common features in raw feature counts
 ```{r}
 upset(fromList(ids), order.by = "freq",  nsets = length(ids), nintersects = 40, mainbar.y.label = "number of common discovered features between MEGAN6 and HUMANN3.0", sets.x.label = "number of discovered features per tool", keep.order = T, text.scale = 1.4, point.size = 2.6, line.size = 0.8, set_size.show = TRUE)
 ```
 
-
+### common features in significantly differentially expressed features
 ```{r}
 # upset plot over common significantly expressed features between megan and humann 
-try({
-ids <- list(megan = c(megan_logFC_egg[ , 1]), humann = c(humann_logFC_egg[ , 1]))
 png(filename = paste("ToolComparison", "upset_common_feature_expression.png", sep = "/"), width = params$plot_width, height = params$plot_height, units = "in", res = 72)
+ids <- list(megan = c(megan_logFC_egg[ , 1]), humann = c(humann_logFC_egg[ , 1]))
 upset(fromList(ids), order.by = "freq",  nsets = length(ids), nintersects = 40, mainbar.y.label = "number of common significantly expressed features between MEGAN6 and HUMANN3.0", sets.x.label = "number of significantly expressed features per tool", keep.order = T, text.scale = 1.4, point.size = 2.6, line.size = 0.8, set_size.show = TRUE)
 dev.off()
-```
-
-### common significantly expressed features
-```{r}
 upset(fromList(ids), order.by = "freq",  nsets = length(ids), nintersects = 40, mainbar.y.label = "number of common significantly expressed features between MEGAN6 and HUMANN3.0", sets.x.label = "number of significantly expressed features per tool", keep.order = T, text.scale = 1.4, point.size = 2.6, line.size = 0.8, set_size.show = TRUE)
-}, silent = TRUE)
 ```

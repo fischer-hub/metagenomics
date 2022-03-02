@@ -1,0 +1,84 @@
+---
+title: "Result comparison: HUMANN3.0 vs MEGAN6"
+author: "David Fischer"
+date: "02.03.2022"
+output: html_document
+params:
+  counts_megan: "/home/david/Downloads/megan_combined.csv"
+  counts_humann: "/home/david/Downloads/genefamilies_cpm_combined_eggNOG.tsv"
+  logFC_con_humann: "/home/david/Downloads/logFC_combined_eggNOG.tsv"
+  logFC_con_megan: "/home/david/Downloads/logFC_per_contrast_megan.tsv"
+  result_dir: ""
+  plot_height: 11
+  plot_width: 11
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = params$result_dir)
+knitr::opts_chunk$set(fig.width=params$plot_width, fig.height=params$plot_height)
+```
+
+### load librarys
+```{r}
+library(UpSetR)
+```
+
+### create directory structure
+```{r}
+dir.create("ToolComparison", showWarnings =  FALSE)
+```
+### format input data
+```{r}
+# keep only EGGNOG IDs in counts data
+megan_counts <- read.csv(paste("..", "..", params$counts_megan, sep = "/"))
+megan_counts[ , 1] <- gsub(" .*", "", megan_counts[ , 1])
+
+# keep only unstratified, grouped, mapped EGGNOG IDs in count data
+humann_counts <- read.csv(paste("..", "..", params$counts_humann, sep = "/"), sep = "\t")
+humann_counts <- humann_counts[!grepl("\\|", humann_counts[ , 1]), ]
+humann_counts <- humann_counts[!grepl("UNMAPPED|UNGROUPED", humann_counts[ , 1]), ]
+
+# get megan feature expression data over all contrasts
+megan_logFC_egg <- read.csv(paste("..", "..", params$logFC_con_megan, sep = "/"))
+
+# get humann feature expression data over all contrasts
+humann_logFC_egg <- read.csv(paste("..", "..", params$logFC_con_humann, sep = "/"))
+
+# calculate common feature IDs from megan and humann counts, save to file
+common_ids <- merge(megan_counts, humann_counts, by = 1)
+colnames(common_ids) <- gsub("_Abundance.RPKs", ".HUMANN", colnames(common_ids), fixed = TRUE)
+colnames(common_ids) <- gsub("tsv", "MEGAN", colnames(common_ids), fixed = )
+colnames(common_ids) <- gsub(".*counts.", "", colnames(common_ids))
+write.csv(common_ids, file = "ToolComparison/common_feature_hits.csv")
+```
+
+### UpSetR plots
+```{r}
+# upset plot over common features in raw gene counts between megan and humann
+ids <- list(megan = c(megan_counts[ , 1]), humann = c(humann_counts[ , 1]))
+png(filename = paste("ToolComparison", "upset_common_feature_counts.png", sep = "/"), width = params$plot_width, height = params$plot_height, units = "in", res = 72)
+upset(fromList(ids), order.by = "freq",  nsets = length(ids), nintersects = 40, mainbar.y.label = "number of common discovered features between MEGAN6 and HUMANN3.0", sets.x.label = "number of discovered features per tool", keep.order = T, text.scale = 1.4, point.size = 2.6, line.size = 0.8, set_size.show = TRUE)
+dev.off()
+```
+
+### common features in raw gene counts
+```{r}
+upset(fromList(ids), order.by = "freq",  nsets = length(ids), nintersects = 40, mainbar.y.label = "number of common discovered features between MEGAN6 and HUMANN3.0", sets.x.label = "number of discovered features per tool", keep.order = T, text.scale = 1.4, point.size = 2.6, line.size = 0.8, set_size.show = TRUE)
+```
+
+
+```{r}
+# upset plot over common significantly expressed features between megan and humann 
+try({
+ids <- list(megan = c(megan_logFC_egg[ , 1]), humann = c(humann_logFC_egg[ , 1]))
+png(filename = paste("ToolComparison", "upset_common_feature_expression.png", sep = "/"), width = params$plot_width, height = params$plot_height, units = "in", res = 72)
+upset(fromList(ids), order.by = "freq",  nsets = length(ids), nintersects = 40, mainbar.y.label = "number of common significantly expressed features between MEGAN6 and HUMANN3.0", sets.x.label = "number of significantly expressed features per tool", keep.order = T, text.scale = 1.4, point.size = 2.6, line.size = 0.8, set_size.show = TRUE)
+dev.off()
+```
+
+### common significantly expressed features
+```{r}
+upset(fromList(ids), order.by = "freq",  nsets = length(ids), nintersects = 40, mainbar.y.label = "number of common significantly expressed features between MEGAN6 and HUMANN3.0", sets.x.label = "number of significantly expressed features per tool", keep.order = T, text.scale = 1.4, point.size = 2.6, line.size = 0.8, set_size.show = TRUE)
+}, silent = TRUE)
+```

@@ -40,6 +40,9 @@ dir.create(out_dir_gen, showWarnings = FALSE)
 dir.create(out_dir_gen_plots, showWarnings = FALSE)
 dir.create(out_dir_gen_data, showWarnings = FALSE)
 dir.create(out_dir_con, showWarnings = FALSE)
+
+# no idea where Rplots.pdf is coming from but this should prevent R from generating it
+pdf(NULL)
 ```
 
 ### load librarys
@@ -479,9 +482,9 @@ upset_ids[is.na(upset_ids)] <- 0
 upset_ids <- as.data.frame(apply(upset_ids, 2, function(x) ifelse(abs(x) > params$fc_threshold, 1, 0)))
 
 png(filename = paste(out_dir_gen_plots, "upset_plot_per_contrast.png", sep = "/"), width = params$plot_width, height = params$plot_height, units = "in", res = 72)
-upset(upset_ids, order.by = "freq",  nsets = ncol(upset_ids), nintersects = 40, mainbar.y.label = "number of common features between contrasts", sets.x.label = "number of signific features per contrast", keep.order = T, text.scale = 1.4, point.size = 2.6, line.size = 0.8, set_size.show = TRUE)
+upset(upset_ids, order.by = "freq",  nsets = ncol(upset_ids), nintersects = 40, mainbar.y.label = "number of common features between contrasts", sets.x.label = "number of significant features per contrast", keep.order = T, text.scale = 1.4, point.size = 2.6, line.size = 0.8, set_size.show = TRUE)
 dev.off()
-upset(upset_ids, order.by = "freq",  nsets = ncol(upset_ids), nintersects = 40, mainbar.y.label = "number of common features between contrasts", sets.x.label = "number of signific features per contrast", keep.order = T, text.scale = 1.4, point.size = 2.6, line.size = 0.8, set_size.show = TRUE)
+upset(upset_ids, order.by = "freq",  nsets = ncol(upset_ids), nintersects = 40, mainbar.y.label = "number of common features between contrasts", sets.x.label = "number of significant features per contrast", keep.order = T, text.scale = 1.4, point.size = 2.6, line.size = 0.8, set_size.show = TRUE)
 ```
 
 # session info

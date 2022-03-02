@@ -21,6 +21,7 @@ multiqc:              {cpu: 4,  mem: 8,  time: 60,   partition: ""   }
 trimmomatic:          {cpu: 16, mem: 16, time: 60,   partition: ""   }
 dga_analysis:         {cpu: 16, mem: 5,  time: 60,   partition: ""   }
 carnelian:            {cpu: 16, mem: 16, time: 60,   partition: ""   }
+compare_results:      {cpu: 1,  mem: 4,  time: 60,   partition: ""   }
 
 # NOTE: the mem value for diamond_blastx is the base value that multiplied by BLOCK_SIZE * 7 
 # will be used to increase the max memory after each failed attempt, the same goes for the time 

@@ -6,7 +6,7 @@ rule differential_gene_analysis:
     output:
         flag             = os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}","dga_{tool}.done"),
         logFC_con        = os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Data", "logFC_per_contrast.tsv"),
-        count_dist       = report(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Plots", "count_distribution.png"), caption="../assets/report/test.rst", category="DGA-General", subcategory = "Histograms"),
+        count_dist       = report(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Plots", "count_distribution.png"), caption="../assets/report/count_dist.rst", category="DGA-General", subcategory = "Histograms"),
         count_dist_log   = report(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Plots", "count_distribution_log.png"), caption="../assets/report/test.rst", category="DGA-General", subcategory = "Histograms"),
         heat_gen         = report(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Plots", "heatmap_top_50_count_gen.png"), caption="../assets/report/test.rst", category="DGA-General", subcategory = "Heatmaps"),
         heat_gen_log     = report(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Overview", "Plots", "heatmap_top_50_count_log_gen.png"), caption="../assets/report/test.rst", category="DGA-General", subcategory = "Heatmaps"),

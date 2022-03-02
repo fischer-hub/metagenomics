@@ -1,12 +1,12 @@
-rule fastqc_pe:
+rule fastqc_pe_pre:
     input:
         read    = os.path.join(READDIR, f"{{sample}}_{{mate}}{EXT}")
     output:
-        html    = os.path.join(RESULTDIR, "01-QualityControl", "fastqcPre", "{sample}_{mate}.html"),
-        zip     = os.path.join(TEMPDIR, "qc", "fastqc_pre", "{sample}_{mate}_fastqc.zip")
+        html    = os.path.join(RESULTDIR, "01-QualityControl", "fastqc_pe_pre", "{sample}_{mate}.html"),
+        zip     = os.path.join(TEMPDIR, "qc", "fastqc_pe_pre", "{sample}_{mate}_fastqc.zip")
     params: "--quiet"
     log:
-        os.path.join(RESULTDIR, "00-Log", "fastqc", "{sample}_{mate}.log")
+        os.path.join(RESULTDIR, "00-Log", "fastqc_pe_pre", "{sample}_{mate}.log")
     resources:
         time        = RES["fastqc"]["time"],
         mem_mb      = RES["fastqc"]["mem"] * 1024,
@@ -19,15 +19,15 @@ rule fastqc_pe:
         "v0.86.0/bio/fastqc"
 
 
-rule fastqc_se:
+rule fastqc_se_pre:
     input:
         read    = os.path.join(READDIR, f"{{sample}}{EXT}")
     output:
-        html    = os.path.join(RESULTDIR, "01-QualityControl", "fastqc_se", "{sample}.html"),
-        zip     = os.path.join(TEMPDIR, "qc", "fastqc_se", "{sample}_fastqc.zip")
+        html    = os.path.join(RESULTDIR, "01-QualityControl", "fastqc_se_pre", "{sample}.html"),
+        zip     = os.path.join(TEMPDIR, "qc", "fastqc_se_pre", "{sample}_fastqc.zip")
     params: "--quiet"
     log:
-        os.path.join(RESULTDIR, "00-Log", "fastqc", "{sample}.log")
+        os.path.join(RESULTDIR, "00-Log", "fastqc_se_pre", "{sample}.log")
     resources:
         time        = RES["fastqc"]["time"],
         mem_mb      = RES["fastqc"]["mem"] * 1024,
@@ -35,6 +35,48 @@ rule fastqc_se:
     threads:
         RES["fastqc"]["cpu"]
     message:
-        "fastqc_se({wildcards.sample})\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
+        "fastqc_pre({wildcards.sample})\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
+    wrapper:
+        "v0.86.0/bio/fastqc"
+
+
+rule fastqc_pe_post:
+    input:
+        reads   = os.path.join(RESULTDIR, "01-QualityControl", "trimmed_pe", "{sample}_{mate}.fastq.gz"),
+    output:
+        html    = os.path.join(RESULTDIR, "01-QualityControl", "fastqc_pe_post", "{sample}_{mate}.html"),
+        zip     = os.path.join(TEMPDIR, "qc", "fastqc_pe_post", "{sample}_{mate}_fastqc.zip")
+    params: "--quiet"
+    log:
+        os.path.join(RESULTDIR, "00-Log", "fastqc_pe_post", "{sample}_{mate}.log")
+    resources:
+        time        = RES["fastqc"]["time"],
+        mem_mb      = RES["fastqc"]["mem"] * 1024,
+        partition   = RES["fastqc"]["partition"]
+    threads:
+        RES["fastqc"]["cpu"]
+    message:
+        "fastqc_post({wildcards.sample}_{wildcards.mate})\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
+    wrapper:
+        "v0.86.0/bio/fastqc"
+
+
+rule fastqc_se_post:
+    input:
+        read    = os.path.join(RESULTDIR, "01-QualityControl", "trimmed_pe", "{sample}.fastq.gz")
+    output:
+        html    = os.path.join(RESULTDIR, "01-QualityControl", "fastqc_se_post", "{sample}.html"),
+        zip     = os.path.join(TEMPDIR, "qc", "fastqc_se_post", "{sample}_fastqc.zip")
+    params: "--quiet"
+    log:
+        os.path.join(RESULTDIR, "00-Log", "fastqc_se_post", "{sample}.log")
+    resources:
+        time        = RES["fastqc"]["time"],
+        mem_mb      = RES["fastqc"]["mem"] * 1024,
+        partition   = RES["fastqc"]["partition"]
+    threads:
+        RES["fastqc"]["cpu"]
+    message:
+        "fastqc_post({wildcards.sample})\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
     wrapper:
         "v0.86.0/bio/fastqc"

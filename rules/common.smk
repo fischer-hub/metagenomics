@@ -79,9 +79,11 @@ def get_reports(wildcards):
         reports.extend(expand(os.path.join(RESULTDIR, "00-Log", "bowtie2", "bowtie2_map_{sample}.log"), sample = SAMPLE))
 
     if FASTQC and MODE == "paired":
-        reports.extend(expand(os.path.join(TEMPDIR, "qc", "fastqc_pre", "{sample}_{mate}_fastqc.zip"), sample = SAMPLE, mate = ["1", "2"]))
+        reports.extend(expand(os.path.join(TEMPDIR, "qc", "fastqc_pe_pre", "{sample}_{mate}_fastqc.zip"), sample = SAMPLE, mate = ["1", "2"]))
+        reports.extend(expand(os.path.join(TEMPDIR, "qc", "fastqc_pe_post", "{sample}_{mate}_fastqc.zip"), sample = SAMPLE, mate = ["1", "2"]))
     if FASTQC and MODE == "single":
-        reports.extend(expand(os.path.join(TEMPDIR, "qc", "fastqc_se", "{sample}_fastqc.zip"), sample = SAMPLE))
+        reports.extend(expand(os.path.join(TEMPDIR, "qc", "fastqc_se_pre", "{sample}_fastqc.zip"), sample = SAMPLE))
+        reports.extend(expand(os.path.join(TEMPDIR, "qc", "fastqc_se_post", "{sample}_fastqc.zip"), sample = SAMPLE))
 
     return reports
 

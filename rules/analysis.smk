@@ -62,3 +62,41 @@ rule differential_gene_analysis:
                                                         tool = '{params.tool}',
                                                         result_dir = '{params.result_dir}'))" >& {log}
         """
+
+rule compare_results:
+    input:
+        counts_megan        = os.path.join(RESULTDIR, "03-CountData", "megan", "megan_combined.csv"),
+        counts_humann       = os.path.join(RESULTDIR, "03-CountData", "humann", "genefamilies_cpm_combined_eggNOG.tsv"),
+        logFC_con_megan     = os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "megan", "Overview", "Data", "logFC_per_contrast.tsv"),
+        logFC_con_humann    = os.path.join(RESULTDIR, "03-CountData", "humann", "logFC_per_contrast_eggNOG.tsv")
+    output:
+        upset               = report(directory(os.path.join(RESULTDIR, "05-Summary", "ToolComparison")), patterns=["{name}.png"], caption="../assets/report/test.rst", category="Tool-Comparison"),
+        common_csv          = os.path.join(RESULTDIR, "05-Summary", "ToolComparison", "common_feature_hits.csv")
+    log:
+        os.path.join(RESULTDIR, "00-Log", "dga", "compare_results.log")
+    conda:
+        os.path.join("..", "envs", "analysis.yaml")
+    resources:
+        time        = RES["compare_results"]["time"],
+        mem_mb      = RES["compare_results"]["mem"] * 1024,
+        partition   = RES["compare_results"]["partition"]
+    threads:
+        RES["compare_results"]["cpu"]
+    params:
+        result_dir = os.path.join("..", RESULTDIR, "05-Summary"),
+        height      = HEIGHT,
+        width       = WIDTH
+    message:
+        "compare_results\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
+    shell:
+        """
+        Rscript -e "rmarkdown::render('scripts/compare.Rmd', output_file = '{params.result_dir}/compare_results.html',\
+                                                        params=list(\
+                                                        counts_megan = '{input.counts_megan}',\
+                                                        counts_humann = '{input.counts_humann}', \
+                                                        logFC_con_humann = '{input.logFC_con_humann}', \
+                                                        logFC_con_megan = '{input.logFC_con_megan}', \
+                                                        result_dir = '{params.result_dir}',
+                                                        plot_height = {params.height},
+                                                        plot_width = {params.width}))" >& {log}
+        """

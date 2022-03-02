@@ -201,7 +201,8 @@ NOTE: Because of restrictions in RMarkdown some plots might be distorted or miss
 
 ## Reports
 Besides the automatically generated html report for the statistical analysis of the gene abundance mentioned in the section before, you can create a `Snakemake` report summing up the results and statistics of the pipeline run after the run is finished with `snakemake --report my_report.html`. The resulting report will be created in the project directory by default, where you can also find the Snakefile.\
-You might also want to have a look at the `MultiQC` quality control report located in the `05-Summary` directory for additional stats about your read data like read quality, gc content and much more!
+You might also want to have a look at the `MultiQC` quality control report located in the `05-Summary` directory for additional stats about your read data like read quality, gc content and much more!\
+In case you ran `MEGAN6` as well as `HUMANN3.0` you will find an additional report with comparing figures between the results of both tools in the summary directory named `compare_results.html`. The respective figures and all common feature hits can be found in the subdirectory `05-Summary/ToolComparison`.
 
 ## LICENSE
 

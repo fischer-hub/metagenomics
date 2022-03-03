@@ -1,1 +1,1 @@
-UpSet plot showing intersection of discovered features between MEGAN6 and HUMANN3.0.
+UpSet plots showing intersections of discovered / significantly expressed features between MEGAN6 and HUMANN3.0.

@@ -1,1 +1,1 @@
-Minus average plot showing log2 transformed fold change over the mean of normalized counts.
+Minus average plot showing log2 transformed fold change over the mean of normalized counts. Significant features are colored red.

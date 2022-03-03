@@ -29,7 +29,7 @@ library(UpSetR)
 dir.create("ToolComparison", showWarnings =  FALSE)
 ```
 ### format input data
-```{r}
+```{r format, message=FALSE, results='hide',fig.keep='all', warning=FALSE}
 # keep only EGGNOG IDs in counts data
 megan_counts <- read.csv(paste("..", "..", params$counts_megan, sep = "/"))
 megan_counts[ , 1] <- gsub(" .*", "", megan_counts[ , 1])
@@ -54,7 +54,7 @@ write.csv(common_ids, file = "ToolComparison/common_feature_hits.csv")
 ```
 
 ### UpSetR plots
-```{r}
+```{rupset_plots_1_1, message=FALSE, results='hide',fig.keep='all', warning=FALSE}
 # upset plot over common features in raw gene counts between megan and humann
 ids <- list(megan = c(megan_counts[ , 1]), humann = c(humann_counts[ , 1]))
 png(filename = paste("ToolComparison", "upset_common_feature_counts.png", sep = "/"), width = params$plot_width, height = params$plot_height, units = "in", res = 72)
@@ -63,12 +63,12 @@ dev.off()
 ```
 
 ### common features in raw feature counts
-```{r}
+```{r upset_plots_1_2, message=FALSE, results='hide',fig.keep='all', warning=FALSE}
 upset(fromList(ids), order.by = "freq",  nsets = length(ids), nintersects = 40, mainbar.y.label = "number of common discovered features between MEGAN6 and HUMANN3.0", sets.x.label = "number of discovered features per tool", keep.order = T, text.scale = 1.4, point.size = 2.6, line.size = 0.8, set_size.show = TRUE)
 ```
 
 ### common features in significantly differentially expressed features
-```{r}
+```{r upset_plots_2, message=FALSE, results='hide',fig.keep='all', warning=FALSE}
 # upset plot over common significantly expressed features between megan and humann 
 png(filename = paste("ToolComparison", "upset_common_feature_expression.png", sep = "/"), width = params$plot_width, height = params$plot_height, units = "in", res = 72)
 ids <- list(megan = c(megan_logFC_egg[ , 1]), humann = c(humann_logFC_egg[ , 1]))

@@ -382,7 +382,10 @@ worker_array <- foreach(i = 1:nrow(comparisons_df), .errorhandling='pass', .verb
 
   # get top 100 significant features ordered by logFC
   top_100_df <- res_sig_ordered_df[1:min(nrow(res_sig_ordered_df), 100), ]
-  write.csv(top_100_df, file = paste(out_dir_curr_data, paste(contrast, "top_100_features.csv", sep = "_"), sep = "/"))
+
+  try({
+    write.csv(top_100_df, file = paste(out_dir_curr_data, paste(contrast, "top_100_features.csv", sep = "_"), sep = "/"))
+  })
 
   try({
     # plot pca colored by current condition
@@ -484,7 +487,7 @@ if(ncol(logFC_by_cond) > 3){
   dev.off()
   upset(upset_ids, order.by = "freq",  nsets = ncol(upset_ids), nintersects = 40, mainbar.y.label = "number of common features between contrasts", sets.x.label = "number of significant features per contrast", keep.order = T, text.scale = 1.4, point.size = 2.6, line.size = 0.8, set_size.show = TRUE)
 }else{
-  print("Oops, looks like theres only one contrast! Nothing to compare here with UpSetR..")
+  write("Oops, looks like theres only one contrast! Nothing to compare here with UpSetR..", stderr())
 }
 ```
 

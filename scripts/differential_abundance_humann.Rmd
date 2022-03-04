@@ -476,8 +476,9 @@ pca_FC <- plot.pca(logFC_by_cond_num, temp, "contrast", "contrast")
 ggsave(filename = "contrasts_pca.png", plot = pca_FC, device = png, path = out_dir_gen_plots, height = params$plot_height, width = params$plot_width)
 pca_FC
 
-if(ncol(logFC_by_cond_num) < 3){
+if(ncol(logFC_by_cond_num) < 2){
   write("Oops, looks like theres only one contrast! Nothing to compare here with UpSetR..", stderr())
+  file.create(paste(out_dir_gen_plots, "upset_plot_per_contrast.png", sep = "/"))
   stop()
 }  
 # upset plots

@@ -137,6 +137,8 @@ SIG_TH          = config["sig_th"]
 META            = path_check(config["metadata_csv"], True)
 CONTRAST        = path_check(config["contrast_csv"], True)
 CLEAN           = config["cleanup"]
+ID_TH           = config["id_th"]
+TOP_RANGE       = config["top_range"]
 
 with open('profiles/resource.yaml', 'r') as f:
     RES = yaml.load(f, Loader=yaml.FullLoader)

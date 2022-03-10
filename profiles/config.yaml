@@ -29,6 +29,10 @@ count_units: "cpm"
 # diamond args, higher block size and lower idx chunks -> higher performance / mem usage
 block_size: 12
 num_index_chunks: 1
+# report only read alignments with at least 80% identity
+id_th: 80
+# report alignments within the given percentage range of the top alignment score for a query 
+top_range: 1
 
 # bowtie2 args
 reference: ""

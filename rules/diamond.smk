@@ -6,7 +6,7 @@ rule diamond_makedb:
         prot_ref_db_dir = os.path.join(CACHEDIR, "databases", "protein_reference")
     conda:
         os.path.join("..", "envs", "diamond.yaml")
-    resources:
+    resources:  
         time        = RES["diamond_makedb"]["time"],
         mem_mb      = RES["diamond_makedb"]["mem"] * 1024,
         partition   = RES["diamond_makedb"]["partition"]
@@ -31,7 +31,9 @@ rule diamond_blastx:
         os.path.join(TEMPDIR, "diamond", "{sample}.daa")
     params:
         num_index_chunks = IDX_CHUNKS,
-        block_size = BLOCK_SIZE
+        block_size = BLOCK_SIZE,
+        id_th = ID_TH,
+        top_range = TOP_RANGE
     conda:
         os.path.join("..", "envs", "diamond.yaml")
     resources:
@@ -46,5 +48,5 @@ rule diamond_blastx:
         os.path.join(RESULTDIR, "00-Log", "diamond", "{sample}_blastx.log"),
     shell:
         """
-        diamond blastx -p {threads} -q {input.reads} -d {input.db} -o {output} -f 100 -b {params.block_size} -c {params.num_index_chunks} 2> {log}
+        diamond blastx --top 1 --id 80 -p {threads} -q {input.reads} -d {input.db} -o {output} -f 100 -b {params.block_size} -c {params.num_index_chunks} 2> {log}
         """

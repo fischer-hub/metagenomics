@@ -44,7 +44,7 @@ else:
 
 # set more constants
 READDIR     = SAMPLESHEET.loc[0, "R1"].rsplit("/", 1)[0]
-SINGLE = True if pd.isna(SAMPLESHEET.loc[0, "R2"]) == 0 else False
+SINGLE      = True if pd.isna(SAMPLESHEET.loc[0, "R2"]) == 0 else False
 
 print(f"{bcolors.OKBLUE}INFO: Found sample files:", SAMPLE)
 

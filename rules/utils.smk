@@ -5,6 +5,8 @@ rule concat_paired_reads:
         os.path.join(TEMPDIR, "concat_reads", "{sample}_concat.fq.gz")
     log:
         os.path.join(RESULTDIR, "00-Log", "concat_paired_reads", "{sample}_concat.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "concat_paired_reads", "{sample}_concat.benchmark.txt")
     conda:
         os.path.join("..", "envs", "utils.yaml")
     resources:
@@ -17,5 +19,5 @@ rule concat_paired_reads:
         "concat_paired_reads({wildcards.sample})\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
     shell: 
         """
-        cat {input} > {output}
+        cat {input} > {output} 2> {log}
         """

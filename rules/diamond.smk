@@ -17,6 +17,8 @@ rule diamond_makedb:
     log:
         wget    = os.path.join(RESULTDIR, "00-Log", "diamond", "wget.log"),
         makedb  = os.path.join(RESULTDIR, "00-Log", "diamond", "makedb.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "diamond", "makedb.benchmark.txt")
     shell:
         """
         wget --directory-prefix={params.prot_ref_db_dir} {params.prot_ref_db_src}  2> {log.wget}
@@ -37,15 +39,17 @@ rule diamond_blastx:
     conda:
         os.path.join("..", "envs", "diamond.yaml")
     resources:
-        time        = RES["diamond_makedb"]["time"],
-        mem_mb      = lambda wildcards,attempt: ((BLOCK_SIZE * 7 + BLOCK_SIZE * attempt) * RES["diamond_makedb"]["mem"]),
-        partition   = RES["diamond_makedb"]["partition"]
+        time        = RES["diamond_blastx"]["time"],
+        mem_mb      = lambda wildcards,attempt: ((BLOCK_SIZE * 7 + BLOCK_SIZE * attempt) * RES["diamond_blastx"]["mem"] * 1024),
+        partition   = RES["diamond_blastx"]["partition"]
     threads:
-        RES["diamond_makedb"]["cpu"]
+        RES["diamond_blastx"]["cpu"]
     message:
         "diamond_blastx({wildcards.sample})\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
     log:
-        os.path.join(RESULTDIR, "00-Log", "diamond", "{sample}_blastx.log"),
+        os.path.join(RESULTDIR, "00-Log", "diamond", "{sample}_blastx.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "diamond", "{sample}_blastx.benchmark.txt")
     shell:
         """
         diamond blastx --top 1 --id 80 -p {threads} -q {input.reads} -d {input.db} -o {output} -f 100 -b {params.block_size} -c {params.num_index_chunks} 2> {log}

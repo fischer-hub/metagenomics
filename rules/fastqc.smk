@@ -7,6 +7,8 @@ rule fastqc_pe_pre:
     params: "--quiet"
     log:
         os.path.join(RESULTDIR, "00-Log", "fastqc_pe_pre", "{sample}_{mate}.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "fastqc_pe_pre", "{sample}_{mate}.benchmark.txt")
     resources:
         time        = RES["fastqc"]["time"],
         mem_mb      = RES["fastqc"]["mem"] * 1024,
@@ -28,6 +30,8 @@ rule fastqc_se_pre:
     params: "--quiet"
     log:
         os.path.join(RESULTDIR, "00-Log", "fastqc_se_pre", "{sample}.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "fastqc_se_pre", "{sample}.benchmark.txt")
     resources:
         time        = RES["fastqc"]["time"],
         mem_mb      = RES["fastqc"]["mem"] * 1024,
@@ -49,6 +53,8 @@ rule fastqc_pe_post:
     params: "--quiet"
     log:
         os.path.join(RESULTDIR, "00-Log", "fastqc_pe_post", "{sample}_{mate}.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "fastqc_pe_post", "{sample}_{mate}.benchmark.txt")
     resources:
         time        = RES["fastqc"]["time"],
         mem_mb      = RES["fastqc"]["mem"] * 1024,
@@ -70,6 +76,8 @@ rule fastqc_se_post:
     params: "--quiet"
     log:
         os.path.join(RESULTDIR, "00-Log", "fastqc_se_post", "{sample}.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "fastqc_se_post", "{sample}.benchmark.txt")
     resources:
         time        = RES["fastqc"]["time"],
         mem_mb      = RES["fastqc"]["mem"] * 1024,

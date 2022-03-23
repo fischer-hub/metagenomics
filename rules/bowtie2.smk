@@ -13,6 +13,8 @@ rule bowtie2_index:
         ref_dir     = REFERENCE
     log:
         os.path.join(RESULTDIR, "00-Log", "bowtie2", "bowtie2_index.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "bowtie2", "bowtie2_index.benchmark.txt")
     conda:
         os.path.join("..", "envs", "bowtie2.yaml")
     resources:
@@ -45,10 +47,12 @@ rule bowtie2_map:
     output:
         unmapped = os.path.join(RESULTDIR, "02-Decontamination", "{sample}_unmapped.fastq.gz")
     params:
-        ref_dir     = lambda w, input: os.path.split(input[0])[0], #os.path.join(CACHEDIR, "bowtie2", REFERENCE.split(os.path.sep)[-1]),
+        ref_dir     = lambda w, input: os.path.split(input[0])[0],
         file_format = FORMAT
     log:
         os.path.join(RESULTDIR, "00-Log", "bowtie2", "bowtie2_map_{sample}.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "bowtie2", "bowtie2_map_{sample}.benchmark.txt")
     conda:
         os.path.join("..", "envs", "bowtie2.yaml")
     message:
@@ -61,5 +65,5 @@ rule bowtie2_map:
         RES["bowtie2_map"]["cpu"]
     shell:
         """
-        bowtie2 --quiet {params.file_format} -x {params.ref_dir}/index -U {input.reads} --un-gz {output.unmapped} 2> {log} > /dev/null
+        bowtie2 --quiet --threads {threads} {params.file_format} -x {params.ref_dir}/index -U {input.reads} --un-gz {output.unmapped} 2> {log} > /dev/null
         """

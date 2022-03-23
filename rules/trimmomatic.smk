@@ -12,6 +12,8 @@ rule trimmomatic_pe:
         r2_unpaired = os.path.join(TEMPDIR, "TRIMMOMATIC", "untrimmed_pe", "{sample}_2.unpaired.fastq.gz")
     log:
         os.path.join(RESULTDIR, "00-Log", "trimmomatic_pe", "{sample}.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "trimmomatic_pe", "{sample}.benchmark.txt")    
     params:
         # list of trimmers (see manual)
         trimmer=[f"ILLUMINACLIP:{ADPT_PE}:{MAX_MISMATCH}:{P_TH}:{S_TH}:{MIN_ADPT_LEN}:True"],
@@ -38,6 +40,8 @@ rule trimmomatic_se:
         os.path.join(RESULTDIR, "01-QualityControl", "trimmed_se", "{sample}.fastq.gz")
     log:
         os.path.join(RESULTDIR, "00-Log", "trimmomatic_se", "{sample}.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "trimmomatic_se", "{sample}.benchmark.txt")
     params:
         # list of trimmers (see manual)
         # :2:True LEADING:3 TRAILING:3 MINLEN:36

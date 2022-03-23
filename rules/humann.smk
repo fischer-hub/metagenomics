@@ -3,6 +3,8 @@ rule humann_databases:
         c = os.path.join(RESULTDIR, "00-Log", "humann", "humann_databases_ChocoPhlAn.log"),
         u = os.path.join(RESULTDIR, "00-Log", "humann", "humann_databases_UniRef.log"),
         t = os.path.join(RESULTDIR, "00-Log", "humann", "humann_test.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "humann", "humann_databases.benchmark.txt")
     output:
         nucDB   = directory(os.path.join(CACHEDIR, "databases", "humann", "nuc")),
         protDB  = directory(os.path.join(CACHEDIR, "databases", "humann", "prot"))
@@ -40,6 +42,8 @@ rule humann_compute:
         pathCov         = os.path.join(TEMPDIR, "humann", "raw", "{sample}_pathcoverage.tsv")
     log:
         os.path.join(RESULTDIR, "00-Log", "humann", "compute", "{sample}_humann.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "humann", "compute", "{sample}_humann.benchmark.txt")
     conda:
         os.path.join("..", "envs", "humann.yaml")
     resources:
@@ -68,6 +72,8 @@ rule humann_join:
         pathCov         = os.path.join(TEMPDIR, "humann", "pathcoverage_combined.tsv")
     log:
         os.path.join(RESULTDIR, "00-Log", "humann", "join", "humann.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "humann", "join", "humann.benchmark.txt")
     conda:
         os.path.join("..", "envs", "humann.yaml")
     resources:
@@ -99,6 +105,8 @@ rule humann_normalize:
         pathCov         = os.path.join(RESULTDIR, "03-CountData", "humann", "pathcoverage_normalized_combined.tsv")
     log:
         os.path.join(RESULTDIR, "00-Log", "humann", "humann_norm.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "humann", "humann_norm.benchmark.txt")
     conda:
         os.path.join("..", "envs", "humann.yaml")
     resources:
@@ -130,6 +138,8 @@ rule humann_regroup:
         genefamilies_eggNOG = os.path.join(RESULTDIR, "03-CountData", "humann", f"genefamilies_{UNITS}_combined_eggNOG.tsv")
     log:
         os.path.join(RESULTDIR, "00-Log", "humann", "humann_regroup.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "humann", "humann_regroup.benchmark.txt")
     conda:
         os.path.join("..", "envs", "humann.yaml")
     params:

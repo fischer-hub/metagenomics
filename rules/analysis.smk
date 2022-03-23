@@ -22,6 +22,8 @@ rule differential_gene_analysis:
         contrasts        = report(directory(os.path.join(RESULTDIR, "04-DifferentialGeneAbundance", "{tool}", "Contrasts")), patterns=["{contrast}/Plots/{name}.png"], caption="../assets/report/contrasts.rst", category="DGA-{contrast}", subcategory = "{contrast}")
     log:
         os.path.join(RESULTDIR, "00-Log", "dga", "dga_{tool}.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "dga", "dga_{tool}.benchmark.txt")
     conda:
         os.path.join("..", "envs", "analysis.yaml")
     resources:
@@ -76,6 +78,8 @@ rule compare_results:
         common_csv          = os.path.join(RESULTDIR, "05-Summary", "ToolComparison", "common_feature_hits.csv")
     log:
         os.path.join(RESULTDIR, "00-Log", "dga", "compare_results.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "dga", "compare_results.benchmark.txt")
     conda:
         os.path.join("..", "envs", "analysis.yaml")
     resources:

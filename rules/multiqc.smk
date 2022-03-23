@@ -7,6 +7,8 @@ rule multiqc:
         ""  # Optional: extra parameters for multiqc.
     log:
         os.path.join(RESULTDIR, "00-Log", "multiqc.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "multiqc.log")
     message:
         "multiqc\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
     resources:

@@ -10,6 +10,8 @@ rule pear:
         resultDir = lambda w, output: output[0].split("01-QualityControl")[0]
     log:
         os.path.join(RESULTDIR, "00-Log", "pear", "{sample}_pear.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "pear", "{sample}_pear.benchmark.txt")
     conda:
         os.path.join("..", "envs", "pear.yaml")
     message:

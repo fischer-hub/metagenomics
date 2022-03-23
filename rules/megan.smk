@@ -14,6 +14,8 @@ rule megan_get_db:
     log:
         wget = os.path.join(RESULTDIR, "00-Log", "megan", "wget.log"),
         gunzip = os.path.join(RESULTDIR, "00-Log", "megan", "gunzip.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "megan", "megan_get_db.benchmark.txt")
     shell:
         """
         wget --directory-prefix={output} https://software-ab.informatik.uni-tuebingen.de/download/megan6/megan-map-Jan2021.db.zip 2> {log.wget} > /dev/null
@@ -29,6 +31,8 @@ rule daa_meganize:
         meganized_daa   = os.path.join(TEMPDIR, "megan", "meganized_daa", "{sample}_meganized.daa")
     log:
         os.path.join(RESULTDIR, "00-Log", "megan", "{sample}_daa_meganizer.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "megan", "{sample}_daa_meganizer.benchmark.txt")
     conda:
         os.path.join("..", "envs", "megan.yaml")
     message:
@@ -60,6 +64,8 @@ rule daa_to_info:
         counts          = os.path.join(TEMPDIR, "megan", "counts", "{sample}.tsv")
     log:
         os.path.join(RESULTDIR, "00-Log", "megan", "{sample}_daa2info.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "megan", "{sample}_daa2info.benchmark.txt")
     conda:
         os.path.join("..", "envs", "megan.yaml")
     resources:
@@ -72,10 +78,7 @@ rule daa_to_info:
         "daa_to_info({wildcards.sample})\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
     shell:
         """
-        daa2info --in {input} --names -c2c EGGNOG >> {output} 2>> {log} 
-        #for DB in EC EGGNOG INTERPRO2GO SEED; do
-        #    daa2info --in {input} --names -c2c $DB >> {output} 2>> {log} 
-        #done
+        daa2info --in {input} --names -c2c EGGNOG >> {output} 2>> {log}
         """
 
 rule join_megan_tsv:
@@ -87,6 +90,8 @@ rule join_megan_tsv:
         "join_megan_tsv\ncpu: {threads}, mem: {resources.mem_mb}, time: {resources.time}, part: {resources.partition}"
     log:
         os.path.join(RESULTDIR, "00-Log", "megan", "join_megan_tsv.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "megan", "join_megan_tsv.benchmark.txt")
     resources:
         time        = RES["join_megan_tsv"]["time"],
         mem_mb      = RES["join_megan_tsv"]["mem"] * 1024,

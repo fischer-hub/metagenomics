@@ -7,6 +7,8 @@ rule bbmerge:
         inserthist  = os.path.join(TEMPDIR,   "bbmerge", "{sample}_ihist.txt")
     log:
         os.path.join(RESULTDIR, "00-Log", "bbmerge", "{sample}_merge.log")
+    benchmark:
+        os.path.join(RESULTDIR, "06-Benchmark", "bbmerge", "{sample}_merge.benchmark.txt")
     conda:
         os.path.join("..", "envs", "bbmerge.yaml")
     message:

@@ -51,7 +51,7 @@ contrast_csv: "assets/test_data/contrast.csv"
 formula: "cond+seed"
 plot_height: 11
 plot_width: 11
-fc_th: 1
+fc_th: 0.2
 ab_th: 10
-pr_th: 0.1
+pr_th: 0.5
 sig_th: 0.05

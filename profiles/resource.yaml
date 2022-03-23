@@ -3,15 +3,15 @@
 bbmerge:              {cpu: 16, mem: 10, time: 480,  partition: ""   }
 pear:                 {cpu: 16, mem: 10, time: 480,  partition: ""   }
 bowtie2_index:        {cpu: 24, mem: 15, time: 240,  partition: ""   }
-bowtie2_map:          {cpu: 24, mem: 10, time: 480,  partition: "big"}
+bowtie2_map:          {cpu: 16, mem: 10, time: 480,  partition: "big"}
 concat_paired_reads:  {cpu: 1,  mem: 4,  time: 60,   partition: ""   }
 megan_get_db:         {cpu: 1,  mem: 2,  time: 60,   partition: ""   }
 daa_meganize:         {cpu: 8,  mem: 32, time: 60,   partition: ""   }
 daa_to_info:          {cpu: 1,  mem: 32, time: 60,   partition: ""   }
-diamond_blastx:       {cpu: 32, mem: 1,  time: 2880, partition: "big"}
+diamond_blastx:       {cpu: 16, mem: 1,  time: 2880, partition: "big"}
 diamond_makedb:       {cpu: 24, mem: 10, time: 1200, partition: ""   }
 fastqc:               {cpu: 8,  mem: 5,  time: 60,   partition: ""   }
-humann_compute:       {cpu: 32, mem: 25, time: 1200, partition: "big"}
+humann_compute:       {cpu: 16, mem: 25, time: 1200, partition: "big"}
 humann_join:          {cpu: 8,  mem: 8,  time: 60,   partition: ""   }
 humann_database:      {cpu: 4,  mem: 8,  time: 60,   partition: ""   }
 humann_normalize:     {cpu: 4,  mem: 8,  time: 60,   partition: ""   }

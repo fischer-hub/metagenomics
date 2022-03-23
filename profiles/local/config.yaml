@@ -1,5 +1,5 @@
 # local profile
-cores: 50
+cores: 96
 use-conda: true
 latency-wait: 20
 rerun-incomplete: true

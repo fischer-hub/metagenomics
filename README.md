@@ -1,5 +1,5 @@
 # WGS-Metagenomics
-![couldn't load title image](assets/metagenomics_workflow_fig.png "Standard workflow figure.")
+![couldn't load title image](assets/metagenomics wf(1)(1).png "Standard workflow figure.")
 This is a `Snakemake` based pipeline for functional profiling of (WGS) metagenomic read data.
 It provides an easy to use interface for standard analysis methods while still being customizable at a very low level.
 The pipeline contains optional preprocessing of your reads such as quality control, adapter trimming, merging of paired-end reads and host sequence removal, different core tools for functional analysis and calculation of gene / feature counts and analysis steps for visualization and further processing of said count data.\

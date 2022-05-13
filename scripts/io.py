@@ -101,7 +101,8 @@ def path_check(path, is_file):
             return ""
         else:
             print(f"{bcolors.OKBLUE}INFO: Directory {path} does not exist, creating and hoping for the best now..")
-            os.makedirs(path, exist_ok=True)
+            if path:
+                os.makedirs(path, exist_ok=True)
             return path
 
 # set static vars from config file here
